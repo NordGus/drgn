@@ -96,7 +96,7 @@ flowchart TB
 | id                 | integer (auto-increment) | index, pk, not null |                                                                                                                                       |
 | character_id       | integer                  | index, fk, not null | A pointer/reference to the character this padlock locks                                                                               |
 | replacement_key_id | integer                  | index               | (Optional) A pointer/reference to the record that replaced this record as the active padlock/key. Used for a password history feature |
-| key                | string                   |                     | The secure hashed and salted password use for authentication                                                                          |
+| key_digest         | string                   |                     | The secure hashed and salted password use for authentication                                                                          |
 | expires_at         | date                     | not null            | A simple expiration date use to tell the user to change its password for security                                                     |
 | unlocked_by        | integer(enum)            | not null            | An ActiveRecord enum that indicates which action last unlocked the padlock record                                                     |
 | last_unlocked_at   | datetime                 | not null            | A timestamp that stores the last time the padlock record was unlocked at (login or system modification confirmation)                  |

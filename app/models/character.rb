@@ -1,4 +1,7 @@
 class Character < ApplicationRecord
   validates :tag, presence: true, uniqueness: true
   validates :deleted_at, comparison: { less_than_or_equal_to: Time.current }, if: :deleted_at
+
+  has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
+  has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
 end

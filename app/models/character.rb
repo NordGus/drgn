@@ -4,4 +4,6 @@ class Character < ApplicationRecord
 
   has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
   has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
+
+  normalizes :tag, with: ->(t) { t.strip.downcase.split(" ").reject(&:blank?).join(" ") }
 end

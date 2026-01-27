@@ -11,6 +11,6 @@ class Padlock::Password < ApplicationRecord
   has_one :_replaced_padlock, class_name: "Padlock::Password", dependent: :destroy, foreign_key: :replacement_padlock_id
   belongs_to :_replacement_padlock, optional: true, class_name: "Padlock::Password", foreign_key: :replacement_padlock_id
 
-  scope :active, -> { where(replacement_padlock_id: nil) }
-  scope :replaced, -> { where.not(replacement_padlock_id: nil) }
+  scope :active, -> { where(replacement_padlock_id: nil).order(created_at: :desc) }
+  scope :replaced, -> { where.not(replacement_padlock_id: nil).order(created_at: :desc) }
 end

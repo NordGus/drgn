@@ -13,4 +13,20 @@ class Padlock::Password < ApplicationRecord
 
   scope :active, -> { where(replacement_padlock_id: nil).order(created_at: :desc) }
   scope :replaced, -> { where.not(replacement_padlock_id: nil).order(created_at: :desc) }
+
+  def self.unlock_padlock(username:, key:, by: :web_login)
+    padlocks = [
+      # Using threads to unlock the character to hedge against timing attacks and also to run this IO bound operations
+      # concurrently for better retrieval.
+      Thread.new { includes(:character).active.authenticate_by(character: { tag: username }, key:) },
+      Thread.new { includes(:character).active.authenticate_by(character: { contact_address: username }, key:) }
+    ]
+
+    padlock = padlocks.each(&:join).map(&:value).find(&:present?)
+
+    # TODO: move this to a background job
+    padlock.update(unlocked_by: by) unless padlock.nil?
+
+    padlock
+  end
 end

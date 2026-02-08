@@ -6,11 +6,10 @@ class SessionsController < ApplicationController
   end
 
   def create
-    unlocked_padlock = Padlock::Password.active.authenticate_by(character: { tag: params[:username] }, key: params[:password]) ||
-                       Padlock::Password.active.authenticate_by(character: { contact_address: params[:username] }, key: params[:password])
+    unlocked_padlock = Padlock::Password.unlock_padlock(username: params[:username], key: params[:password], by: :web_login)
 
-    if unlocked_padlock
-      start_new_session_for unlocked_padlock.character
+    if (character = unlocked_padlock&.character)
+      start_new_session_for character
       redirect_to after_authentication_url
     else
       redirect_to new_session_path, alert: "Try another username or password."

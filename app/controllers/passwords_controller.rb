@@ -7,7 +7,12 @@ class PasswordsController < ApplicationController
   end
 
   def create
-    if (character = Character.includes(:password_padlock).find_by(tag: params[:username]))
+    characters = [
+      Thread.new { Character.includes(:password_padlock).find_by(tag: params[:username]) },
+      Thread.new { Character.includes(:password_padlock).find_by(contact_address: params[:username]) }
+    ]
+
+    if (character = characters.each(&:join).map(&:value).find(&:present?))
       PasswordsMailer.reset(character).deliver_later
     end
 

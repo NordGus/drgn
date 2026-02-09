@@ -46,7 +46,7 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
 
   test "update" do
     assert_changes -> { @character.reload.password_padlock.key_digest } do
-      put password_path(@character.password_padlock.key_reset_token), params: { password: "new", password_confirmation: "new" }
+      put password_path(@character.password_padlock.key_reset_token), params: { key: "new", key_confirmation: "new" }
       assert_redirected_to new_session_path
     end
 
@@ -57,8 +57,8 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
   test "update with non matching passwords" do
     token = @character.password_padlock.key_reset_token
 
-    assert_no_changes -> { @character.reload.password_padlock.key_reset_token } do
-      put password_path(token), params: { password: "no", password_confirmation: "match" }
+    assert_no_changes -> { @character.reload.password_padlock.key_digest } do
+      put password_path(token), params: { key: "no", key_confirmation: "match" }
       assert_redirected_to edit_password_path(token)
     end
 

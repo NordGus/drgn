@@ -120,4 +120,63 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
       end
     end
   end
+
+  class ReplacePadlockTest < Padlock::PasswordTest
+    include ActiveJob::TestHelper
+
+    setup { @padlock = padlock_passwords(:luffys_active_password) }
+
+    test "with valid keys" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password"
+
+        assert_difference -> { Padlock::Password.count }, 1 do
+          assert_enqueued_with job: Padlock::Password::OnReplacedJob, args: [ @padlock ] do
+            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+
+            assert new_padlock.persisted?
+            assert_equal @padlock.replacement_padlock_id, new_padlock.id
+            assert_equal Padlock::Password.new_padlock_expires_in.to_date, new_padlock.expires_at
+            assert_equal @padlock.character_id, new_padlock.character_id
+            assert_equal @padlock.character.password_padlock, new_padlock
+            assert_equal replacement_key, new_padlock.key
+            assert_equal replacement_key_confirmation, new_padlock.key_confirmation
+          end
+        end
+      end
+    end
+
+    test "with no matching keys" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password_no_match"
+
+        assert_difference -> { Padlock::Password.count }, 0 do
+          assert_no_enqueued_jobs do
+            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+
+            assert_not new_padlock.persisted?
+            assert_nil @padlock.reload.replacement_padlock_id
+          end
+        end
+      end
+    end
+
+    test "with keys that exists in the characters password history" do
+      freeze_time do
+        replacement_key = "password"
+        replacement_key_confirmation = "password"
+
+        assert_difference -> { Padlock::Password.count }, 0 do
+          assert_no_enqueued_jobs do
+            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+
+            assert_not new_padlock.persisted?
+            assert_nil @padlock.reload.replacement_padlock_id
+          end
+        end
+      end
+    end
+  end
 end

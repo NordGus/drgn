@@ -1,4 +1,6 @@
 class Padlock::Password < ApplicationRecord
+  class AlreadyReplacedError < StandardError; end
+
   # TODO: move these values into system configurations
   HISTORY_MAX_LENGTH = 3.freeze
   EXPIRES_IN_DAYS = 180.freeze
@@ -55,7 +57,7 @@ class Padlock::Password < ApplicationRecord
   end
 
   def replace_padlock(replacement_key:, replacement_key_confirmation:)
-    fail RuntimeError, "Padlock is already replaced" unless still_active?
+    fail AlreadyReplacedError, "Padlock is already replaced" unless still_active?
 
     new_padlock = self.class.new(
       character:,

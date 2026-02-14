@@ -14,18 +14,33 @@ class Padlock::Password < ApplicationRecord
   scope :active, -> { where(replacement_padlock_id: nil).order(created_at: :desc) }
   scope :replaced, -> { where.not(replacement_padlock_id: nil).order(created_at: :desc) }
 
+  def still_active?
+    replacement_padlock_id.nil?
+  end
+
+  # Unlock a password padlock for the given username and key combination.
+  #
+  # Performs two lookups concurrently (by Character tag and by contact address) to
+  # reduce timing differences and speed up IO-bound authentication.
+  #
+  # Always enqueues {OnUnlockedJob} (even if no padlock is found) to further hedge
+  # against timing attacks.
+  #
+  # @param username [String] Character tag or contact address used to locate the character.
+  # @param key [String] Plain-text key (password) to authenticate against the padlock.
+  # @param by [Symbol] Source of the unlock event (e.g. :web_login, :dangerous_action_authorization).
+  # @return [Padlock::Password, nil] The authenticated padlock if found; otherwise nil.
   def self.unlock_padlock(username:, key:, by: :web_login)
     padlocks = [
-      # Using threads to unlock the character to hedge against timing attacks and also to run this IO bound operations
+      # Using threads to unlock the character to hedge against timing attacks and also to run these IO bound operations
       # concurrently for better retrieval.
-      Thread.new { includes(:character).active.authenticate_by(character: { tag: username }, key:) },
-      Thread.new { includes(:character).active.authenticate_by(character: { contact_address: username }, key:) }
+      Thread.new { Padlock::Password.joins(:character).active.authenticate_by(character: { tag: username }, key:) },
+      Thread.new { Padlock::Password.joins(:character).active.authenticate_by(character: { contact_address: username }, key:) }
     ]
 
     padlock = padlocks.each(&:join).map(&:value).find(&:present?)
 
-    # TODO: move this to a background job
-    padlock.update(unlocked_by: by) unless padlock.nil?
+    OnUnlockedJob.perform_later(padlock, by, Time.current) # Always enqueue the job to hedge against timing attacks
 
     padlock
   end

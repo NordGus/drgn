@@ -6,7 +6,8 @@ class SessionsController < ApplicationController
   end
 
   def create
-    unlocked_padlock = Padlock::Password.unlock_padlock(username: params[:username], key: params[:password], by: :web_login)
+    username, key = params.expect(:username, :password)
+    unlocked_padlock = Padlock::Password.unlock_padlock(username:, key:, by: :web_login)
 
     if (character = unlocked_padlock&.character)
       start_new_session_for character

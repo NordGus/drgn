@@ -24,6 +24,10 @@
   </head>
 
   <body>
+    <% if Current.session.present? %>
+      <%= button_to "Logout", session_path, method: :delete %>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>

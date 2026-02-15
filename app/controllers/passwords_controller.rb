@@ -7,14 +7,7 @@ class PasswordsController < ApplicationController
   end
 
   def create
-    characters = [
-      Thread.new { Character.includes(:password_padlock).find_by(tag: params[:username]) },
-      Thread.new { Character.includes(:password_padlock).find_by(contact_address: params[:username]) }
-    ]
-
-    if (character = characters.each(&:join).map(&:value).find(&:present?))
-      PasswordsMailer.reset(character).deliver_later
-    end
+    Character::PasswordPadlock::OnForgotPasswordJob.perform_later(params[:username])
 
     redirect_to new_session_path, notice: "Password reset instructions sent (if user with that email address exists)."
   end

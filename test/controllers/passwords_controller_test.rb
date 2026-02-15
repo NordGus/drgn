@@ -1,6 +1,8 @@
 require "test_helper"
 
 class PasswordsControllerTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   setup { @character = characters(:luffy) }
 
   test "new" do
@@ -9,25 +11,33 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create" do
-    post passwords_path, params: { username: @character.tag }
+    username = @character.tag
 
-    assert_enqueued_email_with PasswordsMailer, :reset, args: [ @character ]
+    assert_enqueued_emails 0 do
+      assert_enqueued_with job: Character::PasswordPadlock::OnForgotPasswordJob, args: [ username ] do
+        post passwords_path, params: { username: }
 
-    assert_redirected_to new_session_path
+        assert_redirected_to new_session_path
 
-    follow_redirect!
-    assert_notice "reset instructions sent"
+        follow_redirect!
+        assert_notice "reset instructions sent"
+      end
+    end
   end
 
   test "create for an unknown user redirects but sends no mail" do
-    post passwords_path, params: { username: "missing-user@example.com" }
+    username = @character.tag
 
-    assert_enqueued_emails 0
+    assert_enqueued_emails 0 do
+      assert_enqueued_with job: Character::PasswordPadlock::OnForgotPasswordJob, args: [ username ] do
+        post passwords_path, params: { username: }
 
-    assert_redirected_to new_session_path
+        assert_redirected_to new_session_path
 
-    follow_redirect!
-    assert_notice "reset instructions sent"
+        follow_redirect!
+        assert_notice "reset instructions sent"
+      end
+    end
   end
 
   test "edit" do

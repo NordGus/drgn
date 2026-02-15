@@ -7,7 +7,7 @@ class PasswordsController < ApplicationController
   end
 
   def create
-    Character::PasswordPadlock::OnForgotPasswordJob.perform_later(params[:username])
+    Character::PasswordPadlock::OnForgotJob.perform_later(params[:username])
 
     redirect_to new_session_path, notice: "Password reset instructions sent (if user with that email address exists)."
   end

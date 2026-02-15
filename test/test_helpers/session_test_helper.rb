@@ -12,6 +12,12 @@ module SessionTestHelper
     Current.session&.destroy!
     cookies.delete("session_id")
   end
+
+  def get_signed_cookie(cookie_name)
+    jar = ActionDispatch::Cookies::CookieJar.build(@request, cookies.to_hash)
+
+    jar.signed[cookie_name]
+  end
 end
 
 ActiveSupport.on_load(:action_dispatch_integration_test) do

@@ -10,7 +10,8 @@ class SessionsController < ApplicationController
     unlocked_padlock = Padlock::Password.unlock_padlock(username:, key:, by: :web_login)
 
     if (character = unlocked_padlock&.character)
-      start_new_session_for character
+      # When the user selects "Remember Me", we set the session lifetime to a year.
+      start_new_session_for character, expires_at: params[:remember_me].eql?("1") ? 1.year.from_now : Session.expires_in.from_now
       redirect_to after_authentication_url
     else
       redirect_to new_session_path, alert: "Try another username or password."

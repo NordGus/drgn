@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_27_231059) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_15_113939) do
   create_table "characters", force: :cascade do |t|
     t.string "contact_address", limit: 4096, null: false
     t.datetime "created_at", null: false
@@ -39,11 +39,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_27_231059) do
   create_table "sessions", force: :cascade do |t|
     t.integer "character_id", null: false
     t.datetime "created_at", null: false
+    t.datetime "expires_at"
     t.string "ip_address"
     t.string "token", null: false
     t.datetime "updated_at", null: false
     t.string "user_agent"
     t.index ["character_id"], name: "index_sessions_on_character_id"
+    t.index ["expires_at"], name: "index_sessions_on_expires_at"
     t.index ["token"], name: "sessions_token", unique: true
   end
 

@@ -1,6 +1,6 @@
 module SessionTestHelper
-  def sign_in_as(character)
-    Current.session = character.sessions.create!
+  def sign_in_as(character, non_perishable: false)
+    Current.session = character.sessions.create!(expires_at: non_perishable ? nil : Session.expires_in.from_now)
 
     ActionDispatch::TestRequest.create.cookie_jar.tap do |cookie_jar|
       cookie_jar.signed[:session_id] = Current.session.token

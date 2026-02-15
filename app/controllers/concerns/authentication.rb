@@ -26,7 +26,14 @@ module Authentication
     end
 
     def find_session_by_cookie
-      Session.includes(:character).find_by(token: cookies.signed[:session_id]) if cookies.signed[:session_id]
+      session = Session.includes(:character).find_by(token: cookies.signed[:session_id]) if cookies.signed[:session_id]
+
+      # We prevent a session from being resumed if it has expired. We do not destroy it here, because the platform will
+      # do it automatically when the Session::ExpireJob job enqueued at session creation is processed or during recurring
+      # orphan session cleanup.
+      return nil if session.present? && session.expired?
+
+      session
     end
 
     def request_authentication
@@ -38,10 +45,11 @@ module Authentication
       session.delete(:return_to_after_authenticating) || root_url
     end
 
-    def start_new_session_for(character)
-      character.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip).tap do |session|
+    def start_new_session_for(character, expires_at: Session.expires_in.from_now)
+      character.sessions.create!(user_agent: request.user_agent, ip_address: request.remote_ip, expires_at:).tap do |session|
         Current.session = session
         cookies.signed.permanent[:session_id] = { value: session.token, httponly: true, same_site: :lax }
+        Session::ExpireJob.set(wait_until: session.expires_at).perform_later(session) if session.perishable?
       end
     end
 

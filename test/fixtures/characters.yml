@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+luffy:
+  tag: monkey-d-luffy
+  contact_address: luffy@mugiwara.com
+
+zoro:
+  tag: roronoa-zoro
+  contact_address: zoro@mugiwara.com

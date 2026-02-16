@@ -34,4 +34,19 @@ class Padlock::Password::OnUnlockedJobTest < ActiveJob::TestCase
       assert_equal :no_padlock_received, Padlock::Password::OnUnlockedJob.perform_now(nil, :web_login, Time.current)
     end
   end
+
+  class WithOlderLastUnlockedAtAction < Padlock::Password::OnUnlockedJobTest
+    test "does nothing" do
+      freeze_time do
+        last_unlocked_at = 1.year.ago
+        previous_unlocked_at = @padlock.last_unlocked_at
+        previous_unlocked_by = @padlock.unlocked_by
+
+
+        assert_equal :old_unlocked_timestamp_received, Padlock::Password::OnUnlockedJob.perform_now(@padlock, :web_login, last_unlocked_at)
+        assert_equal previous_unlocked_at, @padlock.reload.last_unlocked_at
+        assert_equal previous_unlocked_by, @padlock.reload.unlocked_by
+      end
+    end
+  end
 end

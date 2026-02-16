@@ -29,6 +29,11 @@ Install all dependencies:
 bundle install
 ```
 
+Prepare the database and load some text data:
+```shell
+bin/rails db:setup db:fixtures:load
+```
+
 ---
 
 Things you may want to cover:

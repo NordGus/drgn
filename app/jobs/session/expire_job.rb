@@ -1,6 +1,6 @@
 class Session::ExpireJob < ApplicationJob
   queue_as :default
-  limits_concurrency to: 1, key: ->(session) { session }, duration: 1.minute, group: "SessionActions"
+  limits_concurrency to: 1, key: ->(session, *) { session }, duration: 1.minute, group: "SessionActions"
 
   retry_on ActiveRecord::RecordNotFound, wait: 3.seconds, attempts: 10, report: true
 

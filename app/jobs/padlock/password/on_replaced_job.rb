@@ -1,5 +1,6 @@
 class Padlock::Password::OnReplacedJob < ApplicationJob
   queue_as :default
+  limits_concurrency to: 1, key: ->(padlock) { padlock }, duration: 1.minute, group: "PadlockActions"
 
   retry_on ActiveRecord::RecordNotDestroyed, wait: 3.seconds, attempts: 10, report: true
 

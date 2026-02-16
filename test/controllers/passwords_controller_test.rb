@@ -14,7 +14,7 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     username = @character.tag
 
     assert_enqueued_emails 0 do
-      assert_enqueued_with job: Character::PasswordPadlock::OnForgotJob, args: [username ] do
+      assert_enqueued_with job: Character::PasswordPadlock::OnForgotJob, args: [ username ] do
         post passwords_path, params: { username: }
 
         assert_redirected_to new_session_path
@@ -29,7 +29,7 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     username = @character.tag
 
     assert_enqueued_emails 0 do
-      assert_enqueued_with job: Character::PasswordPadlock::OnForgotJob, args: [username ] do
+      assert_enqueued_with job: Character::PasswordPadlock::OnForgotJob, args: [ username ] do
         post passwords_path, params: { username: }
 
         assert_redirected_to new_session_path

@@ -13,4 +13,14 @@ class Character < ApplicationRecord
 
   has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
   has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
+
+  attribute :password, :string, default: nil
+
+  validate :password_padlock_must_be_unlocked, on: :update
+
+  private
+
+  def password_padlock_must_be_unlocked
+    errors.add(:password, :invalid) unless password_padlock.unlock_for_dangerous_action(password)
+  end
 end

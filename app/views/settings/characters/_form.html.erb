@@ -29,7 +29,7 @@
         command: "show-modal",
         commandfor: 'confirmation-modal',
         data: {
-          action: "confirmation-form#confirm"
+          action: "confirmation-form#openConfirm"
         },
       )
     %>
@@ -39,7 +39,7 @@
         Please enter your password to update your profile data
       </p>
       <div>
-        <%= form.password_field :password, data: { confirmation_form_target: "password" } %>
+        <%= form.password_field :password, data: { confirmation_form_target: "password" }, value: " ", autocomplete: "old-password" %>
       </div>
       <div>
         <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'confirmation-modal' %>

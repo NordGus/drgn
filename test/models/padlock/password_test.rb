@@ -1,10 +1,10 @@
 require "test_helper"
 
 class Padlock::PasswordTest < ActiveSupport::TestCase
-  class UnlockPadlockTest < Padlock::PasswordTest
+  class UnlockPadlockTest < self
     include ActiveJob::TestHelper
 
-    class WithAnActivePadlockTest < UnlockPadlockTest
+    class WithAnActivePadlockTest < self
       setup { @padlock = padlock_passwords(:luffys_active_password) }
 
       class ByCharacterTagTest < WithAnActivePadlockTest
@@ -25,7 +25,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
         end
       end
 
-      class ByCharacterContactAddressTest < WithAnActivePadlockTest
+      class ByCharacterContactAddressTest < self
         setup { @padlock = padlock_passwords(:zoros_active_password) }
 
         test "unlocks the padlock for the given character" do
@@ -46,10 +46,10 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
       end
     end
 
-    class WithAReplacedPadlockTest < UnlockPadlockTest
+    class WithAReplacedPadlockTest < self
       setup { @padlock = padlock_passwords(:luffys_previous_password) }
 
-      class ByCharacterTagTest < WithAnActivePadlockTest
+      class ByCharacterTagTest < self
         test "unlocks the padlock for the given character" do
           username = @padlock.character.tag
           key = "old_password"
@@ -65,7 +65,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
         end
       end
 
-      class ByCharacterContactAddressTest < WithAnActivePadlockTest
+      class ByCharacterContactAddressTest < self
         setup { @padlock = padlock_passwords(:zoros_previous_password) }
 
         test "unlocks the padlock for the given character" do
@@ -84,8 +84,8 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
       end
     end
 
-    class WithBadCredentialsTest < UnlockPadlockTest
-      class WithInvalidUsernameTest < WithBadCredentialsTest
+    class WithBadCredentialsTest < self
+      class WithInvalidUsernameTest < self
         test "unlocks the padlock for the given character" do
           username = "invalid_username"
           key = "old_password"
@@ -101,7 +101,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
         end
       end
 
-      class WithInvalidPassword < WithBadCredentialsTest
+      class WithInvalidPassword < self
         setup { @padlock = padlock_passwords(:zoros_previous_password) }
 
         test "unlocks the padlock for the given character" do
@@ -121,7 +121,38 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
     end
   end
 
-  class ReplacePadlockTest < Padlock::PasswordTest
+  class UnlockForDangerousActionTest < self
+    include ActiveJob::TestHelper
+    setup { @padlock = padlock_passwords(:luffys_active_password) }
+
+    test "unlocks the padlock when the correct password is passed" do
+      freeze_time do
+        assert_enqueued_with job: Padlock::Password::OnUnlockedJob, args: [ @padlock, :dangerous_action_authorization, Time.current ] do
+          assert @padlock.unlock_for_dangerous_action("password")
+        end
+      end
+    end
+
+    test "does not unlock the padlock when the wrong password is passed" do
+      freeze_time do
+        assert_no_enqueued_jobs do
+          assert_not @padlock.unlock_for_dangerous_action("wrong_password")
+        end
+      end
+    end
+
+    test "does not unlock the padlock if it is not active" do
+      padlock = padlock_passwords(:zoros_previous_password)
+
+      freeze_time do
+        assert_no_enqueued_jobs do
+          assert_not padlock.unlock_for_dangerous_action("wrong_password")
+        end
+      end
+    end
+  end
+
+  class ReplacePadlockTest < self
     include ActiveJob::TestHelper
 
     setup { @padlock = padlock_passwords(:luffys_active_password) }

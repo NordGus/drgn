@@ -1,5 +1,5 @@
 class Padlock::Password < ApplicationRecord
-  class AlreadyReplacedError < StandardError; end
+  class AlreadyReplaced < StandardError; end
 
   # TODO: move these values into system configurations
   HISTORY_MAX_LENGTH = 3.freeze
@@ -56,17 +56,15 @@ class Padlock::Password < ApplicationRecord
     padlock
   end
 
-  def unlock_for_dangerous_action(password)
+  def unlock_for_dangerous_action(key)
     return false unless still_active?
-    return false unless authenticate_key(password)
+    return false unless authenticate_key(key)
 
     OnUnlockedJob.perform_later(self, :dangerous_action_authorization, Time.current)
-
-    true
   end
 
   def replace_padlock(replacement_key:, replacement_key_confirmation:)
-    fail AlreadyReplacedError, "Padlock is already replaced" unless still_active?
+    fail AlreadyReplaced, "Padlock is already replaced" unless still_active?
 
     new_padlock = self.class.new(
       character:,

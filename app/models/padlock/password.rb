@@ -56,6 +56,15 @@ class Padlock::Password < ApplicationRecord
     padlock
   end
 
+  def unlock_for_dangerous_action(password)
+    return false unless still_active?
+    return false unless authenticate_key(password)
+
+    OnUnlockedJob.perform_later(self, :dangerous_action_authorization, Time.current)
+
+    true
+  end
+
   def replace_padlock(replacement_key:, replacement_key_confirmation:)
     fail AlreadyReplacedError, "Padlock is already replaced" unless still_active?
 
@@ -105,6 +114,6 @@ class Padlock::Password < ApplicationRecord
     # BCrypt::Password.new(digest) allows us to compare a plain text string against a hashed string correctly.
     # if the character has no more than 10 padlocks, the computational cost for this comparison is negligible.
     # FIXME: Include this decision in the documentation.
-    errors.add(:key, :uniqueness) if digests.any? { |digest| BCrypt::Password.new(digest) == key }
+    errors.add(:key, :uniqueness) if digests.any? { |digest| BCrypt::Password.new(digest).is_password?(key) }
   end
 end

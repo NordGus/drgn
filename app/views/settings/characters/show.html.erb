@@ -1,0 +1,9 @@
+<% content_for :settings_title, "Character Sheet" %>
+
+<p style="color: green"><%= notice %></p>
+
+<%= render @character %>
+
+<div>
+  <%= button_to "Destroy this character", [:settings, @character], method: :delete %>
+</div>

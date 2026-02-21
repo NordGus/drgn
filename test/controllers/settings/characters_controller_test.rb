@@ -37,6 +37,6 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
       delete settings_character_url
     end
 
-    assert_redirected_to session_url
+    assert_redirected_to root_url
   end
 end

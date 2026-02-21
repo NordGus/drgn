@@ -1,4 +1,4 @@
-<%= form_with(model: character) do |form| %>
+<%= form_with(model: character, url: settings_character_path, data: { controller: "confirmation-form" }) do |form| %>
   <% if character.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(character.errors.count, "error") %> prohibited this character from being saved:</h2>
@@ -12,6 +12,39 @@
   <% end %>
 
   <div>
-    <%= form.submit %>
+    <%= form.label :tag %>
+    <%= form.text_field :tag %>
+  </div>
+
+  <div>
+    <%= form.label :contact_address %>
+    <%= form.email_field :contact_address %>
+  </div>
+
+  <div>
+    <%=
+      form.button(
+        t("helpers.submit.update", model: form.object.class),
+        type: "button",
+        command: "show-modal",
+        commandfor: 'confirmation-modal',
+        data: {
+          action: "confirmation-form#confirm"
+        },
+      )
+    %>
+
+    <dialog id="confirmation-modal" data-confirmation-form-target="dialog">
+      <p>
+        Please enter your password to update your profile data
+      </p>
+      <div>
+        <%= form.password_field :password, data: { confirmation_form_target: "password" } %>
+      </div>
+      <div>
+        <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'confirmation-modal' %>
+        <%= form.submit %>
+      </div>
+    </dialog>
   </div>
 <% end %>

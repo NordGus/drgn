@@ -2,7 +2,7 @@
 
 <p style="color: green"><%= notice %></p>
 
-<%= render @character %>
+<%= render "form", character: @character %>
 
 <div>
   <%= button_to "Destroy this character", [:settings, @character], method: :delete %>

@@ -36,6 +36,6 @@ class Settings::CharactersController < SettingsController
 
     # Only allow a list of trusted parameters through.
     def character_params
-      params.fetch(:character, {})
+      params.fetch(:character, {}).permit(:tag, :contact_address, :password)
     end
 end

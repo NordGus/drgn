@@ -26,7 +26,10 @@ class Character < ApplicationRecord
 
     update_outcome = update(attributes)
 
-    OnSheetUpdatedJob.perform_later(self, Time.current) if update_outcome
+    return update_outcome unless update_outcome
+
+    OnSheetUpdatedJob.perform_later(self, Time.current)
+    sessions.destroy_all
 
     update_outcome
   end

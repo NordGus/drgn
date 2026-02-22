@@ -9,9 +9,7 @@ class Settings::CharactersController < SettingsController
   def update
     respond_to do |format|
       if @character.update_sheet(character_params)
-        @character.sessions.destroy_all
-
-        format.html { redirect_to settings_character_path, notice: "Character was successfully updated.", status: :see_other }
+        format.html { redirect_to settings_character_path, notice: "Character sheet was successfully updated.", status: :see_other }
         format.json { render :show, status: :ok, location: @character }
       else
         format.html { render :show, status: :unprocessable_entity }

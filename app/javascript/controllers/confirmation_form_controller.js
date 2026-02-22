@@ -14,12 +14,14 @@ export default class extends Controller {
     this.element.addEventListener("keypress", this.preventSubmitOnEnter.bind(this))
     this.element.addEventListener("keydown", this.preventSubmitOnEnter.bind(this))
     this.element.addEventListener("keyup", this.preventSubmitOnEnter.bind(this))
+    this.element.addEventListener("submit", this.onSubmit.bind(this))
   }
 
   disconnect() {
     this.element.removeEventListener("keypress", this.preventSubmitOnEnter.bind(this))
     this.element.removeEventListener("keydown", this.preventSubmitOnEnter.bind(this))
     this.element.removeEventListener("keyup", this.preventSubmitOnEnter.bind(this))
+    this.element.removeEventListener("submit", this.onSubmit.bind(this))
   }
 
   preventSubmitOnEnter(event) {

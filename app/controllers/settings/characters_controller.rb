@@ -29,12 +29,10 @@ class Settings::CharactersController < SettingsController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_character
-      @character = Current.character
+      @character = Character.where(deleted_at: nil).find(Current.character.id)
     end
 
-    # Only allow a list of trusted parameters through.
     def character_params
       params.fetch(:character, {}).permit(:tag, :contact_address, :password)
     end

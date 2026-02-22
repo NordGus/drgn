@@ -45,8 +45,8 @@ class Padlock::Password < ApplicationRecord
     padlocks = [
       # Using threads to unlock the character to hedge against timing attacks and also to run these IO bound operations
       # concurrently for better retrieval.
-      Thread.new { joins(:character).active.authenticate_by(character: { tag: username }, key:) },
-      Thread.new { joins(:character).active.authenticate_by(character: { contact_address: username }, key:) }
+      Thread.new { joins(:character).active.authenticate_by(character: { tag: username, deleted_at: nil }, key:) },
+      Thread.new { joins(:character).active.authenticate_by(character: { contact_address: username, deleted_at: nil }, key:) }
     ]
 
     padlock = padlocks.each(&:join).map(&:value).find(&:present?)

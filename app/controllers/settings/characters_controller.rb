@@ -8,7 +8,7 @@ class Settings::CharactersController < SettingsController
   # PATCH/PUT /character or /character.json
   def update
     respond_to do |format|
-      if @character.update(character_params)
+      if @character.update_sheet(character_params)
         @character.sessions.destroy_all
 
         format.html { redirect_to settings_character_path, notice: "Character was successfully updated.", status: :see_other }

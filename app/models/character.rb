@@ -21,8 +21,6 @@ class Character < ApplicationRecord
   # the validation whether the character's password padlock is unlocked or not.
   attribute :updated_from_dangerous_action, :boolean, default: false
 
-  after_update_commit -> { OnUpdateJob.perform_later(self, Time.current) }
-
   def update_sheet(attributes)
     self.updated_from_dangerous_action = true
 

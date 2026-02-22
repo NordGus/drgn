@@ -5,6 +5,8 @@ class Character < ApplicationRecord
   validates :tag, presence: true, uniqueness: true
   validates :contact_address, presence: true, uniqueness: true, email: true
   validates :deleted_at, comparison: { less_than_or_equal_to: Time.current }, if: :deleted_at
+  # We validate that the password_padlock is unlocked only when is done from a dangerous action; otherwise it's unnecessary.
+  validate :password_padlock_must_be_unlocked, if: -> { updated_from_dangerous_action }
 
   encrypts :tag, deterministic: true, ignore_case: true
   encrypts :contact_address, deterministic: true, downcase: true
@@ -15,8 +17,21 @@ class Character < ApplicationRecord
   has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
 
   attribute :password, :string, default: nil
+  # This flag is used to control whether the character is updated from a dangerous action or not. This is used to control
+  # the validation whether the character's password padlock is unlocked or not.
+  attribute :updated_from_dangerous_action, :boolean, default: false
 
-  validate :password_padlock_must_be_unlocked, on: :update
+  after_update_commit -> { OnUpdateJob.perform_later(self, Time.current) }
+
+  def update_sheet(attributes)
+    self.updated_from_dangerous_action = true
+
+    update_outcome = update(attributes)
+
+    OnSheetUpdatedJob.perform_later(self, Time.current) if update_outcome
+
+    update_outcome
+  end
 
   private
 

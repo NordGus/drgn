@@ -4,7 +4,7 @@ class CharacterMailer < ApplicationMailer
   #
   #   en.character_mailer.profile_updated.subject
   #
-  def profile_updated(character)
+  def sheet_updated(character)
     @character = character
 
     mail subject: "Profile Updated", to: character.contact_address

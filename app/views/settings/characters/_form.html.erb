@@ -1,24 +1,32 @@
 <%= form_with(model: character, url: settings_character_path, data: { controller: "confirmation-form" }) do |form| %>
-  <% if character.errors.any? %>
+  <% if character.errors.where(:password).any? %>
     <div style="color: red">
-      <h2><%= pluralize(character.errors.count, "error") %> prohibited this character from being saved:</h2>
-
-      <ul>
-        <% character.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+      <h2 style="font-size: 1em">Invalid password, this character sheet can't be save</h2>
     </div>
   <% end %>
 
-  <div>
+  <div style="display: flex; flex-direction: column; gap: 5px;">
     <%= form.label :tag %>
     <%= form.text_field :tag %>
+    <% if character.errors.where(:tag).any? %>
+      <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+        <% character.errors.where(:tag).each do |error| %>
+          <span><%= error.message %></span>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 
-  <div>
+  <div style="display: flex; flex-direction: column; gap: 5px;">
     <%= form.label :contact_address %>
     <%= form.email_field :contact_address %>
+    <% if character.errors.where(:contact_address).any? %>
+      <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+        <% character.errors.where(:contact_address).each do |error| %>
+          <span><%= error.message %></span>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 
   <div>

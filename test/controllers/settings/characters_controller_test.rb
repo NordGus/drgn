@@ -34,12 +34,22 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
-    test "should destroy character" do
-      assert_difference("Character.count", -1) do
-        delete settings_character_url
-      end
+    test "should mark character as deleted" do
+      assert_difference -> { Character.active.count }, -1 do
+        assert_difference -> { Session.count }, -1 do
+          delete settings_character_url, params: { character: { password: "password" } }
+          assert_redirected_to root_url
 
-      assert_redirected_to root_url
+          assert_not_nil @character.reload.deleted_at
+        end
+      end
+    end
+
+    test "should not destroy character when an invalid password is passed" do
+      assert_no_difference -> { Character.active.count } do
+        delete settings_character_url, params: { character: { password: "invalid_password" } }
+        assert_response :unprocessable_entity
+      end
     end
   end
 

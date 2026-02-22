@@ -4,7 +4,7 @@ class Character < ApplicationRecord
 
   validates :tag, presence: true, uniqueness: true
   validates :contact_address, presence: true, uniqueness: true, email: true
-  validates :deleted_at, comparison: { less_than_or_equal_to: Time.current }, if: :deleted_at
+  validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
   # We validate that the password_padlock is unlocked only when is done from a dangerous action; otherwise it's unnecessary.
   validate :password_padlock_must_be_unlocked, if: -> { updated_from_dangerous_action }
 
@@ -21,15 +21,57 @@ class Character < ApplicationRecord
   # the validation whether the character's password padlock is unlocked or not.
   attribute :updated_from_dangerous_action, :boolean, default: false
 
+  scope :active, -> { where(deleted_at: nil) }
+
   def update_sheet(attributes)
-    self.updated_from_dangerous_action = true
+    update_outcome = false
 
-    update_outcome = update(attributes)
+    transaction do
+      close_remote_connections
 
-    return update_outcome unless update_outcome
+      sessions.delete_all
 
-    OnSheetUpdatedJob.perform_later(self, Time.current)
-    sessions.destroy_all
+      update!(attributes.to_h.merge(
+        updated_from_dangerous_action: true
+      ))
+
+      update_outcome = true
+
+      OnSheetUpdatedJob.perform_later(self, Time.current)
+    rescue StandardError => e
+      Rails.logger.debug e.message
+      Rails.logger.debug e.backtrace.join("\n")
+
+      raise ActiveRecord::Rollback
+    end
+
+    update_outcome
+  end
+
+  def mark_as_deleted(attributes)
+    update_outcome = false
+
+    transaction do
+      close_remote_connections
+
+      sessions.delete_all
+      previous_password_padlocks.delete_all
+      password_padlock.delete
+
+      update!(attributes.to_h.merge(
+        updated_from_dangerous_action: true,
+        deleted_at: Time.current
+      ))
+
+      update_outcome = true
+
+      OnMarkedAsDeletedJob.perform_later(self, Time.current)
+    rescue StandardError => e
+      Rails.logger.debug e.message
+      Rails.logger.debug e.backtrace.join("\n")
+
+      raise ActiveRecord::Rollback
+    end
 
     update_outcome
   end
@@ -38,5 +80,9 @@ class Character < ApplicationRecord
 
   def password_padlock_must_be_unlocked
     errors.add(:password, :invalid) unless password_padlock.unlock_for_dangerous_action(password)
+  end
+
+  def close_remote_connections(reconnect: false)
+    ActionCable.server.remote_connections.where(current_character: self).disconnect reconnect:
   end
 end

@@ -20,20 +20,27 @@ class Settings::CharactersController < SettingsController
 
   # DELETE /character or /character.json
   def destroy
-    @character.destroy!
-
     respond_to do |format|
-      format.html { redirect_to root_path, status: :see_other }
-      format.json { head :no_content }
+      if @character.mark_as_deleted(destroy_character_params)
+        format.html { redirect_to root_path, status: :see_other }
+        format.json { head :no_content }
+      else
+        format.html { render :show, status: :unprocessable_entity }
+        format.json { render json: @character.errors, status: :unprocessable_entity }
+      end
     end
   end
 
   private
     def set_character
-      @character = Character.where(deleted_at: nil).find(Current.character.id)
+      @character = Character.includes(:password_padlock, :sessions).where(deleted_at: nil).find(Current.character.id)
     end
 
     def character_params
       params.fetch(:character, {}).permit(:tag, :contact_address, :password)
+    end
+
+    def destroy_character_params
+      params.fetch(:character, {}).permit(:password)
     end
 end

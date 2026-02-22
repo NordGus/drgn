@@ -9,6 +9,8 @@ class Settings::CharactersController < SettingsController
   def update
     respond_to do |format|
       if @character.update(character_params)
+        @character.sessions.destroy_all
+
         format.html { redirect_to settings_character_path, notice: "Character was successfully updated.", status: :see_other }
         format.json { render :show, status: :ok, location: @character }
       else

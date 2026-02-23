@@ -11,7 +11,7 @@ class Character::OnSheetUpdatedJobTest < ActiveJob::TestCase
     end
   end
 
-  test "does nothing when last_updated_at is in the pass" do
+  test "does nothing when last_updated_at is in the past" do
     assert_enqueued_emails 0 do
       assert_equal :old_updated_at_timestamp_received, Character::OnSheetUpdatedJob.perform_now(@character, 1.year.ago)
     end

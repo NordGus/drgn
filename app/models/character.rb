@@ -54,12 +54,12 @@ class Character < ApplicationRecord
     transaction do
       close_remote_connections
 
+      # We delete all sessions to prevent any further connection.
       sessions.delete_all
-      previous_password_padlocks.delete_all
-      password_padlock.delete
 
       update!(attributes.to_h.merge(
         updated_from_dangerous_action: true,
+        # By marking the character as deleted, we also prevent login padlocks from being unlocked.
         deleted_at: Time.current
       ))
 

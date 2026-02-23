@@ -77,12 +77,12 @@ class CharacterTest < ActiveSupport::TestCase
 
     test "marks the character as deleted" do
       freeze_time do
-        assert_changes -> { @character.reload.deleted_at } do
+        assert_changes -> { @character.reload.deleted_at }, from: nil, to: Time.current do
           assert_difference -> { @character.sessions.count }, -1 do
             assert_enqueued_with job: Character::OnMarkedAsDeletedJob, args: [ @character, Time.current ] do
               assert @character.mark_as_deleted(@attributes)
+
               assert_not_includes @character.errors[:password], "is invalid"
-              assert_equal Time.current, @character.deleted_at
             end
           end
         end

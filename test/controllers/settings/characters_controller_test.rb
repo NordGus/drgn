@@ -16,7 +16,7 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
       assert_changes -> { @character.reload.tag } do
         assert_changes -> { @character.reload.contact_address } do
           assert_difference -> { @character.reload.sessions.count }, -1 do
-            patch settings_character_url, params: { character: { tag: "monkey.d.luffy", contact_address: "yonko-luffy@mugiwara.com", password: "password" } }
+            patch settings_character_url, params: { character: { tag: "monkey.d.luffy", contact_address: "yonko-luffy@mugiwara.com", confirmation_password: "password" } }
             assert_redirected_to settings_character_url
           end
         end
@@ -27,7 +27,7 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
       assert_no_changes -> { @character.reload.tag } do
         assert_no_changes -> { @character.reload.contact_address } do
           assert_no_difference -> { @character.reload.sessions.count } do
-            patch settings_character_url, params: { character: { tag: "monkey.d.luffy", contact_address: "yonko-luffy@mugiwara.com", password: "invalid_password" } }
+            patch settings_character_url, params: { character: { tag: "monkey.d.luffy", contact_address: "yonko-luffy@mugiwara.com", confirmation_password: "invalid_password" } }
             assert_response :unprocessable_entity
           end
         end
@@ -37,7 +37,7 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
     test "should mark character as deleted" do
       assert_difference -> { Character.active.count }, -1 do
         assert_difference -> { Session.count }, -1 do
-          delete settings_character_url, params: { character: { password: "password" } }
+          delete settings_character_url, params: { character: { confirmation_password: "password" } }
           assert_redirected_to root_url
 
           assert_not_nil @character.reload.deleted_at
@@ -47,7 +47,7 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
 
     test "should not destroy character when an invalid password is passed" do
       assert_no_difference -> { Character.active.count } do
-        delete settings_character_url, params: { character: { password: "invalid_password" } }
+        delete settings_character_url, params: { character: { confirmation_password: "invalid_password" } }
         assert_response :unprocessable_entity
       end
     end
@@ -63,7 +63,7 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
       assert_no_changes -> { @character.reload.tag } do
         assert_no_changes -> { @character.reload.contact_address } do
           assert_no_difference -> { @character.reload.sessions.count } do
-            patch settings_character_url, params: { character: { tag: "monkey-d-luffy", contact_address: "one@mugiwara.com", password: "password" } }
+            patch settings_character_url, params: { character: { tag: "monkey-d-luffy", contact_address: "one@mugiwara.com", confirmation_password: "password" } }
             assert_redirected_to new_session_url
           end
         end

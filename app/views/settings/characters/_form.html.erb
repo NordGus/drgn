@@ -1,5 +1,5 @@
 <%= form_with(model: character, url: settings_character_path, data: { controller: "confirmation-form" }) do |form| %>
-  <% if character.errors.where(:password).any? %>
+  <% if character.errors.where(:confirmation_password).any? %>
     <div style="color: red">
       <h2 style="font-size: 1em">Invalid password, this character sheet can't be save</h2>
     </div>
@@ -35,22 +35,22 @@
         t("helpers.submit.update", model: form.object.class),
         type: "button",
         command: "show-modal",
-        commandfor: 'confirmation-modal',
+        commandfor: 'update-confirmation-modal',
         data: {
           action: "confirmation-form#openConfirm"
         },
       )
     %>
 
-    <dialog id="confirmation-modal" data-confirmation-form-target="dialog">
+    <dialog id="update-confirmation-modal" data-confirmation-form-target="dialog">
       <p>
         Please enter your password to update your profile data
       </p>
       <div>
-        <%= form.password_field :password, data: { confirmation_form_target: "password" }, value: " ", autocomplete: "old-password" %>
+        <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
       </div>
       <div>
-        <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'confirmation-modal' %>
+        <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'update-confirmation-modal' %>
         <%= form.submit %>
       </div>
     </dialog>

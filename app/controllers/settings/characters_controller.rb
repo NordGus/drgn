@@ -37,10 +37,10 @@ class Settings::CharactersController < SettingsController
     end
 
     def character_params
-      params.fetch(:character, {}).permit(:tag, :contact_address, :password)
+      params.fetch(:character, {}).permit(:tag, :contact_address, :confirmation_password)
     end
 
     def destroy_character_params
-      params.fetch(:character, {}).permit(:password)
+      params.fetch(:character, {}).permit(:confirmation_password)
     end
 end

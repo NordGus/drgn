@@ -16,7 +16,7 @@ class Character < ApplicationRecord
   has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
   has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
 
-  attribute :password, :string, default: nil
+  attribute :confirmation_password, :string, default: nil
   # This flag is used to control whether the character is updated from a dangerous action or not. This is used to control
   # the validation whether the character's password padlock is unlocked or not.
   attribute :updated_from_dangerous_action, :boolean, default: false
@@ -79,7 +79,7 @@ class Character < ApplicationRecord
   private
 
   def password_padlock_must_be_unlocked
-    errors.add(:password, :invalid) unless password_padlock.unlock_for_dangerous_action(password)
+    errors.add(:confirmation_password, :invalid) unless password_padlock.unlock_for_dangerous_action(confirmation_password)
   end
 
   def close_remote_connections(reconnect: false)

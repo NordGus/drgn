@@ -6,18 +6,18 @@ class CharacterTest < ActiveSupport::TestCase
   class WhenSettingUpdatedFromDangerousActionAttribute < self
     test "forces to pass the password padlock key to save the character" do
       @character.updated_from_dangerous_action = true
-      @character.password = "password"
+      @character.confirmation_password = "password"
 
       assert @character.save
-      assert_nil @character.reload.password
+      assert_nil @character.reload.confirmation_password
     end
 
     test "adds an error to the password attribute when it can't unlock password padlock" do
       @character.updated_from_dangerous_action = true
-      @character.password = "invalid_password"
+      @character.confirmation_password = "invalid_password"
 
       assert_not @character.save
-      assert_includes @character.errors[:password], "is invalid"
+      assert_includes @character.errors[:confirmation_password], "is invalid"
     end
   end
 
@@ -25,7 +25,7 @@ class CharacterTest < ActiveSupport::TestCase
     setup do
       @character.sessions.create!
 
-      @attributes = { tag: "king-luffy", password: "password" }
+      @attributes = { tag: "king-luffy", confirmation_password: "password" }
     end
 
     include ActiveJob::TestHelper
@@ -34,8 +34,8 @@ class CharacterTest < ActiveSupport::TestCase
       assert_no_enqueued_jobs only: [ Character::OnSheetUpdatedJob ] do
         assert_no_changes -> { @character.reload.tag } do
           assert_no_difference -> { @character.sessions.count } do
-            assert_not @character.update_sheet(@attributes.except(:password))
-            assert_includes @character.errors[:password], "is invalid"
+            assert_not @character.update_sheet(@attributes.except(:confirmation_password))
+            assert_includes @character.errors[:confirmation_password], "is invalid"
           end
         end
       end
@@ -47,7 +47,7 @@ class CharacterTest < ActiveSupport::TestCase
           assert_difference -> { @character.sessions.count }, -1 do
             assert_enqueued_with job: Character::OnSheetUpdatedJob, args: [ @character, Time.current ] do
               assert @character.update_sheet(@attributes)
-              assert_not_includes @character.errors[:password], "is invalid"
+              assert_not_includes @character.errors[:confirmation_password], "is invalid"
             end
           end
         end
@@ -59,7 +59,7 @@ class CharacterTest < ActiveSupport::TestCase
     setup do
       @character.sessions.create!
 
-      @attributes = { password: "password" }
+      @attributes = { confirmation_password: "password" }
     end
 
     include ActiveJob::TestHelper
@@ -68,8 +68,8 @@ class CharacterTest < ActiveSupport::TestCase
       assert_no_enqueued_jobs only: [ Character::OnMarkedAsDeletedJob ] do
         assert_no_changes -> { @character.reload.deleted_at } do
           assert_no_difference -> { @character.sessions.count } do
-            assert_not @character.mark_as_deleted(@attributes.except(:password))
-            assert_includes @character.errors[:password], "is invalid"
+            assert_not @character.mark_as_deleted(@attributes.except(:confirmation_password))
+            assert_includes @character.errors[:confirmation_password], "is invalid"
           end
         end
       end
@@ -82,7 +82,7 @@ class CharacterTest < ActiveSupport::TestCase
             assert_enqueued_with job: Character::OnMarkedAsDeletedJob, args: [ @character, Time.current ] do
               assert @character.mark_as_deleted(@attributes)
 
-              assert_not_includes @character.errors[:password], "is invalid"
+              assert_not_includes @character.errors[:confirmation_password], "is invalid"
             end
           end
         end

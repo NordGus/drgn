@@ -2,6 +2,12 @@
 
 <p style="color: green"><%= notice %></p>
 
+<% if @character.errors.where(:confirmation_password).any? %>
+  <div style="color: red">
+    <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
+  </div>
+<% end %>
+
 <%= render "form", character: @character %>
 
 <%= render "deletion_form", character: @character %>

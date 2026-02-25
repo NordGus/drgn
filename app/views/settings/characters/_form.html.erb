@@ -1,10 +1,4 @@
 <%= form_with(model: character, url: settings_character_path, data: { controller: "confirmation-form" }) do |form| %>
-  <% if character.errors.where(:confirmation_password).any? %>
-    <div style="color: red">
-      <h2 style="font-size: 1em">Invalid password, this character sheet can't be save</h2>
-    </div>
-  <% end %>
-
   <div style="display: flex; flex-direction: column; gap: 5px;">
     <%= form.label :tag %>
     <%= form.text_field :tag %>

@@ -1,0 +1,52 @@
+<%= form_with(model: character, url: settings_character_path, data: { controller: "confirmation-form" }) do |form| %>
+  <div style="display: flex; flex-direction: column; gap: 5px;">
+    <%= form.label :tag %>
+    <%= form.text_field :tag %>
+    <% if character.errors.where(:tag).any? %>
+      <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+        <% character.errors.where(:tag).each do |error| %>
+          <span><%= error.message %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 5px;">
+    <%= form.label :contact_address %>
+    <%= form.email_field :contact_address %>
+    <% if character.errors.where(:contact_address).any? %>
+      <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+        <% character.errors.where(:contact_address).each do |error| %>
+          <span><%= error.message %></span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%=
+      form.button(
+        t("helpers.submit.update", model: form.object.class),
+        type: "button",
+        command: "show-modal",
+        commandfor: 'update-confirmation-modal',
+        data: {
+          action: "confirmation-form#openConfirm"
+        },
+      )
+    %>
+
+    <dialog id="update-confirmation-modal" data-confirmation-form-target="dialog">
+      <p>
+        Please enter your password to update your profile data
+      </p>
+      <div>
+        <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+      </div>
+      <div>
+        <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'update-confirmation-modal' %>
+        <%= form.submit %>
+      </div>
+    </dialog>
+  </div>
+<% end %>

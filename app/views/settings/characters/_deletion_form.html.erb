@@ -1,0 +1,34 @@
+<%= form_with(model: character, url: settings_character_path, method: :delete, data: { controller: "confirmation-form" }) do |form| %>
+  <% if character.errors.where(:password).any? %>
+    <div style="color: red">
+      <h2 style="font-size: 1em">Invalid password, this character sheet can't be deleted</h2>
+    </div>
+  <% end %>
+
+  <div>
+    <%=
+      form.button(
+        "Destroy this Character",
+        type: "button",
+        command: "show-modal",
+        commandfor: 'deletion-confirmation-modal',
+        data: {
+          action: "confirmation-form#openConfirm"
+        },
+        )
+    %>
+
+    <dialog id="deletion-confirmation-modal" data-confirmation-form-target="dialog">
+      <p>
+        Please enter your password to confirm your character deletion
+      </p>
+      <div>
+        <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+      </div>
+      <div>
+        <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'deletion-confirmation-modal' %>
+        <%= form.submit "Delete" %>
+      </div>
+    </dialog>
+  </div>
+<% end %>

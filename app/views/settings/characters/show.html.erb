@@ -4,6 +4,4 @@
 
 <%= render "form", character: @character %>
 
-<div>
-  <%= button_to "Destroy this character", [:settings, @character], method: :delete %>
-</div>
+<%= render "deletion_form", character: @character %>

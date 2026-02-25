@@ -6,7 +6,8 @@
   - [x] Implement dangerous action confirmation.
   - [x] Add character base sheet update.
   - [ ] Implement character deletion inspired by [Once - Campfire](https://github.com/basecamp/once-campfire).
-    - [x] Add a character deletion form on the character sheet.
+    - [x] Implement the soft deletion system of the character.
+    - [ ] Add a character deletion form on the character sheet.
     - [ ] Add a character that has been marked as deleted.
     - [ ] Extend the current code to take this into consideration. So, it prevents deleted users from accessing the system.
       - [ ] Extend test cases to also test this.

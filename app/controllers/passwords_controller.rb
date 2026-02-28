@@ -17,7 +17,7 @@ class PasswordsController < ApplicationController
 
   def update
     replacement_key, replacement_key_confirmation = params.expect(:password, :password_confirmation)
-    new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+    new_padlock = @padlock.replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
 
     if new_padlock.persisted?
       new_padlock.character.sessions.destroy_all

@@ -63,7 +63,7 @@ class Padlock::Password < ApplicationRecord
     OnUnlockedJob.perform_later(self, :dangerous_action_authorization, Time.current)
   end
 
-  def replace_padlock(replacement_key:, replacement_key_confirmation:)
+  def replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
     fail AlreadyReplaced, "Padlock is already replaced" unless still_active?
 
     new_padlock = self.class.new(

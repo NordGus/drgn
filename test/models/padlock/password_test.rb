@@ -152,7 +152,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
     end
   end
 
-  class ReplacePadlockTest < self
+  class ReplaceForgottenPadlockTest < self
     include ActiveJob::TestHelper
 
     setup { @padlock = padlock_passwords(:luffys_active_password) }
@@ -164,7 +164,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
 
         assert_difference -> { Padlock::Password.count }, 1 do
           assert_enqueued_with job: Padlock::Password::OnReplacedJob, args: [ @padlock ] do
-            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+            new_padlock = @padlock.replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
 
             assert new_padlock.persisted?
             assert_equal @padlock.replacement_padlock_id, new_padlock.id
@@ -185,7 +185,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
 
         assert_difference -> { Padlock::Password.count }, 0 do
           assert_no_enqueued_jobs do
-            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+            new_padlock = @padlock.replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
 
             assert_not new_padlock.persisted?
             assert_nil @padlock.reload.replacement_padlock_id
@@ -201,7 +201,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
 
         assert_difference -> { Padlock::Password.count }, 0 do
           assert_no_enqueued_jobs do
-            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+            new_padlock = @padlock.replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
 
             assert_not new_padlock.persisted?
             assert_nil @padlock.reload.replacement_padlock_id

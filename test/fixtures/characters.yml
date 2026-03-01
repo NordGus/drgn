@@ -7,3 +7,8 @@ luffy:
 zoro:
   tag: roronoa-zoro
   contact_address: zoro@mugiwara.com
+
+kanjuro:
+  tag: kurozumi-kanjuro
+  contact_address: kanjuro@akazaya.com
+  deleted_at: <%= 1.day.ago %>

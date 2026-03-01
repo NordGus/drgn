@@ -1,10 +1,10 @@
 require "test_helper"
 
 class Padlock::PasswordTest < ActiveSupport::TestCase
-  class UnlockPadlockTest < Padlock::PasswordTest
+  class UnlockPadlockTest < self
     include ActiveJob::TestHelper
 
-    class WithAnActivePadlockTest < UnlockPadlockTest
+    class WithAnActivePadlockTest < self
       setup { @padlock = padlock_passwords(:luffys_active_password) }
 
       class ByCharacterTagTest < WithAnActivePadlockTest
@@ -25,7 +25,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
         end
       end
 
-      class ByCharacterContactAddressTest < WithAnActivePadlockTest
+      class ByCharacterContactAddressTest < self
         setup { @padlock = padlock_passwords(:zoros_active_password) }
 
         test "unlocks the padlock for the given character" do
@@ -46,10 +46,10 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
       end
     end
 
-    class WithAReplacedPadlockTest < UnlockPadlockTest
+    class WithAReplacedPadlockTest < self
       setup { @padlock = padlock_passwords(:luffys_previous_password) }
 
-      class ByCharacterTagTest < WithAnActivePadlockTest
+      class ByCharacterTagTest < self
         test "unlocks the padlock for the given character" do
           username = @padlock.character.tag
           key = "old_password"
@@ -65,7 +65,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
         end
       end
 
-      class ByCharacterContactAddressTest < WithAnActivePadlockTest
+      class ByCharacterContactAddressTest < self
         setup { @padlock = padlock_passwords(:zoros_previous_password) }
 
         test "unlocks the padlock for the given character" do
@@ -84,8 +84,8 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
       end
     end
 
-    class WithBadCredentialsTest < UnlockPadlockTest
-      class WithInvalidUsernameTest < WithBadCredentialsTest
+    class WithBadCredentialsTest < self
+      class WithInvalidUsernameTest < self
         test "unlocks the padlock for the given character" do
           username = "invalid_username"
           key = "old_password"
@@ -101,7 +101,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
         end
       end
 
-      class WithInvalidPassword < WithBadCredentialsTest
+      class WithInvalidPassword < self
         setup { @padlock = padlock_passwords(:zoros_previous_password) }
 
         test "unlocks the padlock for the given character" do
@@ -121,7 +121,38 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
     end
   end
 
-  class ReplacePadlockTest < Padlock::PasswordTest
+  class UnlockForDangerousActionTest < self
+    include ActiveJob::TestHelper
+    setup { @padlock = padlock_passwords(:luffys_active_password) }
+
+    test "unlocks the padlock when the correct password is passed" do
+      freeze_time do
+        assert_enqueued_with job: Padlock::Password::OnUnlockedJob, args: [ @padlock, :dangerous_action_authorization, Time.current ] do
+          assert @padlock.unlock_for_dangerous_action("password")
+        end
+      end
+    end
+
+    test "does not unlock the padlock when the wrong password is passed" do
+      freeze_time do
+        assert_no_enqueued_jobs do
+          assert_not @padlock.unlock_for_dangerous_action("wrong_password")
+        end
+      end
+    end
+
+    test "does not unlock the padlock if it is not active" do
+      padlock = padlock_passwords(:zoros_previous_password)
+
+      freeze_time do
+        assert_no_enqueued_jobs do
+          assert_not padlock.unlock_for_dangerous_action("wrong_password")
+        end
+      end
+    end
+  end
+
+  class ReplaceForgottenPadlockTest < self
     include ActiveJob::TestHelper
 
     setup { @padlock = padlock_passwords(:luffys_active_password) }
@@ -133,7 +164,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
 
         assert_difference -> { Padlock::Password.count }, 1 do
           assert_enqueued_with job: Padlock::Password::OnReplacedJob, args: [ @padlock ] do
-            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+            new_padlock = @padlock.replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
 
             assert new_padlock.persisted?
             assert_equal @padlock.replacement_padlock_id, new_padlock.id
@@ -154,7 +185,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
 
         assert_difference -> { Padlock::Password.count }, 0 do
           assert_no_enqueued_jobs do
-            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+            new_padlock = @padlock.replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
 
             assert_not new_padlock.persisted?
             assert_nil @padlock.reload.replacement_padlock_id
@@ -170,10 +201,89 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
 
         assert_difference -> { Padlock::Password.count }, 0 do
           assert_no_enqueued_jobs do
-            new_padlock = @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:)
+            new_padlock = @padlock.replace_forgotten_padlock(replacement_key:, replacement_key_confirmation:)
 
             assert_not new_padlock.persisted?
             assert_nil @padlock.reload.replacement_padlock_id
+          end
+        end
+      end
+    end
+  end
+
+  class ReplacePadlockTest < self
+    include ActiveJob::TestHelper
+
+    setup { @padlock = padlock_passwords(:luffys_active_password) }
+
+    test "with valid keys" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password"
+        confirmation_password = "password"
+
+        assert_difference -> { Padlock::Password.count }, 1 do
+          assert_changes -> { @padlock.reload.character.password_padlock } do
+            assert_enqueued_with job: Padlock::Password::OnReplacedJob, args: [ @padlock ] do
+              assert_enqueued_with job: Padlock::Password::OnUnlockedJob, args: [ @padlock, :dangerous_action_authorization, Time.current ] do
+                assert @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+                assert_not_nil @padlock.reload.replacement_padlock_id
+              end
+            end
+          end
+        end
+      end
+    end
+
+    test "with no matching keys and valid confirmation password" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password_no_match"
+        confirmation_password = "password"
+
+        assert_difference -> { Padlock::Password.count }, 0 do
+          assert_no_enqueued_jobs do
+            assert_not @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+            assert_nil @padlock.replacement_padlock_id
+            assert_includes @padlock.errors[:key_confirmation], "doesn't match Key"
+          end
+        end
+      end
+    end
+
+    test "with valid keys and invalid confirmation password" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password"
+        confirmation_password = "invalid_password"
+
+        assert_no_changes -> { @padlock.reload.replacement_padlock_id } do
+          assert_difference -> { Padlock::Password.count }, 0 do
+            assert_no_enqueued_jobs do
+              assert_not @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+              assert_includes @padlock.errors[:confirmation_password], "is invalid"
+            end
+          end
+        end
+      end
+    end
+
+    test "with keys that exists in the characters password history" do
+      freeze_time do
+        replacement_key = "password"
+        replacement_key_confirmation = "password"
+        confirmation_password = "password"
+
+        assert_no_changes -> { @padlock.reload.replacement_padlock_id } do
+          assert_difference -> { Padlock::Password.count }, 0 do
+            assert_no_enqueued_jobs do
+              assert_not @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+              assert_includes @padlock.errors[:key], "can't be the same as one previous #{Padlock::Password.max_history_length} Keys"
+            end
           end
         end
       end

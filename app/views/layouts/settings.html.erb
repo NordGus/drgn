@@ -23,15 +23,19 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <% if Current.session.present? %>
-      <div>
-        <%= link_to Current.character.tag, settings_character_path %>
-        <%= button_to "Logout", session_path, method: :delete %>
-      </div>
-    <% end %>
+  <body class="settings">
+    <nav class="settings-navigation">
+      <%= link_to "Character Sheet", settings_character_path %>
+    </nav>
 
-    <main>
+    <section class="settings-header">
+      <h1 class="title">
+        <%= content_for :settings_title %>
+      </h1>
+      <%= link_to "Back", root_path, class: "back-link" %>
+    </section>
+
+    <main class="settings-content">
       <%= yield %>
     </main>
   </body>

@@ -34,6 +34,17 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
+    test "should update character when the character data does not change" do
+      assert_no_changes -> { @character.reload.tag } do
+        assert_no_changes -> { @character.reload.contact_address } do
+          assert_no_difference -> { @character.reload.sessions.count } do
+            patch settings_character_url, params: { character: { tag: @character.tag, contact_address: @character.contact_address, confirmation_password: "password" } }
+            assert_redirected_to settings_character_url
+          end
+        end
+      end
+    end
+
     test "should mark character as deleted" do
       assert_difference -> { Character.active.count }, -1 do
         assert_difference -> { Session.count }, -1 do

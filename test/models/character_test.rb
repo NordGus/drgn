@@ -53,6 +53,19 @@ class CharacterTest < ActiveSupport::TestCase
         end
       end
     end
+
+    test "does nothing when attributes are not changed" do
+      freeze_time do
+        assert_no_changes -> { @character.reload.tag } do
+          assert_no_difference -> { @character.sessions.count } do
+            assert_no_enqueued_jobs do
+              assert @character.update_sheet(@attributes.except(:tag))
+              assert_empty @character.errors
+            end
+          end
+        end
+      end
+    end
   end
 
   class MarkedAsDeletedTest < self

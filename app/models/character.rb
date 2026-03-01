@@ -26,6 +26,10 @@ class Character < ApplicationRecord
   def update_sheet(attributes)
     update_outcome = false
 
+    assign_attributes(attributes.except(:confirmation_password))
+
+    return true unless changed?
+
     transaction do
       close_remote_connections
 

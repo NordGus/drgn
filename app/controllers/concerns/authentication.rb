@@ -32,6 +32,9 @@ module Authentication
       # do it automatically when the Session::ExpireJob job enqueued at session creation is processed or during recurring
       # orphan session cleanup.
       return nil if session.present? && session.expired?
+      # We prevent a session from being resumed if the associated character has been marked as deleted. Is never too bad
+      # to be a little paranoid.
+      return nil if session.present? && session.character.deleted_at.present?
 
       session
     end

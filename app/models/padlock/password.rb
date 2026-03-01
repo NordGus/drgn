@@ -24,6 +24,15 @@ class Padlock::Password < ApplicationRecord
   # Ensures that a padlock key is unique per character's password history. Basically prevents using repeated padlock
   # keys while these exist in the character's history.
   validate :key_uniqueness_on_character_password_history, on: :create
+  validate :must_be_unlocked, if: -> { updated_from_dangerous_action }
+
+  attribute :confirmation_password, :string, default: nil
+  # This flag is used to control whether the password is updated from a dangerous action or not. This is used to control
+  # the validation whether the padlock is unlocked or not.
+  attribute :updated_from_dangerous_action, :boolean, default: false
+  # This flag is used to control whether the padlock is being replaced actively by its character on their character sheet.
+  # This is used to control the validation whether the padlock is being replaced or not.
+  attribute :being_actively_replaced_by_character, :boolean, default: false
 
   def still_active?
     replacement_padlock_id.nil?
@@ -56,9 +65,9 @@ class Padlock::Password < ApplicationRecord
     padlock
   end
 
-  def unlock_for_dangerous_action(key)
-    return false unless still_active?
-    return false unless authenticate_key(key)
+  def unlock_for_dangerous_action(confirmation_key)
+    return false unless still_active? || being_actively_replaced_by_character
+    return false unless authenticate_key(confirmation_key)
 
     OnUnlockedJob.perform_later(self, :dangerous_action_authorization, Time.current)
   end
@@ -81,6 +90,8 @@ class Padlock::Password < ApplicationRecord
       # later.
       update!(_replacement_padlock: new_padlock)
 
+      character.sessions.destroy_all
+
       OnReplacedJob.perform_later(self)
     rescue StandardError => e
       Rails.logger.debug e.message
@@ -90,6 +101,50 @@ class Padlock::Password < ApplicationRecord
     end
 
     new_padlock
+  end
+
+  def replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+    fail AlreadyReplaced, "Padlock is already replaced" unless still_active?
+    update_outcome = false
+
+    new_padlock = self.class.new(
+      character:,
+      key: replacement_key,
+      key_confirmation: replacement_key_confirmation,
+      expires_at: self.class.new_padlock_expires_in
+    )
+
+    # Use a transaction to ensure that the padlock is not created if the replacement fails.
+    transaction do
+      new_padlock.save!
+
+      # We need to update the current padlock's replacement padlock reference so is registered as replaced in the
+      # database so the OnReplacedJob job/event handler can be processed, because is a supposition of the platform
+      # later. Also, because this action is performed by a user knowingly, it needs to be authorized with the password.
+      update!(
+        updated_from_dangerous_action: true,
+        being_actively_replaced_by_character: true,
+        confirmation_password:,
+        _replacement_padlock: new_padlock
+      )
+
+      character.sessions.destroy_all
+
+      update_outcome = true
+
+      OnReplacedJob.perform_later(self)
+    rescue StandardError => e
+      Rails.logger.debug e.message
+      Rails.logger.debug e.backtrace.join("\n")
+
+      raise ActiveRecord::Rollback
+    end
+
+    # We merge the errors from the new padlock into the current padlock's errors. This is done to ensure that we can
+    # return them to the UI because we do not have access to this record back in the template.
+    self.errors.merge!(new_padlock.errors) unless update_outcome
+
+    update_outcome
   end
 
   def self.new_padlock_expires_in
@@ -112,6 +167,10 @@ class Padlock::Password < ApplicationRecord
     # BCrypt::Password.new(digest) allows us to compare a plain text string against a hashed string correctly.
     # if the character has no more than 10 padlocks, the computational cost for this comparison is negligible.
     # FIXME: Include this decision in the documentation.
-    errors.add(:key, :uniqueness) if digests.any? { |digest| BCrypt::Password.new(digest).is_password?(key) }
+    errors.add(:key, :uniqueness, message: "can't be the same as one previous #{self.class.max_history_length} Keys") if digests.any? { |digest| BCrypt::Password.new(digest).is_password?(key) }
+  end
+
+  def must_be_unlocked
+    errors.add(:confirmation_password, :invalid) unless unlock_for_dangerous_action(confirmation_password)
   end
 end

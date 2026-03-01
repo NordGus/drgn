@@ -210,4 +210,83 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
       end
     end
   end
+
+  class ReplacePadlockTest < self
+    include ActiveJob::TestHelper
+
+    setup { @padlock = padlock_passwords(:luffys_active_password) }
+
+    test "with valid keys" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password"
+        confirmation_password = "password"
+
+        assert_difference -> { Padlock::Password.count }, 1 do
+          assert_changes -> { @padlock.reload.character.password_padlock } do
+            assert_enqueued_with job: Padlock::Password::OnReplacedJob, args: [ @padlock ] do
+              assert_enqueued_with job: Padlock::Password::OnUnlockedJob, args: [ @padlock, :dangerous_action_authorization, Time.current ] do
+                assert @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+                assert_not_nil @padlock.reload.replacement_padlock_id
+              end
+            end
+          end
+        end
+      end
+    end
+
+    test "with no matching keys and valid confirmation password" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password_no_match"
+        confirmation_password = "password"
+
+        assert_difference -> { Padlock::Password.count }, 0 do
+          assert_no_enqueued_jobs do
+            assert_not @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+            assert_nil @padlock.replacement_padlock_id
+            assert_includes @padlock.errors[:key_confirmation], "doesn't match Key"
+          end
+        end
+      end
+    end
+
+    test "with valid keys and invalid confirmation password" do
+      freeze_time do
+        replacement_key = "new_password"
+        replacement_key_confirmation = "new_password"
+        confirmation_password = "invalid_password"
+
+        assert_no_changes -> { @padlock.reload.replacement_padlock_id } do
+          assert_difference -> { Padlock::Password.count }, 0 do
+            assert_no_enqueued_jobs do
+              assert_not @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+              assert_includes @padlock.errors[:confirmation_password], "is invalid"
+            end
+          end
+        end
+      end
+    end
+
+    test "with keys that exists in the characters password history" do
+      freeze_time do
+        replacement_key = "password"
+        replacement_key_confirmation = "password"
+        confirmation_password = "password"
+
+        assert_no_changes -> { @padlock.reload.replacement_padlock_id } do
+          assert_difference -> { Padlock::Password.count }, 0 do
+            assert_no_enqueued_jobs do
+              assert_not @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+
+              assert_includes @padlock.errors[:key], "can't be the same as one previous #{Padlock::Password.max_history_length} Keys"
+            end
+          end
+        end
+      end
+    end
+  end
 end

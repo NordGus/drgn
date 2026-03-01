@@ -51,6 +51,34 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
         assert_response :unprocessable_entity
       end
     end
+
+    test "should replace character password padlock" do
+      assert_changes -> { @character.reload.password_padlock.id } do
+        put replace_password_settings_character_url, params: { character: { confirmation_password: "password", password_padlock: { key: "new_password", key_confirmation: "new_password" } } }
+        assert_redirected_to settings_character_url
+      end
+    end
+
+    test "should not replace character password padlock when confirmation_password is invalid" do
+      assert_no_changes -> { @character.reload.password_padlock.id } do
+        put replace_password_settings_character_url, params: { character: { confirmation_password: "invalid_password", password_padlock: { key: "new_password", key_confirmation: "new_password" } } }
+        assert_response :unprocessable_entity
+      end
+    end
+
+    test "should not replace character password padlock when new keys do not match" do
+      assert_no_changes -> { @character.reload.password_padlock.id } do
+        put replace_password_settings_character_url, params: { character: { confirmation_password: "password", password_padlock: { key: "new_password", key_confirmation: "new_password_no_match" } } }
+        assert_response :unprocessable_entity
+      end
+    end
+
+    test "should not replace character password padlock when new keys are still present on the character history" do
+      assert_no_changes -> { @character.reload.password_padlock.id } do
+        put replace_password_settings_character_url, params: { character: { confirmation_password: "password", password_padlock: { key: "password", key_confirmation: "password" } } }
+        assert_response :unprocessable_entity
+      end
+    end
   end
 
   class WithAnUnauthenticatedCharacter < self
@@ -73,6 +101,14 @@ class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
     test "should not destroy character" do
       assert_no_difference "Character.count" do
         delete settings_character_url
+      end
+
+      assert_redirected_to new_session_url
+    end
+
+    test "should not replace character password padlock" do
+      assert_no_difference -> { Padlock::Password.where(character: @character).count } do
+        put replace_password_settings_character_url
       end
 
       assert_redirected_to new_session_url

@@ -3,7 +3,12 @@ Rails.application.routes.draw do
   resources :passwords, only: [ :new, :create, :edit, :update ], param: :token
 
   namespace :settings do
-    resource :character, only: [ :show, :update, :destroy ]
+    resource :character, only: [ :show, :update, :destroy ] do
+      member do
+        patch :replace_password
+        put :replace_password
+      end
+    end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

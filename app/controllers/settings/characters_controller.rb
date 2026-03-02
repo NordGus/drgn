@@ -1,6 +1,4 @@
 class Settings::CharactersController < SettingsController
-  before_action :set_character, only: %i[ show update replace_password destroy ]
-
   # GET /character or /character.json
   def show
   end
@@ -49,10 +47,6 @@ class Settings::CharactersController < SettingsController
   end
 
   private
-    def set_character
-      @character = Character.includes(:password_padlock, :sessions).where(deleted_at: nil).find(Current.character.id)
-    end
-
     def character_params
       params.fetch(:character, {}).permit(:tag, :contact_address, :confirmation_password)
     end

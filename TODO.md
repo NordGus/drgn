@@ -13,4 +13,6 @@
 - [ ] Design the invitation padlock flow for character creation.
   - [ ] Implement security.
   - [ ] Implement form.
+## Master Padlock
+- [ ] Master padlock data model.
 - [ ] Implement master padlocks roles for securing these dangerous system-wide features.

@@ -37,7 +37,7 @@ Taking this into consideration the next section will represent each implementati
 ## Specifications
 
 > [!NOTE]
-> This is a living document, so its constantly being updated to include new the implementation specs for our Locks and
+> This is a living document, so it's constantly being updated to include new the implementation specs for our Locks and
 > Keys.
 
 ### Character (v0.1)

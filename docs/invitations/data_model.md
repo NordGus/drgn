@@ -45,7 +45,7 @@ issued by a `Character` with the `Padlock::Admin::Invitation` key.
 | issuer_id        | integer                  | index, fk, not null | A pointer/reference to the character who issued this padlock                                          |
 | carrier_id       | integer                  | index, fk           | (Optional) A pointer/reference to the created using this invitation                                   |
 | key              | string                   | index               | The secure token used to unlock this padlock                                                          |
-| expires_at       | date                     | not null            | A simple expiration date expired this invitation to prevent usage after a configurable amount of time |
+| expires_at       | datetime                 | not null            | A simple expiration date expired this invitation to prevent usage after a configurable amount of time |
 | last_unlocked_at | datetime                 | not null            | A timestamp that stores the last time the padlock record was unlocked at                              |
 | created_at       | datetime                 | not null            |                                                                                                       |
 | updated_at       | datetime                 | not null            |                                                                                                       |

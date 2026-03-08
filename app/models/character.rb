@@ -16,6 +16,9 @@ class Character < ApplicationRecord
   has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
   has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
 
+  has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :destroy
+  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :destroy
+
   attribute :confirmation_password, :string, default: nil
   # This flag is used to control whether the character is updated from a dangerous action or not. This is used to control
   # the validation whether the character's password padlock is unlocked or not.

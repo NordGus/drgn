@@ -1,0 +1,20 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+zoro_invitation:
+  issuer: luffy
+  carrier: zoro
+  key: <%= SecureRandom.base58(64) %>
+  expires_at: <%= 3.years.ago %>
+  last_unlocked_at: <%= 3.years.ago %>
+
+kunjuro_invitation:
+  issuer: luffy
+  carrier: kanjuro
+  key: <%= SecureRandom.base58(64) %>
+  expires_at: <%= 6.weeks.ago %>
+  last_unlocked_at: <%= 6.weeks.ago %>
+
+unused_invitation:
+  issuer: luffy
+  key: <%= SecureRandom.base58(64) %>
+  expires_at: <%= 1.day.from_now %>

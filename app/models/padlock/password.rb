@@ -79,7 +79,7 @@ class Padlock::Password < ApplicationRecord
       character:,
       key: replacement_key,
       key_confirmation: replacement_key_confirmation,
-      expires_at: self.class.new_padlock_expires_in
+      expires_at: self.class.expires_at
     )
 
     # Use a transaction to ensure that the padlock is not created if the replacement fails.
@@ -111,7 +111,7 @@ class Padlock::Password < ApplicationRecord
       character:,
       key: replacement_key,
       key_confirmation: replacement_key_confirmation,
-      expires_at: self.class.new_padlock_expires_in
+      expires_at: self.class.expires_at
     )
 
     # Use a transaction to ensure that the padlock is not created if the replacement fails.
@@ -147,7 +147,7 @@ class Padlock::Password < ApplicationRecord
     update_outcome
   end
 
-  def self.new_padlock_expires_in
+  def self.expires_at
     # TODO: move this value into system configurations
     EXPIRES_IN_DAYS.days.from_now
   end

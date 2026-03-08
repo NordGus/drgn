@@ -168,7 +168,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
 
             assert new_padlock.persisted?
             assert_equal @padlock.replacement_padlock_id, new_padlock.id
-            assert_equal Padlock::Password.new_padlock_expires_in.to_date, new_padlock.expires_at
+            assert_equal Padlock::Password.expires_at.to_date, new_padlock.expires_at
             assert_equal @padlock.character_id, new_padlock.character_id
             assert_equal @padlock.character.password_padlock, new_padlock
             assert_equal replacement_key, new_padlock.key

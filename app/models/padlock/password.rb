@@ -19,7 +19,7 @@ class Padlock::Password < ApplicationRecord
 
   scope :active, -> { where(replacement_padlock_id: nil).order(created_at: :desc) }
   scope :replaced, -> { where.not(replacement_padlock_id: nil).order(created_at: :desc) }
-  scope :character_padlock_history, ->(character) { where(character:).order(created_at: :desc).limit(max_history_length) }
+  scope :character_padlock_history, ->(character) { where(character:).order(created_at: :desc).limit(history_length) }
 
   # Ensures that a padlock key is unique per character's password history. Basically prevents using repeated padlock
   # keys while these exist in the character's history.
@@ -152,7 +152,7 @@ class Padlock::Password < ApplicationRecord
     EXPIRES_IN_DAYS.days.from_now
   end
 
-  def self.max_history_length
+  def self.history_length
     # TODO: move this value into system configurations
     HISTORY_MAX_LENGTH
   end
@@ -167,7 +167,7 @@ class Padlock::Password < ApplicationRecord
     # BCrypt::Password.new(digest) allows us to compare a plain text string against a hashed string correctly.
     # if the character has no more than 10 padlocks, the computational cost for this comparison is negligible.
     # FIXME: Include this decision in the documentation.
-    errors.add(:key, :uniqueness, message: "can't be the same as one previous #{self.class.max_history_length} Keys") if digests.any? { |digest| BCrypt::Password.new(digest).is_password?(key) }
+    errors.add(:key, :uniqueness, message: "can't be the same as one previous #{self.class.history_length} Keys") if digests.any? { |digest| BCrypt::Password.new(digest).is_password?(key) }
   end
 
   def must_be_unlocked

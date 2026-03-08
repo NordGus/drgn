@@ -9,7 +9,7 @@ class Padlock::Password::OnReplacedJob < ApplicationJob
   def perform(padlock)
     return :no_padlock_received unless padlock.present?
 
-    max_history_length = Padlock::Password.max_history_length
+    max_history_length = Padlock::Password.history_length
     character = padlock.character
 
     previous_padlocks = character.previous_password_padlocks.limit(max_history_length).limit(max_history_length).to_a

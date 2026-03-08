@@ -282,7 +282,7 @@ class Padlock::PasswordTest < ActiveSupport::TestCase
             assert_no_enqueued_jobs do
               assert_not @padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
 
-              assert_includes @padlock.errors[:key], "can't be the same as one previous #{Padlock::Password.max_history_length} Keys"
+              assert_includes @padlock.errors[:key], "can't be the same as one previous #{Padlock::Password.history_length} Keys"
             end
           end
         end

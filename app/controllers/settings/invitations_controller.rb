@@ -1,0 +1,49 @@
+class Settings::InvitationsController < SettingsController
+  # TODO: Add authorization with the master key system
+  before_action :set_settings_invitation, only: %i[ show edit update destroy ]
+
+  # GET /settings/invitations or /settings/invitations.json
+  def index
+    @invitations = Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
+  end
+
+  # GET /settings/invitations/1 or /settings/invitations/1.json
+  def show
+  end
+
+  # POST /settings/invitations or /settings/invitations.json
+  def create
+    @invitation = Invitation.issue(issuer: @character)
+
+    respond_to do |format|
+      if @invitation.persisted?
+        format.html { redirect_to @invitation, notice: "Invitation was successfully created." }
+        format.json { render :show, status: :created, location: @invitation }
+      else
+        format.html { render :index, status: :unprocessable_entity }
+        format.json { render json: @invitation.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /settings/invitations/1 or /settings/invitations/1.json
+  def destroy
+    @invitation.destroy!
+
+    respond_to do |format|
+      format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully destroyed.", status: :see_other }
+      format.json { head :no_content }
+    end
+  end
+
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def set_settings_invitation
+      @invitation = Invitation.includes(:issuer, :carrier).find(params.expect(:id))
+    end
+
+    # Only allow a list of trusted parameters through.
+    def settings_invitation_params
+      params.fetch(:invitation, {})
+    end
+end

@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Invitations" %>
+
+<h1>Invitations</h1>
+
+<div id="settings_invitations">
+  <% @invitations.each do |settings_invitation| %>
+    <%= render settings_invitation %>
+    <p>
+      <%= link_to "Show this invitation", settings_invitation %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New invitation", new_settings_invitation_path %>

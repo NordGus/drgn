@@ -13,6 +13,7 @@ class Padlock::Invitation < ApplicationRecord
 
   scope :pending, -> { where(carrier_id: nil) }
   scope :accepted, -> { where.not(carrier_id: nil) }
+  scope :active, -> { pending.where(expires_at: ..Time.current) }
 
   def self.expires_at
     # TODO: move this value into system configurations
@@ -24,7 +25,7 @@ class Padlock::Invitation < ApplicationRecord
 
     create_outcome = invitation.save
 
-    OnIssuedJob.perform_later(invitation, Time.current) if create_outcome
+    OnIssuedJob.set(wait_until: expires_at).perform_later(invitation) if create_outcome
 
     invitation
   end

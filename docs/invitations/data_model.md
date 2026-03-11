@@ -24,6 +24,11 @@ graph TD;
     i3 -- belongs to --> c4["Character (carrier)"]
 ```
 
+The idea is for this Invitation system to also work as the control access to the platform. When a trusted `Character`
+or the protagonist (root `Character` also known as the first `Character` created) decided to delete a `Character` from
+the platform, it will use its invitation to identify and destroy such `Character`. So this system can not only be used
+to invite users to join the platform but also to remove them from it.
+
 ## Specification
 
 > [!NOTE]

@@ -2,6 +2,8 @@ class Padlock::Invitation < ApplicationRecord
   # TODO: move these values into system configurations
   EXPIRES_IN_DAYS = 1.freeze
 
+  class StillAliveError < StandardError; end
+
   has_secure_token :key, length: 64
 
   belongs_to :issuer, class_name: "Character", foreign_key: :issuer_id
@@ -25,7 +27,7 @@ class Padlock::Invitation < ApplicationRecord
 
     create_outcome = invitation.save
 
-    OnIssuedJob.set(wait_until: expires_at).perform_later(invitation) if create_outcome
+    OnExpiredJob.set(wait_until: expires_at).perform_later(invitation) if create_outcome
 
     invitation
   end

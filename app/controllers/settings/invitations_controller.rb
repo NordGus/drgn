@@ -1,10 +1,10 @@
 class Settings::InvitationsController < SettingsController
   # TODO: Add authorization with the master key system
-  before_action :set_settings_invitation, only: %i[ show edit update destroy ]
+  before_action :set_settings_invitation, only: %i[ show destroy ]
 
   # GET /settings/invitations or /settings/invitations.json
   def index
-    @invitations = Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
+    @invitations = Padlock::Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
   end
 
   # GET /settings/invitations/1 or /settings/invitations/1.json
@@ -13,11 +13,12 @@ class Settings::InvitationsController < SettingsController
 
   # POST /settings/invitations or /settings/invitations.json
   def create
-    @invitation = Invitation.issue(issuer: @character)
+    # Important: This action can degenerate into flakey behavior
+    @invitation = Padlock::Invitation.issue(issuer: @character)
 
     respond_to do |format|
       if @invitation.persisted?
-        format.html { redirect_to @invitation, notice: "Invitation was successfully created." }
+        format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully created." }
         format.json { render :show, status: :created, location: @invitation }
       else
         format.html { render :index, status: :unprocessable_entity }
@@ -39,7 +40,7 @@ class Settings::InvitationsController < SettingsController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_settings_invitation
-      @invitation = Invitation.includes(:issuer, :carrier).find(params.expect(:id))
+      @invitation = Padlock::Invitation.includes(:issuer, :carrier).find(params.expect(:id))
     end
 
     # Only allow a list of trusted parameters through.

@@ -1,16 +1,19 @@
 class Padlock::Invitation < ApplicationRecord
+  KEY_LENGTH = 64.freeze
+
   # TODO: move these values into system configurations
   EXPIRES_IN_DAYS = 1.freeze
 
   class StillAliveError < StandardError; end
 
-  has_secure_token :key, length: 64
+  has_secure_token :key, length: KEY_LENGTH
 
   belongs_to :issuer, class_name: "Character", foreign_key: :issuer_id
   belongs_to :carrier, class_name: "Character", foreign_key: :carrier_id, optional: true
 
   validates :key, presence: true
-  validates :expires_at, presence: true, comparison: { greater_than_or_equal_to: ->(_) { Time.current } }
+  validates :issuer_id, presence: true
+  validates :expires_at, presence: true, comparison: { greater_than_or_equal_to: -> { Time.current } }
   validates :carrier_id, uniqueness: true, if: -> { carrier_id.present? }
 
   scope :pending, -> { where(carrier_id: nil) }
@@ -22,12 +25,27 @@ class Padlock::Invitation < ApplicationRecord
     EXPIRES_IN_DAYS.days.from_now
   end
 
+  # Issues a new invitation by the given issuer.
+  #
+  # @note This method is not idempotent, so it should only be called once per invitation.
+  # @note This method is not transactional, so it should only be called within a transaction or as the only
+  #   operation in an action.
+  #
+  # @param issuer [Character] issuer of the invitation.
+  #
+  # @return [Padlock::Invitation]
   def self.issue(issuer:)
     invitation = new(issuer:, expires_at:)
 
-    create_outcome = invitation.save
+    # Because issuing a new invitation has a non-zero chance of generating a non-unique token key, this loop is here as
+    # a mitigation for these extreme edge case.
+    until invitation.valid?
+      break if invitation.errors.where(:key, :uniqueness).none?
 
-    OnExpiredJob.set(wait_until: expires_at).perform_later(invitation) if create_outcome
+      invitation.key = generate_unique_secure_token(length: KEY_LENGTH)
+    end
+
+    OnExpiredJob.set(wait_until: expires_at).perform_later(invitation) if invitation.save
 
     invitation
   end

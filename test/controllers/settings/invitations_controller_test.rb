@@ -26,7 +26,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should destroy settings_invitation" do
-    assert_difference("Settings::Invitation.count", -1) do
+    assert_difference("Invitation.count", -1) do
       delete settings_invitation_url(@invitation)
     end
 

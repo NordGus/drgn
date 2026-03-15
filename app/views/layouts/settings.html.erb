@@ -25,7 +25,8 @@
 
   <body class="settings">
     <nav class="settings-navigation">
-      <%= link_to "Character Sheet", settings_character_path %>
+      <%= link_to "Character Sheet", settings_character_path, class: "#{params[:controller] == "settings/characters" ? "active" : ""}" %>
+      <%= link_to "Invitations", settings_invitations_path, class: "#{params[:controller] == "settings/invitations" ? "active" : ""}" %>
     </nav>
 
     <section class="settings-header">

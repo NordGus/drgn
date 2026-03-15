@@ -40,6 +40,27 @@ body.settings {
     grid-area: nav;
     margin-right: 10px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    & > a {
+      padding: 10px;
+      text-decoration: none;
+      color: inherit;
+      border-color: #222222;
+      border-style: solid;
+      border-width: 1px 1px;
+      transition: border-color 0.2s ease-in-out;
+
+      &.active {
+        border-color: #ffffff;
+      }
+
+      &:hover {
+        border-color: #ffffff;
+      }
+    }
   }
 
   .settings-header {

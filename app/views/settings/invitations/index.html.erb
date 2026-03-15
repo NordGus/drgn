@@ -1,16 +1,32 @@
+<% content_for :settings_title, "Invitations" %>
+
 <p style="color: green"><%= notice %></p>
 
 <% content_for :title, "Invitations" %>
 
-<h1>Invitations</h1>
+<%= button_to "New invitation", settings_invitations_path, class: "button", method: :post %>
 
-<div id="settings_invitations">
-  <% @invitations.each do |settings_invitation| %>
-    <%= render settings_invitation %>
-    <p>
-      <%= link_to "Show this invitation", settings_invitation %>
-    </p>
-  <% end %>
-</div>
-
-<%= link_to "New invitation", new_settings_invitation_path %>
+<section id="settings_invitations">
+  <div>
+    <h2>Pending</h2>
+    <div class="invitation-entries">
+      <%=
+        render partial: "settings/invitations/invitation",
+               collection: @invitations.pending,
+               as: :invitation,
+               locals: { current_time: Time.current }
+      %>
+    </div>
+  </div>
+  <div>
+    <h2>In use</h2>
+    <div class="invitation-entries">
+      <%=
+        render partial: "settings/invitations/invitation",
+               collection: @invitations.accepted,
+               as: :invitation,
+               locals: { current_time: Time.current }
+      %>
+    </div>
+  </div>
+</section>

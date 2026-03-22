@@ -1,4 +1,6 @@
 class Padlock::Invitation < ApplicationRecord
+  include PasswordLockable
+
   KEY_LENGTH = 64.freeze
 
   # TODO: move these values into system configurations
@@ -20,6 +22,8 @@ class Padlock::Invitation < ApplicationRecord
   scope :accepted, -> { where.not(carrier_id: nil) }
   scope :active, -> { pending.where(expires_at: ..Time.current) }
 
+  attribute :unlocked_by, type: :character, default: nil
+
   def self.expires_at
     # TODO: move this value into system configurations
     EXPIRES_IN_DAYS.days.from_now
@@ -34,8 +38,14 @@ class Padlock::Invitation < ApplicationRecord
   # @param issuer [Character] issuer of the invitation.
   #
   # @return [Padlock::Invitation]
-  def self.issue(issuer:)
-    invitation = new(issuer:, expires_at:)
+  def self.issue(issuer:, confirmation_password:)
+    invitation = new(
+      issuer:,
+      expires_at:,
+      confirmation_password:,
+      from_dangerous_action: true,
+      unlocked_by: issuer
+    )
 
     # Because issuing a new invitation has a non-zero chance of generating a non-unique token key, this loop is here as
     # a mitigation for these extreme edge case.
@@ -55,5 +65,13 @@ class Padlock::Invitation < ApplicationRecord
 
   def accepted?
     carrier_id.present?
+  end
+
+  private
+
+  def must_be_unlocked
+    return if unlocked_by.present? && unlocked_by.password_padlock.unlock_for_dangerous_action(confirmation_password)
+
+    errors.add(:confirmation_password, :invalid)
   end
 end

@@ -1,20 +1,16 @@
 class Settings::InvitationsController < SettingsController
   # TODO: Add authorization with the master key system
-  before_action :set_settings_invitation, only: %i[ show destroy ]
+  before_action :set_invitation, only: %i[ destroy ]
+  before_action :set_invitations, only: %i[ index create ]
 
   # GET /settings/invitations or /settings/invitations.json
   def index
-    @invitations = Padlock::Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
-  end
-
-  # GET /settings/invitations/1 or /settings/invitations/1.json
-  def show
   end
 
   # POST /settings/invitations or /settings/invitations.json
   def create
-    # Important: This action can degenerate into flakey behavior
-    @invitation = Padlock::Invitation.issue(issuer: @character)
+    confirmation_password = invitation_params[:confirmation_password]
+    @invitation = Padlock::Invitation.issue(issuer: @character, confirmation_password:)
 
     respond_to do |format|
       if @invitation.persisted?
@@ -38,13 +34,17 @@ class Settings::InvitationsController < SettingsController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_settings_invitation
+  # Use callbacks to share common setup or constraints between actions.
+  def set_invitation
       @invitation = Padlock::Invitation.includes(:issuer, :carrier).find(params.expect(:id))
     end
 
-    # Only allow a list of trusted parameters through.
-    def settings_invitation_params
-      params.fetch(:invitation, {})
+  # Only allow a list of trusted parameters through.
+  def invitation_params
+    params.fetch(:padlock_invitation, {}).permit(:confirmation_password)
     end
+
+  def set_invitations
+    @invitations = Padlock::Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
+  end
 end

@@ -10,7 +10,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :invitations, only: [ :index, :show, :create, :destroy ]
+    resources :invitations, only: [ :index, :create, :destroy ]
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

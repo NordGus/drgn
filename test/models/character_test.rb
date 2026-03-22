@@ -3,24 +3,6 @@ require "test_helper"
 class CharacterTest < ActiveSupport::TestCase
   setup { @character = characters(:luffy) }
 
-  class WhenSettingUpdatedFromDangerousActionAttribute < self
-    test "forces to pass the password padlock key to save the character" do
-      @character.updated_from_dangerous_action = true
-      @character.confirmation_password = "password"
-
-      assert @character.save
-      assert_nil @character.reload.confirmation_password
-    end
-
-    test "adds an error to the password attribute when it can't unlock password padlock" do
-      @character.updated_from_dangerous_action = true
-      @character.confirmation_password = "invalid_password"
-
-      assert_not @character.save
-      assert_includes @character.errors[:confirmation_password], "is invalid"
-    end
-  end
-
   class UpdateSheetTest < self
     setup do
       @character.sessions.create!

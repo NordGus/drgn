@@ -1,12 +1,12 @@
 class Character < ApplicationRecord
+  include PasswordLockable
+
   normalizes :tag, with: ->(t) { t.strip.split(" ").reject(&:blank?).join(" ") }
   normalizes :contact_address, with: ->(t) { t.strip.downcase.strip.split(" ").reject(&:blank?).join("") }
 
   validates :tag, presence: true, uniqueness: true
   validates :contact_address, presence: true, uniqueness: true, email: true
   validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
-  # We validate that the password_padlock is unlocked only when is done from a dangerous action; otherwise it's unnecessary.
-  validate :password_padlock_must_be_unlocked, if: -> { updated_from_dangerous_action }
 
   encrypts :tag, deterministic: true, ignore_case: true
   encrypts :contact_address, deterministic: true, downcase: true
@@ -18,11 +18,6 @@ class Character < ApplicationRecord
 
   has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :destroy
   has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :destroy
-
-  attribute :confirmation_password, :string, default: nil
-  # This flag is used to control whether the character is updated from a dangerous action or not. This is used to control
-  # the validation whether the character's password padlock is unlocked or not.
-  attribute :updated_from_dangerous_action, :boolean, default: false
 
   scope :active, -> { where(deleted_at: nil) }
 
@@ -38,9 +33,7 @@ class Character < ApplicationRecord
 
       sessions.delete_all
 
-      update!(attributes.to_h.merge(
-        updated_from_dangerous_action: true
-      ))
+      update!(attributes.to_h.merge(from_dangerous_action: true))
 
       update_outcome = true
 
@@ -65,7 +58,7 @@ class Character < ApplicationRecord
       sessions.delete_all
 
       update!(attributes.to_h.merge(
-        updated_from_dangerous_action: true,
+        from_dangerous_action: true,
         # By marking the character as deleted, we also prevent login padlocks from being unlocked.
         deleted_at: Time.current
       ))
@@ -85,7 +78,7 @@ class Character < ApplicationRecord
 
   private
 
-  def password_padlock_must_be_unlocked
+  def must_be_unlocked
     errors.add(:confirmation_password, :invalid) unless password_padlock.unlock_for_dangerous_action(confirmation_password)
   end
 

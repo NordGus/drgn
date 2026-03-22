@@ -1,4 +1,6 @@
 class Padlock::Password < ApplicationRecord
+  include PasswordLockable
+
   class AlreadyReplaced < StandardError; end
 
   # TODO: move these values into system configurations
@@ -24,12 +26,7 @@ class Padlock::Password < ApplicationRecord
   # Ensures that a padlock key is unique per character's password history. Basically prevents using repeated padlock
   # keys while these exist in the character's history.
   validate :key_uniqueness_on_character_password_history, on: :create
-  validate :must_be_unlocked, if: -> { updated_from_dangerous_action }
 
-  attribute :confirmation_password, :string, default: nil
-  # This flag is used to control whether the password is updated from a dangerous action or not. This is used to control
-  # the validation whether the padlock is unlocked or not.
-  attribute :updated_from_dangerous_action, :boolean, default: false
   # This flag is used to control whether the padlock is being replaced actively by its character on their character sheet.
   # This is used to control the validation whether the padlock is being replaced or not.
   attribute :being_actively_replaced_by_character, :boolean, default: false
@@ -122,7 +119,7 @@ class Padlock::Password < ApplicationRecord
       # database so the OnReplacedJob job/event handler can be processed, because is a supposition of the platform
       # later. Also, because this action is performed by a user knowingly, it needs to be authorized with the password.
       update!(
-        updated_from_dangerous_action: true,
+        from_dangerous_action: true,
         being_actively_replaced_by_character: true,
         confirmation_password:,
         _replacement_padlock: new_padlock

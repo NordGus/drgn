@@ -23,7 +23,7 @@
       <% if current_time < invitation.expires_at %>
         <%
           # TODO: change this link to one pointing to the character creation
-          link = settings_invitation_url(invitation)
+          link = '#'
         %>
         <p>Expires: <%= relative_time_in_words(invitation.expires_at) %></p>
 

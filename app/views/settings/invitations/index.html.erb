@@ -4,12 +4,37 @@
 
 <% content_for :title, "Invitations" %>
 
-<%= button_to "New invitation", settings_invitations_path, class: "button", method: :post %>
+<%= form_for :padlock_invitation, url: settings_invitations_path, method: :post, data: { controller: "confirmation-form" } do |form| %>
+  <%=
+    form.button(
+      "New invitation",
+      type: "button",
+      command: "show-modal",
+      commandfor: 'new-invitation-modal',
+      data: {
+        action: "confirmation-form#openConfirm"
+      }
+    )
+  %>
+  <dialog id="new-invitation-modal" data-confirmation-form-target="dialog">
+    <p>
+      Please enter your password to update your profile data
+    </p>
+    <div>
+      <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+    </div>
+    <div>
+      <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'new-invitation-modal' %>
+      <%= form.submit %>
+    </div>
+  </dialog>
+<% end %>
 
 <section id="settings_invitations">
   <div>
+    <%= turbo_stream_from "invitations_pending", channel: Padlock::Invitation::PendingChannel %>
     <h2>Pending</h2>
-    <div class="invitation-entries">
+    <div class="invitation-entries" id="pending-invitations">
       <%=
         render partial: "settings/invitations/invitation",
                collection: @invitations.pending,

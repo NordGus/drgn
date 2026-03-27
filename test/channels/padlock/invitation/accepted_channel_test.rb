@@ -1,6 +1,6 @@
 require "test_helper"
 
-class Padlock::Invitation::InUseChannelTest < ActionCable::Channel::TestCase
+class Padlock::Invitation::AcceptedChannelTest < ActionCable::Channel::TestCase
   # test "subscribes" do
   #   subscribe
   #   assert subscription.confirmed?

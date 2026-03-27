@@ -1,6 +1,6 @@
 import consumer from "channels/consumer"
 
-consumer.subscriptions.create("Padlock::Invitation::InUseChannel", {
+consumer.subscriptions.create("Padlock::Invitation::AcceptedChannel", {
     connected() {
         // Called when the subscription is ready for use on the server
     },

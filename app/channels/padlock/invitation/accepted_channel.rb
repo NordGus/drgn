@@ -1,4 +1,4 @@
-class Padlock::Invitation::InUseChannel < ApplicationCable::Channel
+class Padlock::Invitation::AcceptedChannel < ApplicationCable::Channel
   extend Turbo::Streams::Broadcasts, Turbo::Streams::StreamName
   include Turbo::Streams::StreamName::ClassMethods
 

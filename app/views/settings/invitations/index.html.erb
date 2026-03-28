@@ -4,6 +4,13 @@
 
 <% content_for :title, "Invitations" %>
 
+<% if @invitation.present? && @invitation.errors.where(:confirmation_password).any? %>
+  <div style="color: red">
+    <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
+  </div>
+<% end %>
+
+
 <%= form_for :padlock_invitation, url: settings_invitations_path, method: :post, data: { controller: "confirmation-form" } do |form| %>
   <%=
     form.button(

@@ -1,41 +1,42 @@
 <div id="<%= dom_id invitation %>" class="invitation-entry">
-  <%= button_tag command: "show-modal", commandfor: "#{dom_id invitation}_details", class: "entry" do %>
+  <div class="entry">
+    <p class="issuer">Issued by: <%= invitation.issuer.tag %></p>
+    <p>Issued <%= relative_time_in_words(invitation.created_at) %></p>
+
     <% if invitation.carrier_id.present? %>
       <p>
         Carried by: <%= invitation.carrier.tag %> <%= "(Deleted)" if invitation.carrier.deleted_at? %>
       </p>
-      <p>Since: <%= relative_time_in_words(invitation.last_unlocked_at) %></p>
+      <p>
+        Since <%= relative_time_in_words(invitation.last_unlocked_at) %>
+      </p>
+    <% elsif current_time < invitation.expires_at %>
+      <p>Expires in <%= relative_time_in_words(invitation.expires_at) %></p>
     <% else %>
-      <p>Issued by: <%= invitation.issuer.tag %></p>
-      <% if current_time < invitation.expires_at %>
-        <p>Expires: <%= relative_time_in_words(invitation.expires_at) %></p>
-      <% else %>
-        <p>Expired: <%= relative_time_in_words(invitation.expires_at) %></p>
-      <% end %>
+      <p>Expired <%= relative_time_in_words(invitation.expires_at) %></p>
     <% end %>
-  <% end %>
-  <dialog id="<%= dom_id invitation %>_details" closedby="any">
-    <% if invitation.carrier_id.present? %>
-      <p>Carried by: <%= invitation.carrier.tag %></p>
-      <p>Issued by: <%= invitation.issuer.tag %></p>
-    <% else %>
-      <p>Issued by: <%= invitation.issuer.tag %></p>
-      <% if current_time < invitation.expires_at %>
-        <%
-          # TODO: change this link to one pointing to the character creation
-          link = '#'
-        %>
-        <p>Expires: <%= relative_time_in_words(invitation.expires_at) %></p>
 
-        <div data-controller="sharable" data-sharable-content-value="<%= link %>">
-          <%= text_field_tag :sharable_link, link, readonly: true %>
-          <button data-action="sharable#copy">
-            Copy
-          </button>
-        </div>
-      <% else %>
-        <p>Expired: <%= relative_time_in_words(invitation.expires_at) %></p>
+    <div class="controls">
+      <% unless invitation.carrier_id.present? || current_time > invitation.expires_at %>
+        <% link_to_character_creation = "#" %>
+        <%= button_tag "Share", command: "show-modal", commandfor: "#{dom_id invitation}_share" %>
+
+        <dialog id="<%= dom_id invitation %>_share" closedby="any">
+          <div>
+            <p>
+              Share this link with whom you want to invite to your adventure!
+            </p>
+          </div>
+          <div data-controller="sharable">
+            <% label_tag :sharable_link, "Shareable link" %>
+            <%= text_field_tag :sharable_link, link_to_character_creation, readonly: true %>
+            <button data-action="sharable#copy">
+              Copy
+            </button>
+          </div>
+          <%= button_tag "Close", command: "close", commandfor: "#{dom_id invitation}_share" %>
+        </dialog>
       <% end %>
-    <% end %>
-  </dialog>
+    </div>
+  </div>
 </div>

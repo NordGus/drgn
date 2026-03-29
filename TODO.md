@@ -5,6 +5,12 @@
 - [x] Add invitation padlock creation and management on the settings panel.
   - [ ] Implement settings subpanel.
   - [ ] Implement active invitations per character where the character can manually expire them or visualize orphan invitations.
+    - [x] Implement invitation padlock creation.
+    - [x] Implement invitation padlock expiration.
+    - [x] Implement invitation padlock deletion or revoking.
+      - [x] Implement invitation padlock deletion.
+      - [ ] Implement invitation padlock revocation.
+        - [ ] Implement character expulsion.
   - [x] Implement link creation. Maybe used one inspired by [Once - Campfire](https://github.com/basecamp/once-campfire)
   Server invitation links or explore a more "classical" approach, where each character needs to create a new one for
   each new user.

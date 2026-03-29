@@ -40,5 +40,16 @@
             padding: 0;
             margin: 0;
         }
+
+        .controls {
+            display: flex;
+            gap: 5px;
+            justify-content: end;
+            width: 100%;
+
+            button {
+                cursor: pointer;
+            }
+        }
     }
 }

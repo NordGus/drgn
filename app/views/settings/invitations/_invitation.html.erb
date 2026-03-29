@@ -1,20 +1,28 @@
 <div id="<%= dom_id invitation %>" class="invitation-entry">
   <div class="entry">
-    <p class="issuer">Issued by: <%= invitation.issuer.tag %></p>
-    <p>Issued <%= relative_time_in_words(invitation.created_at) %></p>
+    <p>
+      Carried by: <%=
+      if invitation.carrier.present? && invitation.carrier.deleted_at?
+        "#{invitation.carrier.tag} (Deleted)"
+      elsif invitation.carrier.present?
+        invitation.carrier.tag
+      else
+        "Nobody"
+      end
+    %>
+    </p>
 
     <% if invitation.carrier_id.present? %>
-      <p>
-        Carried by: <%= invitation.carrier.tag %> <%= "(Deleted)" if invitation.carrier.deleted_at? %>
-      </p>
-      <p>
-        Since <%= relative_time_in_words(invitation.last_unlocked_at) %>
-      </p>
+      <p>Since <%= relative_time_in_words(invitation.last_unlocked_at) %></p>
     <% elsif current_time < invitation.expires_at %>
       <p>Expires in <%= relative_time_in_words(invitation.expires_at) %></p>
     <% else %>
       <p>Expired <%= relative_time_in_words(invitation.expires_at) %></p>
     <% end %>
+
+    <p class="issuer">
+      Issued by <%= invitation.issuer.tag %> <%= relative_time_in_words(invitation.created_at) %>
+    </p>
 
     <div class="controls">
       <% unless invitation.carrier_id.present? || current_time > invitation.expires_at %>
@@ -35,6 +43,44 @@
             </button>
           </div>
           <%= button_tag "Close", command: "close", commandfor: "#{dom_id invitation}_share" %>
+        </dialog>
+      <% end %>
+
+      <% if invitation.carrier_id.present? %>
+        <%= form_for invitation, url: revoke_settings_invitation_path(invitation), method: :delete, data: { controller: "confirmation_form" } do |form| %>
+          <%=
+            form.button(
+              "Revoke",
+              type: "button",
+              command: "show-modal",
+              commandfor: "#{dom_id invitation}_revoke"
+            ) %>
+
+          <dialog id="<%= dom_id invitation %>_revoke" closedby="any" data-confirmation-form-target="dialog">
+            <p>
+              By revoking this invitation, you are also deleting the carrier's character sheet with their access.
+            </p>
+            <p>
+              Please provide your password to confirm that you want to revoke this invitation.
+            </p>
+            <div>
+              <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+            </div>
+            <div>
+              <%= form.button t("cancel"), type: "button", command: "close", commandfor: "#{dom_id invitation}_revoke" %>
+              <%= form.submit "Revoke", command: "close", commandfor: "#{dom_id invitation}_revoke" %>
+            </div>
+          </dialog>
+        <% end %>
+      <% else %>
+        <%= button_tag "Delete", command: "show-modal", commandfor: "#{dom_id invitation}_delete" %>
+
+        <dialog id="<%= dom_id invitation %>_delete" closedby="any">
+          <p>
+            By deleting this invitation, any person you shared it with will no longer be able to join your adventure.
+          </p>
+          <%= button_tag "Cancel", method: :delete, command: "close", commandfor: "#{dom_id invitation}_delete" %>
+          <%= button_to "Delete", settings_invitation_path(invitation), method: :delete, command: "close", commandfor: "#{dom_id invitation}_delete" %>
         </dialog>
       <% end %>
     </div>

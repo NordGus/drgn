@@ -1,7 +1,8 @@
 class Settings::InvitationsController < SettingsController
   # TODO: Add authorization with the master key system
-  before_action :set_invitation, only: %i[ destroy ]
-  before_action :set_invitations, only: %i[ index create ]
+  before_action :set_deletable_invitation, only: %i[ destroy ]
+  before_action :set_invitation, only: %i[ revoke ]
+  before_action :set_invitations, only: %i[ index create revoke ]
 
   # GET /settings/invitations or /settings/invitations.json
   def index
@@ -33,16 +34,38 @@ class Settings::InvitationsController < SettingsController
     end
   end
 
-  private
-  # Use callbacks to share common setup or constraints between actions.
-  def set_invitation
-      @invitation = Padlock::Invitation.includes(:issuer, :carrier).find(params.expect(:id))
-    end
+  # DELETE /settings/invitations/1/revoke or /settings/invitations/1/revoke.json
+  def revoke
+    confirmation_password = revoke_invitation_params[:confirmation_password]
 
-  # Only allow a list of trusted parameters through.
+    respond_to do |format|
+      if @invitation.revoke(revoker: @character, confirmation_password:)
+        format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully revoked.", status: :see_other }
+        format.json { head :no_content }
+      else
+        format.html { render :index, status: :unprocessable_entity }
+        format.json { render json: @invitation.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  private
+
+  def set_invitation
+    @invitation = Padlock::Invitation.includes(:issuer, :carrier).accepted.find(params.expect(:id))
+  end
+
+  def set_deletable_invitation
+    @invitation = Padlock::Invitation.includes(:issuer, :carrier).pending.find(params.expect(:id))
+  end
+
   def invitation_params
     params.fetch(:padlock_invitation, {}).permit(:confirmation_password)
-    end
+  end
+
+  def revoke_invitation_params
+    params.fetch(:padlock_invitation, {}).permit(:confirmation_password)
+  end
 
   def set_invitations
     @invitations = Padlock::Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)

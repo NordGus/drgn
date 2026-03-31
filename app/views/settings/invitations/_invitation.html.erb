@@ -20,8 +20,9 @@
       <p>Expired <%= relative_time_in_words(invitation.expires_at) %></p>
     <% end %>
 
-    <p class="issuer">
-      Issued by <%= invitation.issuer.tag %> <%= relative_time_in_words(invitation.created_at) %>
+    <p>
+      Issued by
+      <span class="issuer"><%= invitation.issuer.tag %></span> <%= relative_time_in_words(invitation.created_at) %>
     </p>
 
     <div class="controls">

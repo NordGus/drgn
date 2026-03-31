@@ -1,4 +1,6 @@
 class Character < ApplicationRecord
+  EXPULSION_TIME_OFFSET = 2.minutes.freeze
+
   include PasswordLockable
 
   normalizes :tag, with: ->(t) { t.strip.split(" ").reject(&:blank?).join(" ") }
@@ -74,6 +76,24 @@ class Character < ApplicationRecord
     end
 
     update_outcome
+  end
+
+  # Expel the character from the party. This is the same as marking the character as deleted but is used on the
+  # invitation subsystem to remove the character from the platform by an administrator.
+  #
+  # @note This method is not idempotent. It will only expel the character once.
+  # @note This method is not transactional, so it should only be called within a transaction.
+  # @note This method is supposed to be only called by an administrator inside Invitation#revoke.
+  def expel_from_party!
+    close_remote_connections
+
+    # We delete all sessions to prevent any further connection.
+    sessions.delete_all
+
+    update!(deleted_at: Time.current)
+
+    # We delay the deletion of the character by a few minutes to allow the surrounding transaction to complete.
+    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET).perform_later(self, Time.current)
   end
 
   private

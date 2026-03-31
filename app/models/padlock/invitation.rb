@@ -8,6 +8,8 @@ class Padlock::Invitation < ApplicationRecord
 
   class StillAliveError < StandardError; end
 
+  class NonRevocableError < StandardError; end
+
   has_secure_token :key, length: KEY_LENGTH
 
   belongs_to :issuer, class_name: "Character", foreign_key: :issuer_id
@@ -67,6 +69,47 @@ class Padlock::Invitation < ApplicationRecord
     end
 
     invitation
+  end
+
+  def revoke(revoker:, confirmation_password:)
+    fail NonRevocableError, "This invitation cannot be revoked because it does not have a carrier" unless carrier.present?
+
+    carrier_to_expel = carrier
+    revocation_outcome = false
+
+    transaction do
+      # We first nullify the carrier_id so we can protect the action with the confirmation password. This also allows us
+      # to return early if before expeling the carrier from the platform.
+      update!(
+        unlocked_by: revoker,
+        confirmation_password:,
+        from_dangerous_action: true,
+        carrier_id: nil,
+      )
+
+      carrier_to_expel.expel_from_party!
+
+      destroy! # Now we can safely delete the record.
+
+      revocation_outcome = true
+    rescue StandardError => e
+      Rails.logger.debug e.message
+      Rails.logger.debug e.backtrace.join("\n")
+
+      raise ActiveRecord::Rollback
+    end
+
+    if revocation_outcome
+      # TODO: Handle character expulsion cases when it comes to UI updates.
+
+      AcceptedChannel.broadcast_action_later_to(
+        "invitations_accepted",
+        action: :remove,
+        targets: dom_id(self),
+      )
+    end
+
+    revocation_outcome
   end
 
   def accept_character(attributes)

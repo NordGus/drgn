@@ -2,7 +2,7 @@ class Settings::InvitationsController < SettingsController
   # TODO: Add authorization with the master key system
   before_action :set_deletable_invitation, only: %i[ destroy ]
   before_action :set_invitation, only: %i[ revoke ]
-  before_action :set_invitations, only: %i[ index create revoke ]
+  before_action :set_invitations, only: %i[ index create revoke destroy ]
 
   # GET /settings/invitations or /settings/invitations.json
   def index

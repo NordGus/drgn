@@ -1,8 +1,15 @@
 class Settings::InvitationsController < SettingsController
   # TODO: Add authorization with the master key system
-  before_action :set_deletable_invitation, only: %i[ destroy ]
-  before_action :set_invitation, only: %i[ revoke ]
+  before_action :set_invitation, only: %i[ revoke destroy ]
   before_action :set_invitations, only: %i[ index create revoke destroy ]
+
+  rescue_from Padlock::Invitation::NonTearableError do
+    redirect_to settings_invitations_path, alert: "Invitation could not be tear because is already in use."
+  end
+
+  rescue_from Padlock::Invitation::NonRevocableError do
+    redirect_to settings_invitations_path, alert: "Invitation could not be revoked is not in use."
+  end
 
   # GET /settings/invitations or /settings/invitations.json
   def index
@@ -26,7 +33,7 @@ class Settings::InvitationsController < SettingsController
 
   # DELETE /settings/invitations/1 or /settings/invitations/1.json
   def destroy
-    @invitation.destroy!
+    @invitation.tear!
 
     respond_to do |format|
       format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully destroyed.", status: :see_other }
@@ -52,11 +59,7 @@ class Settings::InvitationsController < SettingsController
   private
 
   def set_invitation
-    @invitation = Padlock::Invitation.includes(:issuer, :carrier).accepted.find(params.expect(:id))
-  end
-
-  def set_deletable_invitation
-    @invitation = Padlock::Invitation.includes(:issuer, :carrier).pending.find(params.expect(:id))
+    @invitation = Padlock::Invitation.includes(:issuer, :carrier).find(params.expect(:id))
   end
 
   def invitation_params

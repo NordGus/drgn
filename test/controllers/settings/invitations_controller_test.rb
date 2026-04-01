@@ -6,12 +6,12 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as @character
   end
 
-  test "should get index" do
+  test "should list all invitations" do
     get settings_invitations_url
     assert_response :success
   end
 
-  test "should create settings_invitation" do
+  test "should create invitation" do
     assert_difference -> { Padlock::Invitation.where(issuer: @character).count }, 1 do
       post settings_invitations_url, params: { padlock_invitation: { confirmation_password: "password" } }
     end
@@ -27,13 +27,63 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-  test "should destroy settings_invitation" do
+  test "should tear invitation" do
     invitation = padlock_invitations(:pending_invitation)
 
-    assert_difference("Padlock::Invitation.count", -1) do
+    assert_difference -> { Padlock::Invitation.count }, -1 do
       delete settings_invitation_url(invitation)
     end
 
     assert_redirected_to settings_invitations_url
+  end
+
+  test "should not tear invitation when it is already accepted" do
+    invitation = padlock_invitations(:zoro_invitation)
+
+    assert_no_difference -> { Padlock::Invitation.count } do
+      delete settings_invitation_url(invitation)
+
+      assert_redirected_to settings_invitations_url
+      assert_includes flash[:alert], "Invitation could not be tear because is already in use."
+    end
+  end
+
+  test "should revoke invitation" do
+    invitation = padlock_invitations(:zoro_invitation)
+    carrier = characters(:zoro)
+
+    freeze_time do
+      assert_changes -> { carrier.reload.deleted_at }, from: nil, to: Time.current do
+        assert_difference -> { Padlock::Invitation.count }, -1 do
+          delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "password" } }
+
+          assert_redirected_to settings_invitations_url
+        end
+      end
+    end
+  end
+
+  test "should not revoke invitation when confirmation password is invalid" do
+    invitation = padlock_invitations(:zoro_invitation)
+    carrier = characters(:zoro)
+
+    assert_no_changes -> { carrier.reload.deleted_at } do
+      assert_no_difference -> { Padlock::Invitation.count } do
+        delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "invalid_password" } }
+
+        assert_response :unprocessable_entity
+      end
+    end
+  end
+
+  test "should not revoke a pending invitation" do
+    invitation = padlock_invitations(:pending_invitation)
+
+    assert_no_difference -> { Padlock::Invitation.count } do
+      delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "password" } }
+
+      assert_redirected_to settings_invitations_url
+      assert_includes flash[:alert], "Invitation could not be revoked is not in use."
+    end
   end
 end

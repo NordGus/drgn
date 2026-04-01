@@ -54,26 +54,29 @@
               "Revoke",
               type: "button",
               command: "show-modal",
-              commandfor: "#{dom_id invitation}_revoke"
+              commandfor: "#{dom_id invitation}_revoke",
+              disabled: invitation.carrier_id == Current.session.character_id,
             ) %>
 
-          <dialog id="<%= dom_id invitation %>_revoke" closedby="any" data-confirmation-form-target="dialog">
-            <p>
-              By revoking this invitation, you are also deleting the carrier's character sheet with their access.
-            </p>
-            <p>
-              Please provide your password to confirm that you want to revoke this invitation.
-            </p>
-            <div>
-              <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
-            </div>
-            <div>
-              <%= form.button t("cancel"), type: "button", command: "close", commandfor: "#{dom_id invitation}_revoke" %>
-              <%= form.submit "Revoke", command: "close", commandfor: "#{dom_id invitation}_revoke" %>
-            </div>
-          </dialog>
+          <% unless invitation.carrier_id == Current.session.character_id %>
+            <dialog id="<%= dom_id invitation %>_revoke" closedby="any" data-confirmation-form-target="dialog">
+              <p>
+                By revoking this invitation, you are also deleting the carrier's character sheet with their access.
+              </p>
+              <p>
+                Please provide your password to confirm that you want to revoke this invitation.
+              </p>
+              <div>
+                <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+              </div>
+              <div>
+                <%= form.button t("cancel"), type: "button", command: "close", commandfor: "#{dom_id invitation}_revoke" %>
+                <%= form.submit "Revoke", command: "close", commandfor: "#{dom_id invitation}_revoke" %>
+              </div>
+            </dialog>
+          <% end %>
         <% end %>
-      <% else %>
+      <% elsif invitation.carrier_id.nil? %>
         <%= button_tag "Delete", command: "show-modal", commandfor: "#{dom_id invitation}_delete" %>
 
         <dialog id="<%= dom_id invitation %>_delete" closedby="any">

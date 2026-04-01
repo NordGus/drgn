@@ -1,13 +1,20 @@
 <% content_for :settings_title, "Invitations" %>
 
 <p style="color: green"><%= notice %></p>
+<p style="color: red"><%= alert %></p>
 
 <% content_for :title, "Invitations" %>
 
-<% if @invitation.present? && @invitation.errors.where(:confirmation_password).any? %>
-  <div style="color: red">
-    <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
-  </div>
+<% if @invitation.present? && @invitation.errors.any? %>
+  <% @invitation.errors.each do |error| %>
+    <div style="color: red">
+      <% if error.attribute == :confirmation_password %>
+        <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
+      <% else %>
+        <h2 style="font-size: 1em"><%= error.full_message %></h2>
+      <% end %>
+    </div>
+  <% end %>
 <% end %>
 
 <%= form_for :padlock_invitation, url: settings_invitations_path, method: :post, data: { controller: "confirmation-form" } do |form| %>

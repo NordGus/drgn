@@ -1,6 +1,5 @@
 class Padlock::Invitation::AcceptedChannel < ApplicationCable::Channel
-  extend Turbo::Streams::Broadcasts, Turbo::Streams::StreamName
-  include Turbo::Streams::StreamName::ClassMethods
+  include TurboChargeable
 
   def subscribed
     if (stream_name = verified_stream_name_from_params).present? && subscription_allowed?
@@ -11,7 +10,7 @@ class Padlock::Invitation::AcceptedChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    # Any cleanup needed when channel is unsubscribed
+    super
   end
 
   def subscription_allowed?

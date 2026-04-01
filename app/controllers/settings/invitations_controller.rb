@@ -50,7 +50,7 @@ class Settings::InvitationsController < SettingsController
         format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully revoked.", status: :see_other }
         format.json { head :no_content }
       else
-        format.html { render :index, status: :unprocessable_entity }
+        format.html { render :index, status: :unprocessable_entity, alert: "Invitation could not be revoked." }
         format.json { render json: @invitation.errors, status: :unprocessable_entity }
       end
     end

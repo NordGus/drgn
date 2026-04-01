@@ -110,6 +110,8 @@ class Padlock::Invitation < ApplicationRecord
       )
     else
       self.carrier_id = carrier_to_expel.id
+
+      errors.merge!(carrier_to_expel.errors)
     end
 
     revocation_outcome

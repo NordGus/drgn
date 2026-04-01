@@ -84,4 +84,27 @@ class CharacterTest < ActiveSupport::TestCase
       end
     end
   end
+
+  class ExpelFromPartyTest < self
+    include ActiveJob::TestHelper
+
+    # We create a session to test the application state changes as expected
+    setup { @character.sessions.create! }
+
+    test "expels the character from the party" do
+      freeze_time do
+        assert_changes -> { @character.reload.deleted_at }, from: nil, to: Time.current do
+          assert_difference -> { @character.reload.sessions.count }, -1 do
+            assert_enqueued_with(
+              job: Character::OnMarkedAsDeletedJob,
+              args: [@character, Time.current],
+              at: ->(job_at) { (1.minute.from_now..3.minutes.from_now).cover?(job_at) }
+            ) do
+              assert @character.expel_from_party!
+            end
+          end
+        end
+      end
+    end
+  end
 end

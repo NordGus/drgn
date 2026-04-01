@@ -88,12 +88,12 @@ class Character < ApplicationRecord
     close_remote_connections
 
     # We delete all sessions to prevent any further connection.
-    sessions.delete_all
+    sessions.destroy_all
 
     update!(deleted_at: Time.current)
 
     # We delay the deletion of the character by a few minutes to allow the surrounding transaction to complete.
-    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET).perform_later(self, Time.current)
+    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET.from_now).perform_later(self, Time.current)
   end
 
   private

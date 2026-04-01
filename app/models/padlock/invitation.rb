@@ -10,6 +10,8 @@ class Padlock::Invitation < ApplicationRecord
 
   class NonRevocableError < StandardError; end
 
+  class NonTearableError < StandardError; end
+
   has_secure_token :key, length: KEY_LENGTH
 
   belongs_to :issuer, class_name: "Character", foreign_key: :issuer_id
@@ -17,7 +19,7 @@ class Padlock::Invitation < ApplicationRecord
 
   validates :key, presence: true
   validates :issuer_id, presence: true
-  validates :expires_at, presence: true, comparison: { greater_than_or_equal_to: -> { Time.current } }
+  validates :expires_at, presence: true, comparison: { greater_than_or_equal_to: -> { Time.current }, on: :create }
   validates :carrier_id, uniqueness: true, if: -> { carrier_id.present? }
 
   scope :pending, -> { where(carrier_id: nil) }
@@ -72,7 +74,7 @@ class Padlock::Invitation < ApplicationRecord
   end
 
   def revoke(revoker:, confirmation_password:)
-    fail NonRevocableError, "This invitation cannot be revoked because it does not have a carrier" unless carrier.present?
+    fail NonRevocableError, "This invitation cannot be revoked because it does not has a carrier" unless carrier.present?
 
     carrier_to_expel = carrier
     revocation_outcome = false
@@ -102,14 +104,28 @@ class Padlock::Invitation < ApplicationRecord
     if revocation_outcome
       # TODO: Handle character expulsion cases when it comes to UI updates.
 
-      AcceptedChannel.broadcast_action_later_to(
+      AcceptedChannel.broadcast_remove_to(
         "invitations_accepted",
-        action: :remove,
-        targets: dom_id(self),
+        targets: self,
       )
+    else
+      self.carrier_id = carrier_to_expel.id
     end
 
     revocation_outcome
+  end
+
+  def tear!
+    fail NonTearableError, "This invitation cannot be torn because it has a carrier" if carrier.present?
+
+    tear_outcome = destroy!
+
+    PendingChannel.broadcast_remove_to(
+      "invitations_pending",
+      targets: self,
+    )
+
+    tear_outcome
   end
 
   def accept_character(attributes)

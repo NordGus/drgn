@@ -3,13 +3,8 @@ class Settings::InvitationsController < SettingsController
   before_action :set_invitation, only: %i[ revoke destroy ]
   before_action :set_invitations, only: %i[ index create revoke destroy ]
 
-  rescue_from Padlock::Invitation::NonTearableError do
-    redirect_to settings_invitations_path, alert: "Invitation could not be tear because is already in use."
-  end
-
-  rescue_from Padlock::Invitation::NonRevocableError do
-    redirect_to settings_invitations_path, alert: "Invitation could not be revoked is not in use."
-  end
+  rescue_from Padlock::Invitation::NonTearableError, with: -> { unprocessable_entity_response_with_custom_message "Invitation could not be tear because is already in use." }
+  rescue_from Padlock::Invitation::NonRevocableError, with: -> { unprocessable_entity_response_with_custom_message "Invitation could not be revoked is not in use." }
 
   # GET /settings/invitations or /settings/invitations.json
   def index

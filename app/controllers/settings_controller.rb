@@ -10,4 +10,20 @@ class SettingsController < ApplicationController
     def set_character
       @character = Character.includes(:password_padlock, :sessions).where(deleted_at: nil).find(Current.session.character_id)
     end
+
+  def unprocessable_entity_response_with_custom_message(message)
+    respond_to do |format|
+      format.html do
+        flash[:alert] = message
+
+        render :index, status: :unprocessable_entity
+      end
+
+      format.json do
+        errors = [message]
+
+        render json: { errors: }, status: :unprocessable_entity
+      end
+    end
+  end
 end

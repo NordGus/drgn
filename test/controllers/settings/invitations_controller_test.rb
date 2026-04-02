@@ -43,7 +43,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference -> { Padlock::Invitation.count } do
       delete settings_invitation_url(invitation)
 
-      assert_redirected_to settings_invitations_url
+      assert_response :unprocessable_entity
       assert_includes flash[:alert], "Invitation could not be tear because is already in use."
     end
   end
@@ -82,7 +82,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference -> { Padlock::Invitation.count } do
       delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "password" } }
 
-      assert_redirected_to settings_invitations_url
+      assert_response :unprocessable_entity
       assert_includes flash[:alert], "Invitation could not be revoked is not in use."
     end
   end

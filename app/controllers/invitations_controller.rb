@@ -8,6 +8,8 @@ class InvitationsController < ApplicationController
 
   # GET /invitations/1 or /invitations/1.json
   def show
+    @invitation.carrier = Character.new
+    @invitation.carrier.password_padlock = Padlock::Password.new
   end
 
   # POST /invitations/1/claim or /invitations/1/claim.json

@@ -75,15 +75,22 @@ class Padlock::Invitation < ApplicationRecord
     invitation
   end
 
-  def claim(character_creator_attributes)
+  # Claims the invitation by the given carrier.
+  #
+  # @note This method has a self-contained transaction. So take this into consideration when calling it.
+  #
+  # @param character_creator_params [ActionController::Parameters] parameters for the carrier creation.
+  #
+  # @return [Boolean] true if the invitation was successfully claimed, false otherwise.
+  def claim(character_creator_params)
     fail NonClaimableError, "This invitation is claimed by another character" unless carrier_id.blank?
     fail NonClaimableError, "This invitation has expired" unless expires_at > Time.current
 
     claim_outcome = false
 
     transaction do
-      self.carrier = Character.new(character_creator_attributes.fetch(:carrier, {}).permit(:tag, :contact_address))
-      self.carrier.password_padlock = Padlock::Password.new(character_creator_attributes.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
+      self.carrier = Character.new(character_creator_params.fetch(:carrier, {}).permit(:tag, :contact_address))
+      self.carrier.password_padlock = Padlock::Password.new(character_creator_params.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
 
       self.carrier.save!
 

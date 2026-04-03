@@ -10,7 +10,7 @@ class InvitationsController < ApplicationController
   def show
   end
 
-  # POST /invitations/1/reclaim or /invitations/1/reclaim.json
+  # POST /invitations/1/claim or /invitations/1/claim.json
   def claim
     respond_to do |format|
       if @invitation.claim(character_creator_params)

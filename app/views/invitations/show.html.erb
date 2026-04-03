@@ -1,3 +1,5 @@
 <p style="color: green"><%= notice %></p>
 
-
+<%= form_with model: @invitation, url: claim_invitation_path(@invitation), method: :post do |form| %>
+  <%= form.submit "Create Character" %>
+<% end %>

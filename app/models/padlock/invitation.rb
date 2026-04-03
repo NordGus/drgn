@@ -24,7 +24,7 @@ class Padlock::Invitation < ApplicationRecord
 
   scope :pending, -> { where(carrier_id: nil) }
   scope :accepted, -> { where.not(carrier_id: nil) }
-  scope :active, -> { pending.where(expires_at: ..Time.current) }
+  scope :claimable, -> { pending.where(expires_at: Time.current..) }
 
   attribute :unlocked_by, type: :character, default: nil
 
@@ -52,7 +52,7 @@ class Padlock::Invitation < ApplicationRecord
     )
 
     # Because issuing a new invitation has a non-zero chance of generating a non-unique token key, this loop is here as
-    # a mitigation for these extreme edge case.
+    # mitigation for these extreme edge case.
     until invitation.valid?
       break if invitation.errors.where(:key, :uniqueness).none?
 
@@ -72,6 +72,8 @@ class Padlock::Invitation < ApplicationRecord
 
     invitation
   end
+
+  def claim(carrier_attributes) end
 
   def revoke(revoker:, confirmation_password:)
     fail NonRevocableError, "This invitation cannot be revoked because it does not has a carrier" unless carrier.present?
@@ -128,9 +130,6 @@ class Padlock::Invitation < ApplicationRecord
     )
 
     tear_outcome
-  end
-
-  def accept_character(attributes)
   end
 
   def accepted?

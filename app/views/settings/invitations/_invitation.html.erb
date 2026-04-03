@@ -60,10 +60,10 @@
               type: "button",
               command: "show-modal",
               commandfor: "#{dom_id invitation}_revoke",
-              disabled: invitation.carrier_id == Current.session.character_id,
+              disabled: invitation.carrier_id == Current.session&.character_id,
             ) %>
 
-          <% unless invitation.carrier_id == Current.session.character_id %>
+          <% unless invitation.carrier_id == Current.session&.character_id %>
             <dialog id="<%= dom_id invitation %>_revoke" closedby="any" data-confirmation-form-target="dialog">
               <p>
                 By revoking this invitation, you are also deleting the carrier's character sheet with their access.

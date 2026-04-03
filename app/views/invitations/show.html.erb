@@ -1,6 +1,6 @@
 <%= form_with(
       model: @invitation,
-      url: claim_invitation_path(@invitation),
+      url: claim_invitation_path(key: @invitation.key),
       method: :post,
       class: "character-creation-form",
     ) do |form| %>
@@ -32,7 +32,7 @@
     <%= carrier_form.fields_for :password_padlock, @invitation.carrier.password_padlock do |padlock_form| %>
       <div style="display: flex; flex-direction: column; gap: 5px;">
         <%= padlock_form.label :key %>
-        <%= padlock_form.text_field :key %>
+        <%= padlock_form.password_field :key %>
         <% if padlock_form.object.errors.where(:key).any? %>
           <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
             <% padlock_form.object.errors.where(:key).each do |error| %>
@@ -44,7 +44,7 @@
 
       <div style="display: flex; flex-direction: column; gap: 5px;">
         <%= padlock_form.label :key_confirmation %>
-        <%= padlock_form.text_field :key_confirmation %>
+        <%= padlock_form.password_field :key_confirmation %>
         <% if padlock_form.object.errors.where(:key_confirmation).any? %>
           <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
             <% padlock_form.object.errors.where(:key_confirmation).each do |error| %>

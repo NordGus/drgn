@@ -59,7 +59,7 @@
   <div>
     <%= turbo_stream_from "invitations_accepted", channel: Padlock::Invitation::AcceptedChannel %>
     <h2>In use</h2>
-    <div class="invitation-entries">
+    <div class="invitation-entries" id="accepted-invitations">
       <%=
         render partial: "settings/invitations/invitation",
                collection: @invitations.accepted,

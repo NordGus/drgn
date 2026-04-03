@@ -12,6 +12,8 @@ class Padlock::Invitation < ApplicationRecord
 
   class NonTearableError < StandardError; end
 
+  class NonClaimableError < StandardError; end
+
   has_secure_token :key, length: KEY_LENGTH
 
   belongs_to :issuer, class_name: "Character", foreign_key: :issuer_id
@@ -73,7 +75,45 @@ class Padlock::Invitation < ApplicationRecord
     invitation
   end
 
-  def claim(carrier_attributes) end
+  def claim(character_creator_attributes)
+    fail NonClaimableError, "This invitation is claimed by another character" unless carrier_id.blank?
+    fail NonClaimableError, "This invitation has expired" unless expires_at > Time.current
+
+    claim_outcome = false
+
+    transaction do
+      self.carrier = Character.new(character_creator_attributes.fetch(:carrier, {}).permit(:tag, :contact_address))
+      self.carrier.password_padlock = Padlock::Password.new(character_creator_attributes.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
+
+      self.carrier.save!
+
+      update!(last_unlocked_at: Time.current)
+
+      claim_outcome = true
+    rescue StandardError => e
+      Rails.logger.debug e.message
+      Rails.logger.debug e.backtrace.join("\n")
+
+      raise ActiveRecord::Rollback
+    end
+
+    if claim_outcome
+      # Removes the invitation from the pending list and adds it to the accepted list on the settings panel using
+      # WebSockets via ActionCable.
+      PendingChannel.broadcast_remove_to(
+        "invitations_pending",
+        target: self
+      )
+      AcceptedChannel.broadcast_prepend_to(
+        "invitations_accepted",
+        target: "accepted-invitations",
+        partial: "settings/invitations/invitation",
+        locals: { invitation: self, current_time: Time.current }
+      )
+    end
+
+    claim_outcome
+  end
 
   def revoke(revoker:, confirmation_password:)
     fail NonRevocableError, "This invitation cannot be revoked because it does not has a carrier" unless carrier.present?

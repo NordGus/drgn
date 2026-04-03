@@ -27,18 +27,23 @@
 
     <div class="controls">
       <% unless invitation.carrier_id.present? || current_time > invitation.expires_at %>
-        <% link_to_character_creation = "#" %>
+        <% link_to_character_creation = invitation_path(key: invitation.key) %>
         <%= button_tag "Share", command: "show-modal", commandfor: "#{dom_id invitation}_share" %>
 
-        <dialog id="<%= dom_id invitation %>_share" closedby="any">
+        <dialog
+          id="<%= dom_id invitation %>_share"
+          closedby="any"
+          data-controller="sharable"
+          data-sharable-url-path-value="<%= link_to_character_creation %>"
+        >
           <div>
             <p>
               Share this link with whom you want to invite to your adventure!
             </p>
           </div>
-          <div data-controller="sharable">
+          <div>
             <% label_tag :sharable_link, "Shareable link" %>
-            <%= text_field_tag :sharable_link, link_to_character_creation, readonly: true %>
+            <%= text_field_tag :sharable_link, link_to_character_creation, readonly: true, data: { sharable_target: "input" } %>
             <button data-action="sharable#copy">
               Copy
             </button>

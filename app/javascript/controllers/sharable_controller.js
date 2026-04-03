@@ -2,14 +2,20 @@ import {Controller} from "@hotwired/stimulus"
 
 // Connects to data-controller="sharable"
 export default class extends Controller {
+    static targets = ["input"]
     static values = {
-        content: String
+        urlPath: String
+    }
+
+    connect() {
+        this.inputTarget.value = window.location.origin + this.urlPathValue
     }
 
     copy(event) {
         event.preventDefault()
+        const url = this.inputTarget.value
 
-        navigator.clipboard.writeText(this.contentValue).then(() => {
+        navigator.clipboard.writeText(url).then(() => {
             const originalText = event.target.innerText
             event.target.innerText = "Copied!"
             setTimeout(() => {

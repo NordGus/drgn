@@ -20,7 +20,7 @@ class SettingsController < ApplicationController
       end
 
       format.json do
-        errors = [message]
+        errors = [ message ]
 
         render json: { errors: }, status: :unprocessable_entity
       end

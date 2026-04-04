@@ -34,6 +34,6 @@ class InvitationsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def character_creator_params
-    params.fetch(:padlock_invitation, {}).permit(carrier: [:tag, :contact_address, password_padlock: [:key, :key_confirmation]])
+    params.fetch(:padlock_invitation, {}).permit(carrier: [ :tag, :contact_address, password_padlock: [ :key, :key_confirmation ] ])
   end
 end

@@ -209,7 +209,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
     private
 
     def padlock_invitation_params
-      @params.fetch(:padlock_invitation, {}).permit(carrier: [:tag, :contact_address, password_padlock: [:key, :key_confirmation]])
+      @params.fetch(:padlock_invitation, {}).permit(carrier: [ :tag, :contact_address, password_padlock: [ :key, :key_confirmation ] ])
     end
   end
 end

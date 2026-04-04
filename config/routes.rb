@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   resource :session, only: [ :new, :create, :destroy ]
   resources :passwords, only: [ :new, :create, :edit, :update ], param: :token
-  resources :invitations, only: [:show], param: :key do
+  resources :invitations, only: [ :show ], param: :key do
     member do
       post :claim
     end

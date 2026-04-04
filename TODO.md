@@ -17,10 +17,11 @@
   each new user.
   - [x] Implement invitation padlock expiration/deletion/rotation.
   - [x] Design link sharing protocol.
-- [ ] Design the invitation padlock flow for character creation.
-  - [ ] Implement security.
-  - [ ] Implement form.
+- [x] Design the invitation padlock flow for character creation.
+  - [x] Implement security.
+  - [x] Implement form.
 - [x] Implement invitation padlock expiration mechanism.
+- [x] Implement orphan cleanup job.
 ## Master Padlock
 - [ ] Master padlock data model.
 - [ ] Implement master padlocks roles for securing these dangerous system-wide features.

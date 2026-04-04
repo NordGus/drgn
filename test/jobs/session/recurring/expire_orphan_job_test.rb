@@ -1,8 +1,6 @@
 require "test_helper"
 
 class Session::Recurring::ExpireOrphanJobTest < ActiveJob::TestCase
-  include ActiveJob::TestHelper
-
   setup do
     @character = characters(:luffy)
     @perishable_session = @character.sessions.create!(expires_at: 1.day.from_now)

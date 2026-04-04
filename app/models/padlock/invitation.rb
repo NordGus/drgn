@@ -27,6 +27,7 @@ class Padlock::Invitation < ApplicationRecord
   scope :pending, -> { where(carrier_id: nil) }
   scope :accepted, -> { where.not(carrier_id: nil) }
   scope :claimable, -> { pending.where(expires_at: Time.current..) }
+  scope :tearable, -> { pending.where(expires_at: ..Time.current) }
 
   attribute :unlocked_by, type: :character, default: nil
 

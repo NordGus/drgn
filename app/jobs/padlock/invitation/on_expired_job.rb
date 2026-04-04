@@ -17,6 +17,6 @@ class Padlock::Invitation::OnExpiredJob < ApplicationJob
     # We destroy the issued invitation as a security measure to prevent it from being used. This is so there are no
     # zombie invitations in the database that could be used to create a new character without the knowledge of the
     # issuer.
-    invitation.destroy!
+    invitation.tear!
   end
 end

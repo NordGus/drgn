@@ -1,0 +1,60 @@
+<%= form_with(
+      model: @invitation,
+      url: claim_invitation_path(key: @invitation.key),
+      method: :post,
+      class: "character-creation-form",
+    ) do |form| %>
+  <%= form.fields_for :carrier, @invitation.carrier do |carrier_form| %>
+    <div style="display: flex; flex-direction: column; gap: 5px;">
+      <%= carrier_form.label :tag %>
+      <%= carrier_form.text_field :tag %>
+      <% if carrier_form.object.errors.where(:tag).any? %>
+        <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+          <% carrier_form.object.errors.where(:tag).each do |error| %>
+            <span><%= error.message %></span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 5px;">
+      <%= carrier_form.label :contact_address %>
+      <%= carrier_form.email_field :contact_address %>
+      <% if carrier_form.object.errors.where(:contact_address).any? %>
+        <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+          <% carrier_form.object.errors.where(:contact_address).each do |error| %>
+            <span><%= error.message %></span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <%= carrier_form.fields_for :password_padlock, @invitation.carrier.password_padlock do |padlock_form| %>
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <%= padlock_form.label :key %>
+        <%= padlock_form.password_field :key %>
+        <% if padlock_form.object.errors.where(:key).any? %>
+          <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+            <% padlock_form.object.errors.where(:key).each do |error| %>
+              <span><%= error.message %></span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <%= padlock_form.label :key_confirmation %>
+        <%= padlock_form.password_field :key_confirmation %>
+        <% if padlock_form.object.errors.where(:key_confirmation).any? %>
+          <div style="color: red; display: flex; flex-direction: column; gap: 5px;">
+            <% padlock_form.object.errors.where(:key_confirmation).each do |error| %>
+              <span><%= error.message %></span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= form.submit "Create Character" %>
+<% end %>

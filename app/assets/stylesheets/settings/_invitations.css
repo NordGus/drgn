@@ -1,0 +1,59 @@
+#settings_invitations {
+    display: grid;
+    gap: 5px;
+    grid-template-columns: 1fr 1fr;
+}
+
+.invitation-entries {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-items: stretch;
+    align-items: stretch;
+}
+
+.invitation-entry {
+    display: flex;
+    gap: 5px;
+
+    .entry {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        justify-content: start;
+        align-items: start;
+        padding: 10px;
+        background-color: transparent;
+        border-width: 1px;
+        border-style: solid;
+        border-color: #222222;
+        transition: border-color 0.2s ease-in-out;
+        color: #ffffff;
+
+        &:hover {
+            border-color: #ffffff;
+        }
+
+        p {
+            padding: 0;
+            margin: 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 5px;
+            justify-content: end;
+            width: 100%;
+
+            button {
+                cursor: pointer;
+
+                &:disabled {
+                    cursor: not-allowed;
+                }
+            }
+        }
+    }
+}

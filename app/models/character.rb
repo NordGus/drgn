@@ -1,12 +1,14 @@
 class Character < ApplicationRecord
+  EXPULSION_TIME_OFFSET = 2.minutes.freeze
+
+  include PasswordLockable
+
   normalizes :tag, with: ->(t) { t.strip.split(" ").reject(&:blank?).join(" ") }
   normalizes :contact_address, with: ->(t) { t.strip.downcase.strip.split(" ").reject(&:blank?).join("") }
 
   validates :tag, presence: true, uniqueness: true
   validates :contact_address, presence: true, uniqueness: true, email: true
   validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
-  # We validate that the password_padlock is unlocked only when is done from a dangerous action; otherwise it's unnecessary.
-  validate :password_padlock_must_be_unlocked, if: -> { updated_from_dangerous_action }
 
   encrypts :tag, deterministic: true, ignore_case: true
   encrypts :contact_address, deterministic: true, downcase: true
@@ -16,10 +18,8 @@ class Character < ApplicationRecord
   has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
   has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
 
-  attribute :confirmation_password, :string, default: nil
-  # This flag is used to control whether the character is updated from a dangerous action or not. This is used to control
-  # the validation whether the character's password padlock is unlocked or not.
-  attribute :updated_from_dangerous_action, :boolean, default: false
+  has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :destroy
+  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :destroy
 
   scope :active, -> { where(deleted_at: nil) }
 
@@ -35,9 +35,7 @@ class Character < ApplicationRecord
 
       sessions.delete_all
 
-      update!(attributes.to_h.merge(
-        updated_from_dangerous_action: true
-      ))
+      update!(attributes.to_h.merge(from_dangerous_action: true))
 
       update_outcome = true
 
@@ -62,7 +60,7 @@ class Character < ApplicationRecord
       sessions.delete_all
 
       update!(attributes.to_h.merge(
-        updated_from_dangerous_action: true,
+        from_dangerous_action: true,
         # By marking the character as deleted, we also prevent login padlocks from being unlocked.
         deleted_at: Time.current
       ))
@@ -80,9 +78,27 @@ class Character < ApplicationRecord
     update_outcome
   end
 
+  # Expel the character from the party. This is the same as marking the character as deleted but is used on the
+  # invitation subsystem to remove the character from the platform by an administrator.
+  #
+  # @note This method is not idempotent. It will only expel the character once.
+  # @note This method is not transactional, so it should only be called within a transaction.
+  # @note This method is supposed to be only called by an administrator inside Invitation#revoke.
+  def expel_from_party!
+    close_remote_connections
+
+    # We delete all sessions to prevent any further connection.
+    sessions.destroy_all
+
+    update!(deleted_at: Time.current)
+
+    # We delay the deletion of the character by a few minutes to allow the surrounding transaction to complete.
+    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET.from_now).perform_later(self, Time.current)
+  end
+
   private
 
-  def password_padlock_must_be_unlocked
+  def must_be_unlocked
     errors.add(:confirmation_password, :invalid) unless password_padlock.unlock_for_dangerous_action(confirmation_password)
   end
 

@@ -19,6 +19,11 @@ default: &default
     args: [ { batch_size: 100 } ]
     queue: background
     schedule: "every day at 1:17am"
+  padlock_invitation_recurring_expire_orphans:
+    class: "Padlock::Invitation::Recurring::ExpireOrphansJob"
+    args: [ { batch_size: 100 } ]
+    queue: background
+    schedule: "every Sunday at 5am"
 
 development:
   <<: *default

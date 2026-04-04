@@ -1,12 +1,23 @@
 Rails.application.routes.draw do
   resource :session, only: [ :new, :create, :destroy ]
   resources :passwords, only: [ :new, :create, :edit, :update ], param: :token
+  resources :invitations, only: [ :show ], param: :key do
+    member do
+      post :claim
+    end
+  end
 
   namespace :settings do
     resource :character, only: [ :show, :update, :destroy ] do
       member do
         patch :replace_password
         put :replace_password
+      end
+    end
+
+    resources :invitations, only: [ :index, :create, :destroy ] do
+      member do
+        delete :revoke
       end
     end
   end

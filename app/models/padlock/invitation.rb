@@ -83,8 +83,8 @@ class Padlock::Invitation < ApplicationRecord
   #
   # @return [Boolean] true if the invitation was successfully claimed, false otherwise.
   def claim(character_creator_params)
-    fail NonClaimableError, "This invitation is claimed by another character" unless carrier_id.blank?
-    fail NonClaimableError, "This invitation has expired" unless expires_at > Time.current
+    fail NonClaimableError, "is claimed by another carrier" unless carrier_id.blank?
+    fail NonClaimableError, "has expired" unless expires_at > Time.current
 
     claim_outcome = false
 
@@ -93,6 +93,7 @@ class Padlock::Invitation < ApplicationRecord
       self.carrier.password_padlock = Padlock::Password.new(character_creator_params.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
 
       self.carrier.save!
+      self.carrier.password_padlock.save!
 
       update!(last_unlocked_at: Time.current)
 

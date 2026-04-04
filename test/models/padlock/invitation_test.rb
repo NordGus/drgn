@@ -103,4 +103,113 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       end
     end
   end
+
+  class ClaimTest < self
+    setup { @invitation = padlock_invitations(:pending_invitation) }
+
+    test "claims the invitation" do
+      @params = ActionController::Parameters.new({
+                                                   padlock_invitation: {
+                                                     carrier: {
+                                                       tag: "sun-of-the-sea-jimbe",
+                                                       contact_address: "jimbe@mugiwara.com",
+                                                       password_padlock: {
+                                                         key: "password",
+                                                         key_confirmation: "password"
+                                                       }
+                                                     }
+                                                   }
+                                                 })
+
+      assert_difference -> { Padlock::Invitation.claimable.count }, -1 do
+        assert_difference -> { Padlock::Password.active.count }, 1 do
+          assert_difference -> { Character.count }, 1 do
+            assert @invitation.claim(padlock_invitation_params)
+          end
+        end
+      end
+    end
+
+    test "does not claim the invitation when the carrier is invalid" do
+      @params = ActionController::Parameters.new({
+                                                   padlock_invitation: {
+                                                     carrier: {
+                                                       tag: "monkey-d-luffy",
+                                                       contact_address: "jimbe@mugiwara.com",
+                                                       password_padlock: {
+                                                         key: "password",
+                                                         key_confirmation: "password"
+                                                       }
+                                                     }
+                                                   }
+                                                 })
+
+      assert_no_difference -> { Padlock::Invitation.claimable.count } do
+        assert_no_difference -> { Padlock::Password.active.count } do
+          assert_no_difference -> { Character.count } do
+            assert_not @invitation.claim(padlock_invitation_params)
+          end
+        end
+      end
+    end
+
+    test "does not claim the invitation when the carrier password padlock is invalid" do
+      @params = ActionController::Parameters.new({
+                                                   padlock_invitation: {
+                                                     carrier: {
+                                                       tag: "sun-of-the-sea-jimbe",
+                                                       contact_address: "jimbe@mugiwara.com",
+                                                       password_padlock: {
+                                                         key: "password",
+                                                         key_confirmation: "invalid-password"
+                                                       }
+                                                     }
+                                                   }
+                                                 })
+
+      assert_no_difference -> { Padlock::Invitation.claimable.count } do
+        assert_no_difference -> { Padlock::Password.active.count } do
+          assert_no_difference -> { Character.count } do
+            assert_not @invitation.claim(padlock_invitation_params)
+          end
+        end
+      end
+    end
+
+    test "does not allow to claim an expired invitation" do
+      @params = ActionController::Parameters.new({})
+      invitation = padlock_invitations(:expired_invitation)
+
+      assert_no_difference -> { Padlock::Invitation.claimable.count } do
+        assert_no_difference -> { Padlock::Password.active.count } do
+          assert_no_difference -> { Character.count } do
+            assert_raise Padlock::Invitation::NonClaimableError, match: /has expired/ do
+              invitation.claim(padlock_invitation_params)
+            end
+          end
+        end
+      end
+    end
+
+    test "does not allow to claim a claimed invitation" do
+      @params = ActionController::Parameters.new({})
+      invitation = padlock_invitations(:zoro_invitation)
+
+      assert_no_difference -> { Padlock::Invitation.claimable.count } do
+        assert_no_difference -> { Padlock::Password.active.count } do
+          assert_no_difference -> { Character.count } do
+            assert_raise Padlock::Invitation::NonClaimableError, match: /is claimed by another carrier/ do
+              invitation.claim(padlock_invitation_params)
+            end
+          end
+        end
+      end
+    end
+
+    private
+
+    def padlock_invitation_params
+      @params.fetch(:padlock_invitation, {}).permit(carrier: [:tag, :contact_address, password_padlock: [:key, :key_confirmation]])
+    end
+  end
 end

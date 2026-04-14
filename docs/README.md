@@ -8,11 +8,11 @@ to structure a modern Ruby-on-Rails full-stack application with the following re
 - Self-hosted with minimal dependencies.
   - Mostly the entire Ruby-on-Rails Framework, minimal to no additional Ruby dependencies.
   - Implemented using the new Solid backend for Cache, ActionCable and ActionJob.
-  - Minimal to zero system dependencies, aside form the ones required by Ruby-on-Rails.
+  - Minimal to zero system dependencies, aside from the ones required by Ruby-on-Rails.
   - Minimal to zero JavaScript dependencies, bundlers or preprocessors, aside from the ones required and provided by
   Ruby-on-Rails.
   - No CSS frameworks, preprocessors or dependencies.
-  - Modern Web standard JavaScript and CSS supported by Chromium-based browers.
+  - Modern JavaScript and CSS standards that are supported by Chromium-based browers.
   - Easy to deploy using Kamal and Containers.
 - Flexible Authentication model.
   - Implementing first a password-based authentication model
@@ -20,10 +20,10 @@ to structure a modern Ruby-on-Rails full-stack application with the following re
 - Simple Authorization model.
   - Modeled over the data sandboxing inspired by column-defined multitenancy for ease of use.
   - Simple role-based level of access owner/admin, editor and viewer.
-  - And a global roles to manage the global configurations of the platform.
+  - And global roles to manage the global configurations of the platform.
 - Data Sandboxing modeled over a column-based implementation of multi-tenancy. Using a master model to sandbox the
 platform data.
-- A weighted directed graph data structure based model to define and store user's transactions ledgers (the `Ledger Graph`).
+- A weighted directed graph data-structure-based model to define and store user's transaction ledgers (the `Ledger Graph`).
   - Build using to simple concept Account nodes and Transaction edges Ledgers.
   - Simple and reliable to build interesting features over it.
   - Transaction edges should be able to model the concept that it can be issued one day and be executed in the future.
@@ -42,17 +42,17 @@ platform data.
   - Give the user a clear view of their financial health.
 - Gamify personal finances.
   - Steal Xbox's Achievements system or PlayStation's Trophies.
-  - Allow the user to set custom Goals and Targets and platform should react to them.
+  - Allow the user to set custom Goals and Targets, and the platform should react to them.
 
 ## Technical considerations
   - DRGN is not a horizontal scalable application.
-  - There will only by 2 process running at all times: Web Server and Solid Queue.
-  - Sessions are store on the database.
-  - There will be no more than 10 concurrent users at maximum.
-    - So sqlite with Rails' defaults are sufficient.
-  - DRGN is more like a Network accessible platform that behaves like a desktop single computer application. 
+  - There will only be three processes running at all times: Web Server, SolidQueue and ActionCable.
+  - Sessions are stored on the database.
+  - There will be no more than 10 users at maximum.
+    - So sqlite with Rails' defaults are enough.
+  - DRGN is more like a Network-accessible platform that behaves like a desktop single computer application. 
   - No Build JavaScript is needed to simplify deployment and stability.
-    - So Propshaft is sufficient.
+    - So the new propshaft is enough.
   - Background Jobs are heavily used, so concurrent programming is a given. Some of their uses:
     - For heavy database calculations.
     - Communications between subsystems, like event handlers.

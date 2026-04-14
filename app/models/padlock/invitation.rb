@@ -64,13 +64,7 @@ class Padlock::Invitation < ApplicationRecord
 
     if invitation.save
       OnExpiredJob.set(wait_until: expires_at).perform_later(invitation)
-
-      PendingChannel.broadcast_prepend_later_to(
-        "invitations_pending",
-        target: "pending-invitations",
-        partial: "settings/invitations/invitation",
-        locals: { invitation:, current_time: Time.current }
-      )
+      OnIssuedBroadcastJob.perform_later(invitation)
     end
 
     invitation

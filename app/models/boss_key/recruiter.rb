@@ -11,5 +11,13 @@ class BossKey::Recruiter < BossKey
   validates :type, inclusion: { in: %w[BossKey::Recruiter] }
 
   scope :deactivated, -> { where.not(deleted_at: nil) }
-  scope :with_access, -> { where.not(deleted_at: nil).where.not(access_level: :no) }
+  scope :with_access, -> { where(deleted_at: nil).where.not(access_level: :no) }
+
+  def with_access?
+    deleted_at.nil? && !with_no_access?
+  end
+
+  def can_invite?
+    with_invite_access? || with_manage_access?
+  end
 end

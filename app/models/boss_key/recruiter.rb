@@ -17,7 +17,15 @@ class BossKey::Recruiter < BossKey
     deleted_at.nil? && !with_no_access?
   end
 
+  def can_share?
+    with_share_access? || with_invite_access? || with_manage_access?
+  end
+
   def can_invite?
     with_invite_access? || with_manage_access?
+  end
+
+  def can_revoke?
+    with_manage_access?
   end
 end

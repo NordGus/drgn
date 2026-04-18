@@ -21,6 +21,9 @@ class Character < ApplicationRecord
   has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :destroy
   has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :destroy
 
+  has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :destroy
+  has_one :recruiter_key, class_name: "BossKey::Recruiter", foreign_key: :holder_id
+
   scope :active, -> { where(deleted_at: nil) }
 
   def update_sheet(attributes)

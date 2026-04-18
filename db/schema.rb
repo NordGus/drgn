@@ -10,7 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_07_231706) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_18_100827) do
+  create_table "boss_keys", force: :cascade do |t|
+    t.integer "access_level", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "deleted_at"
+    t.integer "holder_id", null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["access_level"], name: "index_boss_keys_on_access_level"
+    t.index ["deleted_at"], name: "index_boss_keys_on_deleted_at"
+    t.index ["holder_id", "type"], name: "index_boss_keys_on_holder_id_and_type", unique: true
+    t.index ["holder_id"], name: "index_boss_keys_on_holder_id"
+    t.index ["type"], name: "index_boss_keys_on_type"
+  end
+
   create_table "characters", force: :cascade do |t|
     t.string "contact_address", limit: 4096, null: false
     t.datetime "created_at", null: false
@@ -63,6 +77,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_231706) do
     t.index ["token"], name: "sessions_token", unique: true
   end
 
+  add_foreign_key "boss_keys", "characters", column: "holder_id"
   add_foreign_key "padlock_invitations", "characters", column: "carrier_id"
   add_foreign_key "padlock_invitations", "characters", column: "issuer_id"
   add_foreign_key "padlock_passwords", "characters"

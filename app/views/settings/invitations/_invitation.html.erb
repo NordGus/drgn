@@ -60,10 +60,10 @@
               type: "button",
               command: "show-modal",
               commandfor: "#{dom_id invitation}_revoke",
-              disabled: invitation.carrier_id == Current.session&.character_id,
+              disabled: invitation.carrier == current_character || !current_character.recruiter_key.can_revoke?,
             ) %>
 
-          <% unless invitation.carrier_id == Current.session&.character_id %>
+          <% if invitation.carrier != current_character && current_character.recruiter_key.can_revoke? %>
             <dialog id="<%= dom_id invitation %>_revoke" closedby="any" data-confirmation-form-target="dialog">
               <p>
                 By revoking this invitation, you are also deleting the carrier's character sheet with their access.
@@ -82,15 +82,24 @@
           <% end %>
         <% end %>
       <% elsif invitation.carrier_id.nil? %>
-        <%= button_tag "Delete", command: "show-modal", commandfor: "#{dom_id invitation}_delete" %>
+        <%=
+          button_tag(
+            "Delete",
+            command: "show-modal",
+            commandfor: "#{dom_id invitation}_delete",
+            disabled: !current_character.recruiter_key.can_teardown?,
+          )
+        %>
 
-        <dialog id="<%= dom_id invitation %>_delete" closedby="any">
-          <p>
-            By deleting this invitation, any person you shared it with will no longer be able to join your adventure.
-          </p>
-          <%= button_tag "Cancel", method: :delete, command: "close", commandfor: "#{dom_id invitation}_delete" %>
-          <%= button_to "Delete", settings_invitation_path(invitation), method: :delete, command: "close", commandfor: "#{dom_id invitation}_delete" %>
-        </dialog>
+        <% if current_character.recruiter_key.can_teardown? %>
+          <dialog id="<%= dom_id invitation %>_delete" closedby="any">
+            <p>
+              By deleting this invitation, any person you shared it with will no longer be able to join your adventure.
+            </p>
+            <%= button_tag "Cancel", method: :delete, command: "close", commandfor: "#{dom_id invitation}_delete" %>
+            <%= button_to "Delete", settings_invitation_path(invitation), method: :delete, command: "close", commandfor: "#{dom_id invitation}_delete" %>
+          </dialog>
+        <% end %>
       <% end %>
     </div>
   </div>

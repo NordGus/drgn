@@ -64,7 +64,7 @@ class Padlock::Invitation < ApplicationRecord
 
     if invitation.save
       OnExpiredJob.set(wait_until: expires_at).perform_later(invitation)
-      OnIssuedBroadcastJob.perform_later(invitation)
+      Padlock::InvitationChannel.broadcast_issued(invitation)
     end
 
     invitation
@@ -100,20 +100,7 @@ class Padlock::Invitation < ApplicationRecord
       raise ActiveRecord::Rollback
     end
 
-    if claim_outcome
-      # Removes the invitation from the pending list and adds it to the accepted list on the settings panel using
-      # WebSockets via ActionCable.
-      PendingChannel.broadcast_remove_to(
-        "invitations_pending",
-        target: self
-      )
-      AcceptedChannel.broadcast_prepend_to(
-        "invitations_accepted",
-        target: "accepted-invitations",
-        partial: "settings/invitations/invitation",
-        locals: { invitation: self, current_time: Time.current }
-      )
-    end
+    Padlock::InvitationChannel.broadcast_claimed(self) if claim_outcome
 
     claim_outcome
   end
@@ -147,12 +134,7 @@ class Padlock::Invitation < ApplicationRecord
     end
 
     if revocation_outcome
-      # TODO: Handle character expulsion cases when it comes to UI updates.
-
-      AcceptedChannel.broadcast_remove_to(
-        "invitations_accepted",
-        targets: self,
-      )
+      Padlock::InvitationChannel.broadcast_torn_or_revoked(self)
     else
       self.carrier_id = carrier_to_expel.id
 
@@ -167,16 +149,17 @@ class Padlock::Invitation < ApplicationRecord
 
     tear_outcome = destroy!
 
-    PendingChannel.broadcast_remove_to(
-      "invitations_pending",
-      targets: self,
-    )
+    Padlock::InvitationChannel.broadcast_torn_or_revoked(self) if tear_outcome
 
     tear_outcome
   end
 
   def accepted?
     carrier_id.present?
+  end
+
+  def expired?
+    expires_at < Time.current
   end
 
   private

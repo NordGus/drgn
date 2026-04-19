@@ -1,6 +1,8 @@
 class Padlock::Invitation::OnExpiredJob < ApplicationJob
   queue_as :default
 
+  limits_concurrency to: 1, key: ->(invitation) { invitation }, duration: 1.minute, group: "PadlockActions"
+
   retry_on Padlock::Invitation::StillAliveError, wait: 5.seconds, attempts: :unlimited, report: true
   retry_on ActiveRecord::RecordNotDestroyed, wait: 5.minutes, attempts: :unlimited, report: true
 

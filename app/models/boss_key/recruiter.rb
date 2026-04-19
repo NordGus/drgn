@@ -12,6 +12,7 @@ class BossKey::Recruiter < BossKey
 
   scope :deactivated, -> { where.not(deleted_at: nil) }
   scope :with_access, -> { where(deleted_at: nil).where.not(access_level: :no) }
+  scope :with_whom_can_be_broadcasted, -> { includes(holder: [ :recruiter_key ]).with_access }
 
   def with_access?
     deleted_at.nil? && !with_no_access?
@@ -26,6 +27,10 @@ class BossKey::Recruiter < BossKey
   end
 
   def can_revoke?
+    with_manage_access?
+  end
+
+  def can_teardown?
     with_manage_access?
   end
 end

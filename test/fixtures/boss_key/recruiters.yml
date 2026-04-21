@@ -11,7 +11,7 @@ luffys_recruiter_key:
 zoro_recruiter_key:
   <<: *DEFAULTS
   holder: zoro
-  access_level: <%= BossKey::Recruiter.access_levels[:share] %>
+  access_level: <%= BossKey::Recruiter.access_levels[:no] %>
 
 kanjuro_recruiter_key:
   <<: *DEFAULTS

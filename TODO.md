@@ -13,4 +13,4 @@
   - [ ] Implement invitations feature boss key model.
     - [x] Implement the model
     - [x] Add authorization to ActionCable channels.
-    - [ ] Refactor views to use the authorization system.
+    - [x] Refactor views to use the authorization system.

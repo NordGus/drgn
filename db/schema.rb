@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_18_100827) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_180836) do
   create_table "boss_keys", force: :cascade do |t|
     t.integer "access_level", default: 0, null: false
     t.datetime "created_at", null: false
@@ -29,7 +29,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_100827) do
     t.string "contact_address", limit: 4096, null: false
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
-    t.string "original_tag", limit: 4096, null: false
     t.string "tag", limit: 4096, null: false
     t.datetime "updated_at", null: false
     t.index ["contact_address"], name: "index_characters_on_contact_address", unique: true

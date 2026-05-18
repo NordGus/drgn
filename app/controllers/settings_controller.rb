@@ -1,4 +1,9 @@
 class SettingsController < ApplicationController
+  # including Authorization::BossDoor to have settings-wide access to helper method :can_unlock_door? and also include
+  # all authorization methods for controllers that use BossKey-based authorization to work, without needing to include
+  # this concern on every single one of them.
+  include Authorization::BossDoor
+
   before_action :set_character
 
   layout "settings"

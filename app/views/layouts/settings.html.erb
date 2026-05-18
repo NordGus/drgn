@@ -27,7 +27,7 @@
   <body class="settings">
     <nav class="settings-navigation">
       <%= link_to "Character Sheet", settings_character_path, class: "#{params[:controller] == "settings/characters" ? "active" : ""}" %>
-      <% unless @character.recruiter_key.with_no_access? %>
+      <% if can_unlock_door? :recruiter %>
         <%= link_to "Invitations", settings_invitations_path, class: "#{params[:controller] == "settings/invitations" ? "active" : ""}" %>
       <% end %>
     </nav>

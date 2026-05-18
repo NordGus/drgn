@@ -1,8 +1,11 @@
 class Settings::InvitationsController < SettingsController
-  before_action :only_allow_characters_with_access, only: :index
-  before_action :only_allow_characters_that_can_invite, only: %i[ create ]
-  before_action :only_allow_characters_that_can_revoke, only: %i[ revoke ]
-  before_action :only_allow_characters_that_can_teardown, only: %i[ destroy ]
+  unlockable_with :recruiter_key
+
+  require_unlocked_door
+
+  requires_capability :invite, only: :create
+  requires_capability :teardown, only: :destroy
+  requires_capability :revoke, only: :revoke
 
   before_action :set_invitation, only: %i[ revoke destroy ]
   before_action :set_invitations, only: %i[ index create revoke destroy ]
@@ -71,21 +74,5 @@ class Settings::InvitationsController < SettingsController
 
   def set_invitations
     @invitations = Padlock::Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
-  end
-
-  def only_allow_characters_with_access
-    redirect_to root_path unless @character.recruiter_key.has_access?
-  end
-
-  def only_allow_characters_that_can_invite
-    redirect_to root_path unless @character.recruiter_key.can_invite?
-  end
-
-  def only_allow_characters_that_can_revoke
-    redirect_to root_path unless @character.recruiter_key.can_revoke?
-  end
-
-  def only_allow_characters_that_can_teardown
-    redirect_to root_path unless @character.recruiter_key.can_teardown?
   end
 end

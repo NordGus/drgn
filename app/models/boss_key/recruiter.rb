@@ -14,8 +14,8 @@ class BossKey::Recruiter < BossKey
   scope :with_access, -> { where(deleted_at: nil).where.not(access_level: :no) }
   scope :with_whom_can_be_broadcasted, -> { includes(holder: [ :recruiter_key ]).with_access }
 
-  def has_access?
-    deleted_at.nil? && with_share_access? || with_invite_access? || with_manage_access?
+  def can_access?
+    deleted_at.nil? && !with_no_access?
   end
 
   def can_share?

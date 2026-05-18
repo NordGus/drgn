@@ -9,4 +9,8 @@ class BossKey < ApplicationRecord
   validates :access_level, presence: true
   validates :holder_id, presence: true, uniqueness: { scope: :type }
   validates :type, presence: true
+
+  def can_access?
+    fail NotImplementedError, "each BossKey must implement the #can_access? method"
+  end
 end

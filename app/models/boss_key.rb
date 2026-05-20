@@ -10,6 +10,9 @@ class BossKey < ApplicationRecord
   validates :holder_id, presence: true, uniqueness: { scope: :type }
   validates :type, presence: true
 
+  scope :deleted, -> { where.not(deleted_at: nil) }
+  scope :active, -> { where(deleted_at: nil) }
+
   def can_access?
     fail NotImplementedError, "each BossKey must implement the #can_access? method"
   end

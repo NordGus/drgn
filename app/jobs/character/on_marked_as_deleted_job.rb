@@ -12,7 +12,8 @@ class Character::OnMarkedAsDeletedJob < ApplicationJob
     character.transaction do
       # The Padlock::Password configuration will ensure that all previous padlocks are destroyed as well.
       character.password_padlock&.destroy!
-      character.sessions.find_each(&:destroy!)
+      character.sessions.destroy_all
+      character.boss_keys.destroy_all
 
       character.update!(
         tag: "deleted-character-#{deactivation_token}",

@@ -1,13 +1,11 @@
 require "test_helper"
 
 class CharacterTest < ActiveSupport::TestCase
-  setup { @character = characters(:luffy) }
-
   class UpdateSheetTest < self
     setup do
-      @character.sessions.create!
+      @character = characters(:luffy)
 
-      @attributes = { tag: "king-luffy", confirmation_password: "password" }
+      @character.sessions.create!
     end
 
     include ActiveJob::TestHelper
@@ -16,7 +14,7 @@ class CharacterTest < ActiveSupport::TestCase
       assert_no_enqueued_jobs only: [ Character::OnSheetUpdatedJob ] do
         assert_no_changes -> { @character.reload.tag } do
           assert_no_difference -> { @character.sessions.count } do
-            assert_not @character.update_sheet(@attributes.except(:confirmation_password))
+            assert_not @character.update_sheet({ tag: "king-luffy-#{SecureRandom.hex(8)}" })
             assert_includes @character.errors[:confirmation_password], "is invalid"
           end
         end
@@ -28,7 +26,7 @@ class CharacterTest < ActiveSupport::TestCase
         assert_changes -> { @character.reload.tag } do
           assert_difference -> { @character.sessions.count }, -1 do
             assert_enqueued_with job: Character::OnSheetUpdatedJob, args: [ @character, Time.current ] do
-              assert @character.update_sheet(@attributes)
+              assert @character.update_sheet({ tag: "king-luffy-#{SecureRandom.hex(8)}", confirmation_password: "password" })
               assert_not_includes @character.errors[:confirmation_password], "is invalid"
             end
           end
@@ -41,7 +39,7 @@ class CharacterTest < ActiveSupport::TestCase
         assert_no_changes -> { @character.reload.tag } do
           assert_no_difference -> { @character.sessions.count } do
             assert_no_enqueued_jobs do
-              assert @character.update_sheet(@attributes.except(:tag))
+              assert @character.update_sheet({ confirmation_password: "password" })
               assert_empty @character.errors
             end
           end
@@ -52,6 +50,8 @@ class CharacterTest < ActiveSupport::TestCase
 
   class MarkedAsDeletedTest < self
     setup do
+      @character = characters(:luffy)
+
       @character.sessions.create!
 
       @attributes = { confirmation_password: "password" }
@@ -63,8 +63,10 @@ class CharacterTest < ActiveSupport::TestCase
       assert_no_enqueued_jobs only: [ Character::OnMarkedAsDeletedJob ] do
         assert_no_changes -> { @character.reload.deleted_at } do
           assert_no_difference -> { @character.sessions.count } do
-            assert_not @character.mark_as_deleted(@attributes.except(:confirmation_password))
-            assert_includes @character.errors[:confirmation_password], "is invalid"
+            assert_no_difference -> { @character.boss_keys.deleted.count } do
+              assert_not @character.mark_as_deleted(@attributes.except(:confirmation_password))
+              assert_includes @character.errors[:confirmation_password], "is invalid"
+            end
           end
         end
       end
@@ -74,10 +76,12 @@ class CharacterTest < ActiveSupport::TestCase
       freeze_time do
         assert_changes -> { @character.reload.deleted_at }, from: nil, to: Time.current do
           assert_difference -> { @character.sessions.count }, -1 do
-            assert_enqueued_with job: Character::OnMarkedAsDeletedJob, args: [ @character, Time.current ] do
-              assert @character.mark_as_deleted(@attributes)
+            assert_difference -> { @character.boss_keys.deleted.count }, 1 do
+              assert_enqueued_with job: Character::OnMarkedAsDeletedJob, args: [ @character, Time.current ] do
+                assert @character.mark_as_deleted(@attributes)
 
-              assert_not_includes @character.errors[:confirmation_password], "is invalid"
+                assert_not_includes @character.errors[:confirmation_password], "is invalid"
+              end
             end
           end
         end
@@ -89,18 +93,24 @@ class CharacterTest < ActiveSupport::TestCase
     include ActiveJob::TestHelper
 
     # We create a session to test the application state changes as expected
-    setup { @character.sessions.create! }
+    setup do
+      @character = characters(:luffy)
+
+      @character.sessions.create!
+    end
 
     test "expels the character from the party" do
       freeze_time do
         assert_changes -> { @character.reload.deleted_at }, from: nil, to: Time.current do
           assert_difference -> { @character.reload.sessions.count }, -1 do
-            assert_enqueued_with(
-              job: Character::OnMarkedAsDeletedJob,
-              args: [ @character, Time.current ],
-              at: ->(job_at) { (1.minute.from_now..3.minutes.from_now).cover?(job_at) }
-            ) do
-              assert @character.expel_from_party!
+            assert_difference -> { @character.boss_keys.deleted.count }, 1 do
+              assert_enqueued_with(
+                job: Character::OnMarkedAsDeletedJob,
+                args: [ @character, Time.current ],
+                at: ->(job_at) { (1.minute.from_now..3.minutes.from_now).cover?(job_at) }
+              ) do
+                assert @character.expel_from_party!
+              end
             end
           end
         end

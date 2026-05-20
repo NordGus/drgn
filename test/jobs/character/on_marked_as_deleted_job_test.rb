@@ -12,8 +12,10 @@ class Character::OnMarkedAsDeletedJobTest < ActiveJob::TestCase
       assert_no_changes -> { @character.reload.deleted_at } do
         assert_no_changes -> { @character.reload.contact_address } do
           assert_no_difference -> { @character.reload.sessions.count } do
-            assert_no_difference -> { Padlock::Password.where(character: @character).count } do
-              assert_equal :no_character_received, Character::OnMarkedAsDeletedJob.perform_now(nil, Time.current)
+            assert_no_difference -> { @character.reload.boss_keys.count } do
+              assert_no_difference -> { Padlock::Password.where(character: @character).count } do
+                assert_equal :no_character_received, Character::OnMarkedAsDeletedJob.perform_now(nil, Time.current)
+              end
             end
           end
         end
@@ -26,8 +28,10 @@ class Character::OnMarkedAsDeletedJobTest < ActiveJob::TestCase
       assert_no_changes -> { @character.reload.deleted_at } do
         assert_no_changes -> { @character.reload.contact_address } do
           assert_no_difference -> { @character.reload.sessions.count } do
-            assert_no_difference -> { Padlock::Password.where(character: @character).count } do
-              assert_equal :no_deletion_time_received, Character::OnMarkedAsDeletedJob.perform_now(@character, nil)
+            assert_no_difference -> { @character.reload.boss_keys.count } do
+              assert_no_difference -> { Padlock::Password.where(character: @character).count } do
+                assert_equal :no_deletion_time_received, Character::OnMarkedAsDeletedJob.perform_now(@character, nil)
+              end
             end
           end
         end
@@ -40,8 +44,10 @@ class Character::OnMarkedAsDeletedJobTest < ActiveJob::TestCase
       assert_no_changes -> { @character.reload.deleted_at } do
         assert_no_changes -> { @character.reload.contact_address } do
           assert_no_difference -> { @character.reload.sessions.count } do
-            assert_no_difference -> { Padlock::Password.where(character: @character).count } do
-              assert_equal :old_deletion_timestamp_received, Character::OnMarkedAsDeletedJob.perform_now(@character, 1.hour.ago)
+            assert_no_difference -> { @character.reload.boss_keys.count } do
+              assert_no_difference -> { Padlock::Password.where(character: @character).count } do
+                assert_equal :old_deletion_timestamp_received, Character::OnMarkedAsDeletedJob.perform_now(@character, 1.hour.ago)
+              end
             end
           end
         end
@@ -57,8 +63,10 @@ class Character::OnMarkedAsDeletedJobTest < ActiveJob::TestCase
         assert_changes -> { @character.reload.deleted_at }, from: @character.deleted_at, to: deletion_timestamp do
           assert_changes -> { @character.reload.contact_address } do
             assert_difference -> { @character.reload.sessions.count }, -1 do
-              assert_difference -> { Padlock::Password.where(character: @character).count }, -8 do
-                assert_equal :character_deleted, Character::OnMarkedAsDeletedJob.perform_now(@character, deletion_timestamp)
+              assert_difference -> { @character.reload.boss_keys.count }, -1 do
+                assert_difference -> { Padlock::Password.where(character: @character).count }, -8 do
+                  assert_equal :character_deleted, Character::OnMarkedAsDeletedJob.perform_now(@character, deletion_timestamp)
+                end
               end
             end
           end

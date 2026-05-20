@@ -1,3 +1,8 @@
+##
+# Character is a record that represent a user inside the platform.
+#
+# A Character cannot be deleted, only marked as deleted action which cleans the record while maintaining relevant
+# information in the platform.
 class Character < ApplicationRecord
   EXPULSION_TIME_OFFSET = 2.minutes.freeze
 
@@ -7,15 +12,15 @@ class Character < ApplicationRecord
   validates :contact_address, presence: true, uniqueness: true, email: true
   validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
 
-  has_many :sessions, inverse_of: :character, dependent: :destroy
+  has_many :sessions, inverse_of: :character, dependent: :restrict_with_error
 
-  has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
-  has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
+  has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :restrict_with_error
+  has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :restrict_with_error
 
-  has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :destroy
-  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :destroy
+  has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :restrict_with_error
+  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :restrict_with_error
 
-  has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :destroy
+  has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :restrict_with_error
   has_one :recruiter_key, class_name: "BossKey::Recruiter", foreign_key: :holder_id
 
   scope :active, -> { where(deleted_at: nil) }
@@ -30,7 +35,7 @@ class Character < ApplicationRecord
     transaction do
       close_remote_connections
 
-      sessions.delete_all
+      sessions.destroy_all
 
       update!(attributes.to_h.merge(from_dangerous_action: true))
 
@@ -49,22 +54,24 @@ class Character < ApplicationRecord
 
   def mark_as_deleted(attributes)
     update_outcome = false
+    current_time = Time.current
 
     transaction do
       close_remote_connections
 
       # We delete all sessions to prevent any further connection.
-      sessions.delete_all
+      sessions.destroy_all
+      boss_keys.update_all(deleted_at: current_time, updated_at: current_time)
 
       update!(attributes.to_h.merge(
         from_dangerous_action: true,
         # By marking the character as deleted, we also prevent login padlocks from being unlocked.
-        deleted_at: Time.current
+        deleted_at: current_time
       ))
 
       update_outcome = true
 
-      OnMarkedAsDeletedJob.perform_later(self, Time.current)
+      OnMarkedAsDeletedJob.perform_later(self, current_time)
     rescue StandardError => e
       Rails.logger.debug e.message
       Rails.logger.debug e.backtrace.join("\n")
@@ -82,15 +89,18 @@ class Character < ApplicationRecord
   # @note This method is not transactional, so it should only be called within a transaction.
   # @note This method is supposed to be only called by an administrator inside Invitation#revoke.
   def expel_from_party!
+    current_time = Time.current
+
     close_remote_connections
 
     # We delete all sessions to prevent any further connection.
     sessions.destroy_all
 
-    update!(deleted_at: Time.current)
+    update!(deleted_at: current_time)
+    boss_keys.update_all(deleted_at: current_time, updated_at: current_time)
 
     # We delay the deletion of the character by a few minutes to allow the surrounding transaction to complete.
-    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET.from_now).perform_later(self, Time.current)
+    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET.from_now).perform_later(self, current_time)
   end
 
   private

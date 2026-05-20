@@ -13,18 +13,6 @@ class Padlock::InvitationChannel < ApplicationCable::Channel
     super
   end
 
-  def self.broadcast_issued(invitation)
-    BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |recruiter_key|
-      broadcast_action_to(
-        recruiter_key.holder,
-        action: :prepend,
-        target: "pending_invitations",
-        partial: "settings/invitations/invitation",
-        locals: { invitation:, current_time: Time.current, current_character: recruiter_key.holder }
-      )
-    end
-  end
-
   def self.broadcast_claimed(invitation)
     BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |recruiter_key|
       broadcast_remove_to recruiter_key.holder, target: invitation

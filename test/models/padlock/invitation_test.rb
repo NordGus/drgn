@@ -21,9 +21,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
     test "enqueues a job to expired the invitation" do
       freeze_time do
-        at_matcher = ->(job_at) { (Padlock::Invitation.expires_at - 1.minute...Padlock::Invitation.expires_at + 1.minute).cover?(job_at) }
-
-        assert_enqueued_with(job: Padlock::Invitation::OnExpiredJob, at: at_matcher) do
+        assert_enqueued_with(job: Padlock::Invitation::OnIssuedJob) do
           invitation = Padlock::Invitation.issue(issuer: @issuer, confirmation_password: "password")
 
           assert invitation.persisted?
@@ -123,8 +121,10 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       assert_difference -> { Padlock::Invitation.claimable.count }, -1 do
         assert_difference -> { Padlock::Password.active.count }, 1 do
-          assert_difference -> { Character.count }, 1 do
-            assert @invitation.claim(padlock_invitation_params)
+          assert_difference -> { BossKey.active.count }, 1 do
+            assert_difference -> { Character.count }, 1 do
+              assert @invitation.claim(padlock_invitation_params)
+            end
           end
         end
       end
@@ -146,8 +146,10 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       assert_no_difference -> { Padlock::Invitation.claimable.count } do
         assert_no_difference -> { Padlock::Password.active.count } do
-          assert_no_difference -> { Character.count } do
-            assert_not @invitation.claim(padlock_invitation_params)
+          assert_no_difference -> { BossKey.active.count } do
+            assert_no_difference -> { Character.count } do
+              assert_not @invitation.claim(padlock_invitation_params)
+            end
           end
         end
       end
@@ -169,8 +171,10 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       assert_no_difference -> { Padlock::Invitation.claimable.count } do
         assert_no_difference -> { Padlock::Password.active.count } do
-          assert_no_difference -> { Character.count } do
-            assert_not @invitation.claim(padlock_invitation_params)
+          assert_no_difference -> { BossKey.active.count } do
+            assert_no_difference -> { Character.count } do
+              assert_not @invitation.claim(padlock_invitation_params)
+            end
           end
         end
       end
@@ -182,9 +186,11 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       assert_no_difference -> { Padlock::Invitation.claimable.count } do
         assert_no_difference -> { Padlock::Password.active.count } do
-          assert_no_difference -> { Character.count } do
-            assert_raise Padlock::Invitation::NonClaimableError, match: /has expired/ do
-              invitation.claim(padlock_invitation_params)
+          assert_no_difference -> { BossKey.active.count } do
+            assert_no_difference -> { Character.count } do
+              assert_raise Padlock::Invitation::NonClaimableError, match: /has expired/ do
+                invitation.claim(padlock_invitation_params)
+              end
             end
           end
         end
@@ -197,9 +203,11 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       assert_no_difference -> { Padlock::Invitation.claimable.count } do
         assert_no_difference -> { Padlock::Password.active.count } do
-          assert_no_difference -> { Character.count } do
-            assert_raise Padlock::Invitation::NonClaimableError, match: /is claimed by another carrier/ do
-              invitation.claim(padlock_invitation_params)
+          assert_no_difference -> { BossKey.active.count } do
+            assert_no_difference -> { Character.count } do
+              assert_raise Padlock::Invitation::NonClaimableError, match: /is claimed by another carrier/ do
+                invitation.claim(padlock_invitation_params)
+              end
             end
           end
         end

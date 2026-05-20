@@ -62,10 +62,9 @@ class Padlock::Invitation < ApplicationRecord
       invitation.key = generate_unique_secure_token(length: KEY_LENGTH)
     end
 
-    if invitation.save
-      OnExpiredJob.set(wait_until: expires_at).perform_later(invitation)
-      Padlock::InvitationChannel.broadcast_issued(invitation)
-    end
+    # if the invitation was issued we enqueue a job that perform all non-critical actions in the background so this action
+    # is snappier for the issuer!
+    OnIssuedJob.perform_later(invitation) if invitation.save
 
     invitation
   end
@@ -86,9 +85,11 @@ class Padlock::Invitation < ApplicationRecord
     transaction do
       self.carrier = Character.new(character_creator_params.fetch(:carrier, {}).permit(:tag, :contact_address))
       self.carrier.password_padlock = Padlock::Password.new(character_creator_params.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
+      self.carrier.recruiter_key = BossKey::Recruiter.new(access_level: :no)
 
       self.carrier.save!
       self.carrier.password_padlock.save!
+      self.carrier.recruiter_key.save!
 
       update!(last_unlocked_at: Time.current)
 

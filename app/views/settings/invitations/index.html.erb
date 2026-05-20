@@ -1,6 +1,6 @@
 <% content_for :settings_title, "Invitations" %>
 
-<%= turbo_stream_from Current.character, channel: Padlock::InvitationChannel %>
+<%= authorized_turbo_stream_from Current.character, channel: Padlock::InvitationChannel %>
 
 <p style="color: green"><%= notice %></p>
 <p style="color: red"><%= alert %></p>

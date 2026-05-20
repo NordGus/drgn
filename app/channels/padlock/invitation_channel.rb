@@ -1,18 +1,7 @@
-class Padlock::InvitationChannel < ApplicationCable::Channel
-  include TurboChargeable
-
-  def subscribed
-    if (stream_name = verified_stream_name_from_params).present? && subscription_allowed?
-      stream_from stream_name
-    else
-      reject
-    end
-  end
-
-  def unsubscribed
-    super
-  end
-
+##
+# Padlock::InvitationChannel is the ApplicationCable::StreamsChannel that controls all streams related to Padlock::Invitation
+# for real-time updates and asynchronous communications
+class Padlock::InvitationChannel < Turbo::StreamsChannel
   def self.broadcast_claimed(invitation)
     BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |recruiter_key|
       broadcast_remove_to recruiter_key.holder, target: invitation
@@ -35,11 +24,7 @@ class Padlock::InvitationChannel < ApplicationCable::Channel
 
   private
 
-  def subscription_allowed?
-    # The Character needs to be present, otherwise the user is not logged in
-    return false unless connection.current_character.present?
-
-    # Only characters who have BossKey::Recruiter with access
-    BossKey::Recruiter.with_access.exists?(holder: connection.current_character)
+  def character_can_tap_this_channel?
+    connection.current_character.recruiter_key.can_access?
   end
 end

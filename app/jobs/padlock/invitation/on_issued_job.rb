@@ -20,7 +20,7 @@ class Padlock::Invitation::OnIssuedJob < ApplicationJob
     return :no_invitation_received unless invitation.present?
     # To prevent weird behaviors when the queues are congested, and it was claimed before this job runs, we return
     # earlier because all this work is no longer necessary.
-    return :invitation_in_use if invitation.carrier_id.present?
+    return :invitation_in_use if invitation.claimed?
 
     # We enqueue the expiration job so the invitation is removed from the platform to prevent zombie invitations hanging
     # out leaving a security gap in the invitation system.

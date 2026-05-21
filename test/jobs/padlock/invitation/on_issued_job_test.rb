@@ -1,7 +1,7 @@
 require "test_helper"
 
 class Padlock::Invitation::OnIssuedJobTest < ActiveJob::TestCase
-  include ActionCable::TestHelper, Turbo::StreamsHelper
+  include ActionCable::TestHelper
 
   setup { @luffy = characters(:luffy) }
 

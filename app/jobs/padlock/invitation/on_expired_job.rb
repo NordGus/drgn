@@ -10,7 +10,7 @@ class Padlock::Invitation::OnExpiredJob < ApplicationJob
 
   def perform(invitation)
     return :no_invitation_received unless invitation.present?
-    return :invitation_in_use if invitation.carrier_id.present?
+    return :invitation_in_use if invitation.claimed?
 
     # We throw an error that has a retry_on configuration if the invitation hasn't expired yet, so it's retried until
     # any of the previous guard clauses passes or the invitation has expired.

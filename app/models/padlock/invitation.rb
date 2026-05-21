@@ -77,8 +77,8 @@ class Padlock::Invitation < ApplicationRecord
   #
   # @return [Boolean] true if the invitation was successfully claimed, false otherwise.
   def claim(character_creator_params)
-    fail NonClaimableError, "is claimed by another carrier" unless carrier_id.blank?
-    fail NonClaimableError, "has expired" unless expires_at > Time.current
+    fail NonClaimableError, "is claimed by another carrier" if claimed?
+    fail NonClaimableError, "has expired" if expired?
 
     claim_outcome = false
 
@@ -101,13 +101,15 @@ class Padlock::Invitation < ApplicationRecord
       raise ActiveRecord::Rollback
     end
 
-    Padlock::InvitationChannel.broadcast_claimed(self) if claim_outcome
+    # if the invitation was claimed we enqueue a job that perform all non-critical actions in the background so this action
+    # is snappier for the claimer!
+    OnClaimedJob.perform_later(self) if claim_outcome
 
     claim_outcome
   end
 
   def revoke(revoker:, confirmation_password:)
-    fail NonRevocableError, "This invitation cannot be revoked because it does not has a carrier" unless carrier.present?
+    fail NonRevocableError, "This invitation cannot be revoked because it does not has a carrier" unless claimed?
 
     carrier_to_expel = carrier
     revocation_outcome = false
@@ -146,7 +148,7 @@ class Padlock::Invitation < ApplicationRecord
   end
 
   def tear!
-    fail NonTearableError, "This invitation cannot be torn because it has a carrier" if carrier.present?
+    fail NonTearableError, "This invitation cannot be torn because it has a carrier" if claimed?
 
     tear_outcome = destroy!
 
@@ -155,7 +157,7 @@ class Padlock::Invitation < ApplicationRecord
     tear_outcome
   end
 
-  def accepted?
+  def claimed?
     carrier_id.present?
   end
 

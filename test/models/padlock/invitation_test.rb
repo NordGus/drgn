@@ -9,12 +9,14 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
     test "issues an invitation with the given character as issuer" do
       freeze_time do
         assert_difference -> { Padlock::Invitation.count } do
-          invitation = Padlock::Invitation.issue(issuer: @issuer, confirmation_password: "password")
+          assert_enqueued_with(job: Padlock::Invitation::OnIssuedJob) do
+            invitation = Padlock::Invitation.issue(issuer: @issuer, confirmation_password: "password")
 
-          assert invitation.persisted?
-          assert_equal @issuer, invitation.issuer
-          assert_nil invitation.carrier
-          assert_equal Padlock::Invitation.expires_at, invitation.expires_at
+            assert invitation.persisted?
+            assert_equal @issuer, invitation.issuer
+            assert_nil invitation.carrier
+            assert_equal Padlock::Invitation.expires_at, invitation.expires_at
+          end
         end
       end
     end
@@ -52,9 +54,11 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       freeze_time do
         assert_difference -> { Padlock::Invitation.active.count }, -1 do
-          assert @invitation.revoke(revoker: @revoker, confirmation_password:)
+          assert_enqueued_with(job: Padlock::Invitation::OnRevokedOrTornJob, args: [ @invitation ]) do
+            assert @invitation.revoke(revoker: @revoker, confirmation_password:)
 
-          assert_nil @invitation.carrier_id
+            assert_nil @invitation.carrier_id
+          end
         end
       end
     end
@@ -64,10 +68,12 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       freeze_time do
         assert_no_difference -> { Padlock::Invitation.count } do
-          assert_not @invitation.revoke(revoker: @revoker, confirmation_password:)
+          assert_no_enqueued_jobs(only: Padlock::Invitation::OnRevokedOrTornJob) do
+            assert_not @invitation.revoke(revoker: @revoker, confirmation_password:)
 
-          assert_includes @invitation.errors[:confirmation_password], "is invalid"
-          assert_not_nil @invitation.carrier_id
+            assert_includes @invitation.errors[:confirmation_password], "is invalid"
+            assert_not_nil @invitation.carrier_id
+          end
         end
       end
     end
@@ -76,8 +82,12 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       invitation = padlock_invitations(:pending_invitation)
       confirmation_password = "password"
 
-      assert_raises Padlock::Invitation::NonRevocableError do
-        invitation.revoke(revoker: @revoker, confirmation_password:)
+      assert_no_difference -> { Padlock::Invitation.active.count } do
+        assert_no_enqueued_jobs(only: Padlock::Invitation::OnRevokedOrTornJob) do
+          assert_raises Padlock::Invitation::NonRevocableError do
+            invitation.revoke(revoker: @revoker, confirmation_password:)
+          end
+        end
       end
     end
   end
@@ -87,7 +97,9 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
     test "destroys the pending invitation" do
       assert_difference -> { Padlock::Invitation.active.count }, -1 do
-        assert @invitation.tear
+        assert_enqueued_with(job: Padlock::Invitation::OnRevokedOrTornJob, args: [ @invitation ]) do
+          assert @invitation.tear
+        end
       end
     end
 
@@ -95,8 +107,10 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       invitation = padlock_invitations(:zoro_invitation)
 
       assert_no_difference -> { Padlock::Invitation.active.count } do
-        assert_raise Padlock::Invitation::NonTearableError do
-          assert_not invitation.tear
+        assert_no_enqueued_jobs(only: Padlock::Invitation::OnRevokedOrTornJob) do
+          assert_raise Padlock::Invitation::NonTearableError do
+            assert_not invitation.tear
+          end
         end
       end
     end

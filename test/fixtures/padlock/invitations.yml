@@ -23,3 +23,9 @@ expired_invitation:
   issuer: luffy
   key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
   expires_at: <%= 1.day.ago %>
+
+deleted_invitation:
+  issuer: luffy
+  key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
+  expires_at: <%= 1.minute.ago %>
+  deleted_at: <%= 1.minute.ago %>

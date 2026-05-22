@@ -26,5 +26,7 @@ class Padlock::Invitation::OnRevokedOrTornJob < ApplicationJob
       # We remove the invitation from the accepted invitations list
       Padlock::InvitationChannel.broadcast_remove_to(key.holder, target: invitation)
     end
+
+    :inactive_invitation_processed
   end
 end

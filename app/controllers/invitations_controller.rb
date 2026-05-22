@@ -29,7 +29,7 @@ class InvitationsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_invitation
-    @invitation = Padlock::Invitation.claimable.find_by!(key: params.expect(:key))
+    @invitation = Padlock::Invitation.active.claimable.find_by!(key: params.expect(:key))
   end
 
   # Only allow a list of trusted parameters through.

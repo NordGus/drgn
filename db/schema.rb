@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_180836) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_22_033823) do
   create_table "boss_keys", force: :cascade do |t|
     t.integer "access_level", default: 0, null: false
     t.datetime "created_at", null: false
@@ -39,12 +39,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_180836) do
   create_table "padlock_invitations", force: :cascade do |t|
     t.integer "carrier_id"
     t.datetime "created_at", null: false
+    t.datetime "deleted_at"
     t.datetime "expires_at", null: false
     t.integer "issuer_id", null: false
     t.string "key", null: false
     t.datetime "last_unlocked_at"
     t.datetime "updated_at", null: false
     t.index ["carrier_id"], name: "index_padlock_invitations_on_carrier_id"
+    t.index ["deleted_at"], name: "padlock_invitations_on_deleted_at_idx"
     t.index ["expires_at"], name: "index_padlock_invitations_on_expires_at"
     t.index ["issuer_id"], name: "index_padlock_invitations_on_issuer_id"
     t.index ["key"], name: "index_padlock_invitations_on_key", unique: true

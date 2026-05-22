@@ -31,7 +31,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
     test "should tear invitation" do
       invitation = padlock_invitations(:pending_invitation)
 
-      assert_difference -> { Padlock::Invitation.count }, -1 do
+      assert_difference -> { Padlock::Invitation.active.count }, -1 do
         delete settings_invitation_url(invitation)
       end
 
@@ -55,7 +55,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
       freeze_time do
         assert_changes -> { carrier.reload.deleted_at }, from: nil, to: Time.current do
-          assert_difference -> { Padlock::Invitation.count }, -1 do
+          assert_difference -> { Padlock::Invitation.active.count }, -1 do
             delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "password" } }
 
             assert_redirected_to settings_invitations_url

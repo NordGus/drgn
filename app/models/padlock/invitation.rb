@@ -24,6 +24,10 @@ class Padlock::Invitation < ApplicationRecord
   validates :expires_at, presence: true, comparison: { greater_than_or_equal_to: -> { Time.current }, on: :create }
   validates :carrier_id, uniqueness: true, if: -> { carrier_id.present? }
 
+  validates :deleted_at, presence: true, on: :destroy
+  validates :carrier_id, presence: false, on: :destroy
+
+  scope :active, -> { where(deleted_at: nil) }
   scope :pending, -> { where(carrier_id: nil) }
   scope :accepted, -> { where.not(carrier_id: nil) }
   scope :claimable, -> { pending.where(expires_at: Time.current..) }
@@ -122,11 +126,10 @@ class Padlock::Invitation < ApplicationRecord
         confirmation_password:,
         from_dangerous_action: true,
         carrier_id: nil,
+        deleted_at: Time.current
       )
 
       carrier_to_expel.expel_from_party!
-
-      destroy! # Now we can safely delete the record.
 
       revocation_outcome = true
     rescue StandardError => e
@@ -137,8 +140,8 @@ class Padlock::Invitation < ApplicationRecord
     end
 
     if revocation_outcome
-      Padlock::InvitationChannel.broadcast_torn_or_revoked(self)
-    else
+      OnRevokedOrTornJob.perform_later(self)
+    else # if revocation failed we need to
       self.carrier_id = carrier_to_expel.id
 
       errors.merge!(carrier_to_expel.errors)
@@ -147,12 +150,23 @@ class Padlock::Invitation < ApplicationRecord
     revocation_outcome
   end
 
-  def tear!
+  def tear
     fail NonTearableError, "This invitation cannot be torn because it has a carrier" if claimed?
 
-    tear_outcome = destroy!
+    tear_outcome = false
 
-    Padlock::InvitationChannel.broadcast_torn_or_revoked(self) if tear_outcome
+    transaction do
+      update!(deleted_at: Time.current)
+
+      tear_outcome = true
+    rescue StandardError => e
+      Rails.logger.debug e.message
+      Rails.logger.debug e.backtrace.join("\n")
+
+      raise ActiveRecord::Rollback
+    end
+
+    OnRevokedOrTornJob.perform_later(self) if tear_outcome
 
     tear_outcome
   end
@@ -163,6 +177,10 @@ class Padlock::Invitation < ApplicationRecord
 
   def expired?
     expires_at < Time.current
+  end
+
+  def active?
+    deleted_at.nil?
   end
 
   private

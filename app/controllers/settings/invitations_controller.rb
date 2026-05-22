@@ -35,11 +35,14 @@ class Settings::InvitationsController < SettingsController
 
   # DELETE /settings/invitations/1 or /settings/invitations/1.json
   def destroy
-    @invitation.tear!
-
     respond_to do |format|
-      format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully destroyed.", status: :see_other }
-      format.json { head :no_content }
+      if @invitation.tear
+        format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully destroyed.", status: :see_other }
+        format.json { head :no_content }
+      else
+        format.html { render :index, status: :unprocessable_entity }
+        format.json { render json: @invitation.errors, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -61,7 +64,7 @@ class Settings::InvitationsController < SettingsController
   private
 
   def set_invitation
-    @invitation = Padlock::Invitation.includes(:issuer, :carrier).find(params.expect(:id))
+    @invitation = Padlock::Invitation.includes(:issuer, :carrier).active.find(params.expect(:id))
   end
 
   def invitation_params
@@ -73,6 +76,6 @@ class Settings::InvitationsController < SettingsController
   end
 
   def set_invitations
-    @invitations = Padlock::Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
+    @invitations = Padlock::Invitation.includes(:issuer, :carrier).active.order(created_at: :desc)
   end
 end

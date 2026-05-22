@@ -28,7 +28,7 @@ class Padlock::Invitation::OnExpiredJobTest < ActiveJob::TestCase
   test "destroys expired unused invitations" do
     invitation = padlock_invitations(:expired_invitation)
 
-    assert_difference -> { Padlock::Invitation.count }, -1 do
+    assert_difference -> { Padlock::Invitation.active.count }, -1 do
       assert Padlock::Invitation::OnExpiredJob.perform_now(invitation)
     end
   end

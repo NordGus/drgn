@@ -51,7 +51,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       confirmation_password = "password"
 
       freeze_time do
-        assert_difference -> { Padlock::Invitation.count }, -1 do
+        assert_difference -> { Padlock::Invitation.active.count }, -1 do
           assert @invitation.revoke(revoker: @revoker, confirmation_password:)
 
           assert_nil @invitation.carrier_id
@@ -86,17 +86,17 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
     setup { @invitation = padlock_invitations(:pending_invitation) }
 
     test "destroys the pending invitation" do
-      assert_difference -> { Padlock::Invitation.count }, -1 do
-        assert @invitation.tear!
+      assert_difference -> { Padlock::Invitation.active.count }, -1 do
+        assert @invitation.tear
       end
     end
 
     test "does not destroy the accepted invitation" do
       invitation = padlock_invitations(:zoro_invitation)
 
-      assert_no_difference -> { Padlock::Invitation.count } do
+      assert_no_difference -> { Padlock::Invitation.active.count } do
         assert_raise Padlock::Invitation::NonTearableError do
-          assert_not invitation.tear!
+          assert_not invitation.tear
         end
       end
     end

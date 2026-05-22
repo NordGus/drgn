@@ -35,12 +35,12 @@ to invite users to join the platform but also to remove them from it.
 > This is a living document, so it's constantly being updated to include new the implementation specs for our Locks and
 > Keys.
 
-### Padlock Invitation (v0.1)
+### Padlock Invitation (v0.2)
 
 A `Padlock::Invitation` is a `Padlock` that can be used once by a user to create their own `Character`. Which can only be
 issued by a `Character` with the `Padlock::Admin::Invitation` key.
 
-#### v0.1
+#### v0.2
 
 ##### Table Design
 

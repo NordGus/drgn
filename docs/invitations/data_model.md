@@ -44,13 +44,14 @@ issued by a `Character` with the `Padlock::Admin::Invitation` key.
 
 ##### Table Design
 
-| Column           | Type                     | Constraints         | Usage                                                                                                 |
-|------------------|--------------------------|---------------------|-------------------------------------------------------------------------------------------------------|
-| id               | integer (auto-increment) | index, pk, not null |                                                                                                       |
-| issuer_id        | integer                  | index, fk, not null | A pointer/reference to the character who issued this padlock                                          |
-| carrier_id       | integer                  | index, fk           | (Optional) A pointer/reference to the created using this invitation                                   |
-| key              | string                   | index               | The secure token used to unlock this padlock                                                          |
-| expires_at       | datetime                 | not null            | A simple expiration date expired this invitation to prevent usage after a configurable amount of time |
-| last_unlocked_at | datetime                 | not null            | A timestamp that stores the last time the padlock record was unlocked at                              |
-| created_at       | datetime                 | not null            |                                                                                                       |
-| updated_at       | datetime                 | not null            |                                                                                                       |
+| Column           | Type                     | Constraints         | Usage                                                                                                                                                                       |
+|------------------|--------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| id               | integer (auto-increment) | index, pk, not null |                                                                                                                                                                             |
+| issuer_id        | integer                  | index, fk, not null | A pointer/reference to the character who issued this padlock                                                                                                                |
+| carrier_id       | integer                  | index, fk           | (Optional) A pointer/reference to the created using this invitation                                                                                                         |
+| key              | string                   | index               | The secure token used to unlock this padlock                                                                                                                                |
+| expires_at       | datetime                 | not null            | A simple expiration date expired this invitation to prevent usage after a configurable amount of time                                                                       |
+| last_unlocked_at | datetime                 | not null            | A timestamp that stores the last time the padlock record was unlocked at                                                                                                    |
+| deleted_at       | datetime                 | index               | (Optional) Timestamp indicating when the record was marked for deletion. Soft deletion is used to remove the record from the UI while the system erase it in the background |
+| created_at       | datetime                 | not null            |                                                                                                                                                                             |
+| updated_at       | datetime                 | not null            |                                                                                                                                                                             |

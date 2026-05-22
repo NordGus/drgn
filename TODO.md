@@ -7,10 +7,10 @@
 - [ ] Implement locksmith feature settings.
   - [ ] Make it so it can only manage settings and features authorization.
 - [x] Implement a concern to protect the controllers with the `BossKey` authorization.
-- [ ] Extend current `Character` and `Padlock::Invitation` to handle `BossKey` creation.
+- [x] Extend current `Character` and `Padlock::Invitation` to handle `BossKey` creation.
   - [x] Include it on the `Character` model
   - [x] Include it on the `Padlock::Invitation` model.
-- [ ] Implement a system where all ActionCable channels communications are done via a background job.
+- [x] Implement a system where all ActionCable channels communications are done via a background job.
 - [x] Implement Boss Key padlocks roles for securing these dangerous system-wide features.
   - [x] Implement invitations feature boss key model.
     - [x] Implement the model

@@ -36,6 +36,7 @@ class Character < ApplicationRecord
 
   has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :restrict_with_error
   has_one :recruiter_key, class_name: "BossKey::Recruiter", foreign_key: :holder_id
+  has_one :locksmith_key, class_name: "BossKey::Locksmith", foreign_key: :holder_id
 
   scope :active, -> { where(deleted_at: nil) }
 

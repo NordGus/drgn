@@ -76,7 +76,7 @@ class CharacterTest < ActiveSupport::TestCase
       freeze_time do
         assert_changes -> { @character.reload.deleted_at }, from: nil, to: Time.current do
           assert_difference -> { @character.sessions.count }, -1 do
-            assert_difference -> { @character.boss_keys.deleted.count }, 1 do
+            assert_difference -> { @character.boss_keys.deleted.count }, 2 do
               assert_enqueued_with job: Character::OnMarkedAsDeletedJob, args: [ @character, Time.current ] do
                 assert @character.mark_as_deleted(@attributes)
 
@@ -103,7 +103,7 @@ class CharacterTest < ActiveSupport::TestCase
       freeze_time do
         assert_changes -> { @character.reload.deleted_at }, from: nil, to: Time.current do
           assert_difference -> { @character.reload.sessions.count }, -1 do
-            assert_difference -> { @character.boss_keys.deleted.count }, 1 do
+            assert_difference -> { @character.boss_keys.deleted.count }, 2 do
               assert_enqueued_with(
                 job: Character::OnMarkedAsDeletedJob,
                 args: [ @character, Time.current ],

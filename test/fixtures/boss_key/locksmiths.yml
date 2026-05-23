@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+DEFAULTS: &DEFAULTS
+  type: "BossKey::Locksmith"
+
+luffys_locksmith_key:
+  <<: *DEFAULTS
+  holder: luffy
+  access_level: <%= BossKey::Locksmith.access_levels[:manage] %>
+
+zoro_locksmith_key:
+  <<: *DEFAULTS
+  holder: zoro
+  access_level: <%= BossKey::Locksmith.access_levels[:no] %>
+
+nami_locksmith_key:
+  <<: *DEFAULTS
+  holder: nami
+  access_level: <%= BossKey::Locksmith.access_levels[:manage] %>
+
+kanjuro_locksmith_key:
+  <<: *DEFAULTS
+  holder: kanjuro
+  access_level: <%= BossKey::Locksmith.access_levels[:no] %>
+  deleted_at: <%= 1.day.ago %>

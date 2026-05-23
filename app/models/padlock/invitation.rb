@@ -90,10 +90,12 @@ class Padlock::Invitation < ApplicationRecord
       self.carrier = Character.new(character_creator_params.fetch(:carrier, {}).permit(:tag, :contact_address))
       self.carrier.password_padlock = Padlock::Password.new(character_creator_params.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
       self.carrier.recruiter_key = BossKey::Recruiter.new(access_level: :no)
+      self.carrier.locksmith_key = BossKey::Locksmith.new(access_level: :no)
 
       self.carrier.save!
       self.carrier.password_padlock.save!
       self.carrier.recruiter_key.save!
+      self.carrier.locksmith_key.save!
 
       update!(last_unlocked_at: Time.current)
 

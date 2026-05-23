@@ -135,7 +135,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
       assert_difference -> { Padlock::Invitation.claimable.count }, -1 do
         assert_difference -> { Padlock::Password.active.count }, 1 do
-          assert_difference -> { BossKey.active.count }, 1 do
+          assert_difference -> { BossKey.active.count }, 2 do
             assert_difference -> { Character.count }, 1 do
               assert_enqueued_with(job: Padlock::Invitation::OnClaimedJob, args: [ @invitation ]) do
                 assert @invitation.claim(padlock_invitation_params)

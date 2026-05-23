@@ -10,6 +10,11 @@ zoro:
   contact_address: zoro@mugiwara.com
   role: <%= Character.roles[:adventurer] %>
 
+nami:
+  tag: cat-burglar-nami
+  contact_address: nami@mugiwara.com
+  role: <%= Character.roles[:adventurer] %>
+
 kanjuro:
   tag: kurozumi-kanjuro
   contact_address: kanjuro@akazaya.com

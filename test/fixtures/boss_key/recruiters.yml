@@ -13,6 +13,11 @@ zoro_recruiter_key:
   holder: zoro
   access_level: <%= BossKey::Recruiter.access_levels[:no] %>
 
+nami_recruiter_key:
+  <<: *DEFAULTS
+  holder: nami
+  access_level: <%= BossKey::Recruiter.access_levels[:share] %>
+
 kanjuro_recruiter_key:
   <<: *DEFAULTS
   holder: kanjuro

@@ -8,6 +8,8 @@ class Character < ApplicationRecord
 
   include PasswordLockable
 
+  class DungeonMasterCannotBeAffectedByThisActionError < StandardError; end
+
   enum :role, {
     adventurer: 0,
     # Dungeon Master is a special role that can only be one in the platform akin to a superuser. There only can be one
@@ -71,6 +73,8 @@ class Character < ApplicationRecord
     current_time = Time.current
 
     transaction do
+      prevent_deletion_like_actions_for_dungeon_master!
+
       close_remote_connections
 
       # We delete all sessions to prevent any further connection.
@@ -104,6 +108,8 @@ class Character < ApplicationRecord
   # @note This method is supposed to be only called by an administrator inside Invitation#revoke.
   def expel_from_party!
     current_time = Time.current
+
+    prevent_deletion_like_actions_for_dungeon_master!
 
     close_remote_connections
 
@@ -139,5 +145,13 @@ class Character < ApplicationRecord
     error.add(:base, "Characters are permanent records and cannot be deleted")
 
     throw :abort
+  end
+
+  def prevent_deletion_like_actions_for_dungeon_master!
+    return unless is_dungeon_master?
+
+    errors.add(:role, "The dungeon master cannot abdicate!")
+
+    fail ActiveRecord::RecordInvalid, self
   end
 end

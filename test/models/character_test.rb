@@ -50,7 +50,7 @@ class CharacterTest < ActiveSupport::TestCase
 
   class MarkedAsDeletedTest < self
     setup do
-      @character = characters(:luffy)
+      @character = characters(:zoro)
 
       @character.sessions.create!
 
@@ -94,7 +94,7 @@ class CharacterTest < ActiveSupport::TestCase
 
     # We create a session to test the application state changes as expected
     setup do
-      @character = characters(:luffy)
+      @character = characters(:zoro)
 
       @character.sessions.create!
     end

@@ -10,7 +10,9 @@
 
 <%= render "form", character: @character %>
 
-<%= render "deletion_form", character: @character %>
+<% unless @character.is_dungeon_master? %>
+  <%= render "deletion_form", character: @character %>
+<% end %>
 
 <h3>Replace Password Padlock</h3>
 

@@ -2,18 +2,18 @@
 
 <p style="color: green"><%= notice %></p>
 
-<% if @character.errors.where(:confirmation_password).any? || @character.password_padlock.errors.where(:confirmation_password).any? %>
+<% if Current.character.errors.where(:confirmation_password).any? || Current.character.password_padlock.errors.where(:confirmation_password).any? %>
   <div style="color: red">
     <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
   </div>
 <% end %>
 
-<%= render "form", character: @character %>
+<%= render "form", character: Current.character %>
 
-<% unless @character.is_dungeon_master? %>
-  <%= render "deletion_form", character: @character %>
+<% unless Current.character.is_dungeon_master? %>
+  <%= render "deletion_form", character: Current.character %>
 <% end %>
 
 <h3>Replace Password Padlock</h3>
 
-<%= render "replace_password_padlock_form", character: @character %>
+<%= render "replace_password_padlock_form", character: Current.character %>

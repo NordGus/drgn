@@ -6,12 +6,12 @@ class Settings::CharactersController < SettingsController
   # PATCH/PUT /character or /character.json
   def update
     respond_to do |format|
-      if @character.update_sheet(character_params)
+      if Current.character.update_sheet(character_params)
         format.html { redirect_to settings_character_path, notice: "Character sheet was successfully updated.", status: :see_other }
-        format.json { render :show, status: :ok, location: @character }
+        format.json { render :show, status: :ok, location: settings_character_path }
       else
         format.html { render :show, status: :unprocessable_entity }
-        format.json { render json: @character.errors, status: :unprocessable_entity }
+        format.json { render json: Current.character.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -23,12 +23,12 @@ class Settings::CharactersController < SettingsController
     confirmation_password = replace_password_params[:confirmation_password]
 
     respond_to do |format|
-      if @character.password_padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
+      if Current.character.password_padlock.replace_padlock(replacement_key:, replacement_key_confirmation:, confirmation_password:)
         format.html { redirect_to settings_character_path, notice: "Password Padlock was successfully replaced.", status: :see_other }
-        format.json { render :show, status: :ok, location: @character }
+        format.json { render :show, status: :ok, location: settings_character_path }
       else
         format.html { render :show, status: :unprocessable_entity }
-        format.json { render json: @character.errors, status: :unprocessable_entity }
+        format.json { render json: Current.character.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -36,12 +36,12 @@ class Settings::CharactersController < SettingsController
   # DELETE /character or /character.json
   def destroy
     respond_to do |format|
-      if @character.mark_as_deleted(destroy_character_params)
+      if Current.character.mark_as_deleted(destroy_character_params)
         format.html { redirect_to root_path, status: :see_other }
         format.json { head :no_content }
       else
         format.html { render :show, status: :unprocessable_entity }
-        format.json { render json: @character.errors, status: :unprocessable_entity }
+        format.json { render json: Current.character.errors, status: :unprocessable_entity }
       end
     end
   end

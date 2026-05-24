@@ -20,7 +20,7 @@ class Settings::InvitationsController < SettingsController
   # POST /settings/invitations or /settings/invitations.json
   def create
     confirmation_password = invitation_params[:confirmation_password]
-    @invitation = Padlock::Invitation.issue(issuer: @character, confirmation_password:)
+    @invitation = Padlock::Invitation.issue(issuer: Current.character, confirmation_password:)
 
     respond_to do |format|
       if @invitation.persisted?
@@ -51,7 +51,7 @@ class Settings::InvitationsController < SettingsController
     confirmation_password = revoke_invitation_params[:confirmation_password]
 
     respond_to do |format|
-      if @invitation.revoke(revoker: @character, confirmation_password:)
+      if @invitation.revoke(revoker: Current.character, confirmation_password:)
         format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully revoked.", status: :see_other }
         format.json { head :no_content }
       else

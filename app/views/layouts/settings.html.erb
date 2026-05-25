@@ -24,13 +24,10 @@
     <%= action_cable_meta_tag %>
   </head>
 
-  <body class="settings">
-    <nav class="settings-navigation">
-      <%= link_to "Character Sheet", settings_character_path, class: "#{params[:controller] == "settings/characters" ? "active" : ""}" %>
-      <% if can_unlock_door? :recruiter %>
-        <%= link_to "Invitations", settings_invitations_path, class: "#{params[:controller] == "settings/invitations" ? "active" : ""}" %>
-      <% end %>
-    </nav>
+  <body class="settings" data-controller="settings" data-settings-current-controller-value="<%= params[:controller] %>">
+    <%= authorized_turbo_stream_from :settings, :panel, Current.character %>
+
+    <%= render partial: "shared/settings_nav", locals: { current_character: Current.character, params: } %>
 
     <section class="settings-header">
       <h1 class="title">

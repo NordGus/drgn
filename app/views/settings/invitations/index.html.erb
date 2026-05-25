@@ -1,11 +1,10 @@
 <% content_for :settings_title, "Invitations" %>
+<% content_for :title, "Invitations" %>
 
 <%= authorized_turbo_stream_from Current.character, channel: Padlock::InvitationChannel %>
 
 <p style="color: green"><%= notice %></p>
 <p style="color: red"><%= alert %></p>
-
-<% content_for :title, "Invitations" %>
 
 <% if @invitation.present? && @invitation.errors.any? %>
   <% @invitation.errors.each do |error| %>

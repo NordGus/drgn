@@ -20,6 +20,8 @@ Rails.application.routes.draw do
         delete :revoke
       end
     end
+
+    resources :boss_keys, only: [ :index, :show, :update ]
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -6,7 +6,6 @@ class Settings::BossKeysController < SettingsController
   requires_capability :manage
 
   before_action :set_adventurers
-
   before_action :set_adventurer, only: :show
   before_action :set_boss_key, only: :update
 
@@ -37,7 +36,7 @@ class Settings::BossKeysController < SettingsController
   end
 
   def set_adventurer
-    @adventurer = @adventurer.find(params.expect(:id))
+    @adventurer = @adventurers.find(params.expect(:id))
   end
 
   def set_boss_key

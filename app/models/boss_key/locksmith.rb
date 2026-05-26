@@ -16,6 +16,10 @@ class BossKey::Locksmith < BossKey
     deleted_at.nil? && !with_no_access?
   end
 
+  def settings_controller_name
+    "boss_keys"
+  end
+
   def can_manage?
     with_manage_access?
   end

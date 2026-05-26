@@ -22,9 +22,8 @@
   <% end %>
   <% if current_character.locksmith_key.can_access? %>
     <%=
-      link_to "Boss Keys",
+      link_to "Locksmith",
               settings_boss_keys_path,
-              class: "#{params[:controller] == "settings/boss_keys" ? "active" : ""}",
               data: {
                 panel_controller: "settings/boss_keys",
                 settings_target: "link"

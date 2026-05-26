@@ -25,9 +25,10 @@
   </head>
 
   <body class="settings" data-controller="settings" data-settings-current-controller-value="<%= params[:controller] %>">
-    <%= authorized_turbo_stream_from :settings, :panel, Current.character %>
+    <%= authorized_turbo_stream_from :settings, Current.character %>
+    <%= authorized_turbo_stream_from *params[:controller]&.split('/'), Current.character %>
 
-    <%= render partial: "shared/settings_nav", locals: { current_character: Current.character, params: } %>
+    <%= render partial: "shared/settings_nav", locals: { current_character: Current.character } %>
 
     <section class="settings-header">
       <h1 class="title">
@@ -36,7 +37,7 @@
       <%= link_to "Back", root_path, class: "back-link" %>
     </section>
 
-    <main class="settings-content">
+    <main class="settings-content" id="settings_content">
       <%= yield %>
     </main>
   </body>

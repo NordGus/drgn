@@ -18,6 +18,10 @@ class BossKey::Recruiter < BossKey
     deleted_at.nil? && !with_no_access?
   end
 
+  def settings_controller_name
+    "invitations"
+  end
+
   def can_share?
     with_share_access? || with_invite_access? || with_manage_access?
   end

@@ -1,2 +1,34 @@
 <% content_for :settings_title, "Boss Keys" %>
 <% content_for :title, "Boss Keys" %>
+
+<%= authorized_turbo_stream_from Current.character, channel: BossKeyChannel %>
+
+<p style="color: green"><%= notice %></p>
+<p style="color: red"><%= alert %></p>
+
+<% if @boss_key.present? && @boss_key.errors.any? %>
+  <% @boss_key.errors.each do |error| %>
+    <div style="color: red">
+      <% if error.attribute == :confirmation_password %>
+        <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
+      <% else %>
+        <h2 style="font-size: 1em"><%= error.full_message %></h2>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+
+<section id="settings_boss_keys">
+  <% @adventurers.each do |adventurer| %>
+    <div class="adventurer-entry" id="<%= dom_id adventurer %>">
+      <p><%= adventurer.tag %></p>
+      <p><%= adventurer.contact_address %></p>
+      <%=
+          render partial: "settings/boss_keys/boss_key",
+                 collection: adventurer.boss_keys, as: :boss_key,
+                 current_character: Current.character,
+                 current_time: Time.current
+      %>
+    </div>
+  <% end %>
+</section>

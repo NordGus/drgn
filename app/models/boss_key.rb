@@ -22,6 +22,10 @@ class BossKey < ApplicationRecord
     fail NotImplementedError, "each BossKey must implement the #can_access? method"
   end
 
+  def settings_controller_name
+    fail NotImplementedError, "each BossKey must implement the #settings_controller_name method"
+  end
+
   def update_access(manager:, attributes:)
     update_access_outcome = false
 
@@ -41,7 +45,7 @@ class BossKey < ApplicationRecord
       raise ActiveRecord::Rollback
     end
 
-    OnAccessUpdatedJob.perform_later(self) if update_access_outcome
+    OnAccessUpdatedJob.perform_later(self, updated_access_direction:) if update_access_outcome
 
     update_access_outcome
   end
@@ -53,10 +57,18 @@ class BossKey < ApplicationRecord
   end
 
   def prevent_access_modification_for_dungeon_master!
-    return unless carrier.is_dungeon_master?
+    return unless holder.is_dungeon_master?
 
     errors.add(:role, "The dungeon master role must have access to everything!")
 
     fail ActiveRecord::RecordInvalid, self
+  end
+
+  def updated_access_direction
+    return :access_removed if access_level_changed? && with_no_access?
+    return :access_downgraded if self.class.access_levels[access_level_previously_was] > self.class.access_levels[access_level]
+    return :access_upgraded if self.class.access_levels[access_level_previously_was] < self.class.access_levels[access_level]
+
+    :access_level_unmodified
   end
 end

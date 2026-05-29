@@ -73,6 +73,10 @@ needed to authorize a `Character` to access a feature by setting an `access_leve
 `BossKey` uses STI (Single Table Inheritance) to implement the different types of permissions; so we control the behavior
 of the `BossKey` by the implementation of its submodels.
 
+Because of the engineering decisions [we made](../README.md) the amount of `BossKey` records on the application will be
+relatively under control, because it will be one per user, per feature; and with no more than 10 to 20 registered `Character`
+records at any time we can assume there will not be more than 200 `BossKey` records in the entire database. 
+
 #### v0.1
 
 ##### Table Design

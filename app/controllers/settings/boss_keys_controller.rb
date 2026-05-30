@@ -16,7 +16,7 @@ class Settings::BossKeysController < SettingsController
       if @boss_key.update_access(manager: Current.character, attributes: boss_key_params)
         @adventurer = @boss_key.holder.reload
 
-        format.html { redirect_to settings_boss_key_path(id: @boss_key.holder_id), status: :see_other, notice: "Access updated." }
+        format.html { redirect_to settings_boss_keys_path, status: :see_other, notice: "Access updated." }
         format.json { head :no_content }
       else
         format.html { render :index, status: :unprocessable_entity, alert: "Access could not be updated." }

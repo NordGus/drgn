@@ -1,6 +1,6 @@
 <%# locals: (boss_key:) %>
 
-<%= form_with(model: boss_key, url: settings_boss_key_path(boss_key), method: :patch, class: "boss-key-entry", id: boss_key, data: { controller: "confirmation-form" }) do |form| %>
+<%= form_with(model: boss_key, scope: :boss_key, url: settings_boss_key_path(boss_key), method: :patch, class: "boss-key-entry", id: dom_id(boss_key), data: { controller: "confirmation-form" }) do |form| %>
   <%= form.label :access_level, boss_key.holder.tag %>
   <%= form.select :access_level, boss_key.type.constantize.access_levels.keys.map { |access_level| [access_level.humanize, access_level] } %>
   <%=

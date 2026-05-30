@@ -8,23 +8,11 @@ class Character < ApplicationRecord
 
   include PasswordLockable
 
-  class DungeonMasterCannotBeAffectedByThisActionError < StandardError; end
-
-  enum :role, {
-    adventurer: 0,
-    # Dungeon Master is a special role that can only be one in the platform akin to a superuser. There only can be one
-    # character with this role.
-    # - It cannot be destroyed.
-    # - It can only be one.
-    # - Its BossKey can not be touched and have max authorization.
-    dungeon_master: 9999
-  }, default: :adventurer, prefix: :is, validate: true
-
   validates :tag, presence: true, uniqueness: true
   validates :contact_address, presence: true, uniqueness: true, email: true
   validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
-  validates :role, uniqueness: true, if: :is_dungeon_master?
-  validate :dungeon_master_role_has_not_changed
+  validates :type, presence: true, inclusion: { in: %w[Character::DungeonMaster Character::Adventurer] }
+  validates :type, uniqueness: true, if: -> { type == "Character::DungeonMaster" }
 
   has_many :sessions, inverse_of: :character, dependent: :restrict_with_error
 
@@ -32,13 +20,14 @@ class Character < ApplicationRecord
   has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :restrict_with_error
 
   has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :restrict_with_error
-  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :restrict_with_error
+  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :holder_id, dependent: :restrict_with_error
 
   has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :restrict_with_error
   has_one :recruiter_key, class_name: "BossKey::Recruiter", foreign_key: :holder_id
   has_one :locksmith_key, class_name: "BossKey::Locksmith", foreign_key: :holder_id
 
   scope :active, -> { where(deleted_at: nil) }
+  scope :playable, -> { where(type: %w[Character::DungeonMaster Character::Adventurer]) }
 
   before_destroy :prevent_deletion
 
@@ -74,10 +63,6 @@ class Character < ApplicationRecord
     current_time = Time.current
 
     transaction do
-      prevent_deletion_like_actions_for_dungeon_master!
-
-      close_remote_connections
-
       # We delete all sessions to prevent any further connection.
       sessions.destroy_all
       boss_keys.update_all(deleted_at: current_time, updated_at: current_time)
@@ -89,13 +74,17 @@ class Character < ApplicationRecord
       ))
 
       update_outcome = true
-
-      OnMarkedAsDeletedJob.perform_later(self, current_time)
     rescue StandardError => e
       Rails.logger.debug e.message
       Rails.logger.debug e.backtrace.join("\n")
 
       raise ActiveRecord::Rollback
+    end
+
+    if update_outcome
+      close_remote_connections
+
+      OnMarkedAsDeletedJob.perform_later(self, current_time)
     end
 
     update_outcome
@@ -109,8 +98,6 @@ class Character < ApplicationRecord
   # @note This method is supposed to be only called by an administrator inside Invitation#revoke.
   def expel_from_party!
     current_time = Time.current
-
-    prevent_deletion_like_actions_for_dungeon_master!
 
     close_remote_connections
 
@@ -134,25 +121,9 @@ class Character < ApplicationRecord
     ActionCable.server.remote_connections.where(current_character: self).disconnect reconnect:
   end
 
-  def dungeon_master_role_has_not_changed
-    return unless role_changed?
-    return unless is_dungeon_master?
-    return if role_change.all? { |values| values == "dungeon_master" }
-
-    errors.add(:role, "The dungeon master cannot abdicate!") if role_was == "dungeon_master"
-  end
-
   def prevent_deletion
     error.add(:base, "Characters are permanent records and cannot be deleted")
 
     throw :abort
-  end
-
-  def prevent_deletion_like_actions_for_dungeon_master!
-    return unless is_dungeon_master?
-
-    errors.add(:role, "The dungeon master cannot abdicate!")
-
-    fail ActiveRecord::RecordInvalid, self
   end
 end

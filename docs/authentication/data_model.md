@@ -40,23 +40,27 @@ Taking this into consideration the next section will represent each implementati
 > This is a living document, so it's constantly being updated to include new the implementation specs for our Locks and
 > Keys.
 
-### Character (v0.2)
+### Character (v0.3)
 
 The `Character` base model represents of a user on the data model of DRGN. It contains some basic information required
 to identify the user for authentication and information display.
 
-#### v0.2
+To make the design a little bit more flexible and enforce encapsulation of the different user types of `Character` records
+require for the platform. To start `Character::DungeonMaster` to work as the platform's superuser and `Character::Adventurer`
+as the rest of the users.
+
+#### v0.3
 
 ##### Table Design
 
-| Column     | Type                     | Constraints                | Usage                                                                                                                                                                       |
-|------------|--------------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| id         | integer (auto-increment) | index, pk, not null        |                                                                                                                                                                             |
-| tag        | string                   | index, not null, unique    | Use to identify the user, it is a unique system name                                                                                                                        |
-| deleted_at | datetime                 | index                      | (Optional) Timestamp indicating when the record was marked for deletion. Soft deletion is used to remove the record from the UI while the system erase it in the background |
-| role       | integer (enum)           | index, not null, default 0 | Require for ActiveRecord enum to indicate the role of the character on the platform, (support: 0, dungueon_master: 9999)                                                    |
-| created_at | datetime                 | not null                   |                                                                                                                                                                             |
-| updated_at | datetime                 | not null                   |                                                                                                                                                                             |
+| Column     | Type                     | Constraints             | Usage                                                                                                                                                                       |
+|------------|--------------------------|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| id         | integer (auto-increment) | index, pk, not null     |                                                                                                                                                                             |
+| type       | string                   | index, not null         | Used by ActiveRecord for its STI (Single Table Inherintance) feature, it identifies which `Character` implementation the record loads                                       |
+| tag        | string                   | index, not null, unique | Use to identify the user, it is a unique system name                                                                                                                        |
+| deleted_at | datetime                 | index                   | (Optional) Timestamp indicating when the record was marked for deletion. Soft deletion is used to remove the record from the UI while the system erase it in the background |
+| created_at | datetime                 | not null                |                                                                                                                                                                             |
+| updated_at | datetime                 | not null                |                                                                                                                                                                             |
 
 ### Password Padlock (v0.1)
 

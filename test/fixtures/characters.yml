@@ -1,22 +1,22 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 luffy:
+  type: "Character::DungeonMaster"
   tag: monkey-d-luffy
   contact_address: luffy@mugiwara.com
-  role: <%= Character.roles[:dungeon_master] %>
 
 zoro:
+  type: "Character::Adventurer"
   tag: roronoa-zoro
   contact_address: zoro@mugiwara.com
-  role: <%= Character.roles[:adventurer] %>
 
 nami:
+  type: "Character::Adventurer"
   tag: cat-burglar-nami
   contact_address: nami@mugiwara.com
-  role: <%= Character.roles[:adventurer] %>
 
 kanjuro:
+  type: "Character::Adventurer"
   tag: kurozumi-kanjuro
   contact_address: kanjuro@akazaya.com
   deleted_at: <%= 1.day.ago %>
-  role: <%= Character.roles[:adventurer] %>

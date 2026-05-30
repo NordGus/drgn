@@ -57,7 +57,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
           assert_enqueued_with(job: Padlock::Invitation::OnRevokedOrTornJob, args: [ @invitation ]) do
             assert @invitation.revoke(revoker: @revoker, confirmation_password:)
 
-            assert_nil @invitation.carrier_id
+            assert_nil @invitation.holder_id
           end
         end
       end
@@ -72,7 +72,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
             assert_not @invitation.revoke(revoker: @revoker, confirmation_password:)
 
             assert_includes @invitation.errors[:confirmation_password], "is invalid"
-            assert_not_nil @invitation.carrier_id
+            assert_not_nil @invitation.holder_id
           end
         end
       end

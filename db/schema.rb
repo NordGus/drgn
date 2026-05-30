@@ -29,30 +29,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_114445) do
     t.string "contact_address", limit: 4096, null: false
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
-    t.integer "role", default: 0, null: false
     t.string "tag", limit: 4096, null: false
+    t.string "type", default: "Character::Adventurer", null: false
     t.datetime "updated_at", null: false
     t.index ["contact_address"], name: "index_characters_on_contact_address", unique: true
     t.index ["deleted_at"], name: "index_characters_on_deleted_at"
-    t.index ["role"], name: "character_role_index"
-    t.index ["role"], name: "dungeon_master_unique_role_constraint", unique: true, where: "role = 9999"
     t.index ["tag"], name: "index_characters_on_tag", unique: true
+    t.index ["type"], name: "index_characters_on_type"
+    t.index ["type"], name: "index_characters_on_unique_dungeon_master", unique: true, where: "type = 'Character::DungeonMaster'"
   end
 
   create_table "padlock_invitations", force: :cascade do |t|
-    t.integer "carrier_id"
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
     t.datetime "expires_at", null: false
+    t.integer "holder_id"
     t.integer "issuer_id", null: false
     t.string "key", null: false
     t.datetime "last_unlocked_at"
     t.datetime "updated_at", null: false
-    t.index ["carrier_id"], name: "index_padlock_invitations_on_carrier_id"
-    t.index ["deleted_at"], name: "padlock_invitations_on_deleted_at_idx"
+    t.index ["deleted_at"], name: "index_padlock_invitations_on_deleted_at"
     t.index ["expires_at"], name: "index_padlock_invitations_on_expires_at"
+    t.index ["holder_id"], name: "index_padlock_invitations_on_holder_id"
+    t.index ["holder_id"], name: "index_padlock_invitations_on_unique_holder", unique: true, where: "holder_id IS NOT NULL"
     t.index ["issuer_id"], name: "index_padlock_invitations_on_issuer_id"
-    t.index ["key"], name: "index_padlock_invitations_on_key", unique: true
+    t.index ["key"], name: "index_padlock_invitations_on_unique_key", unique: true
   end
 
   create_table "padlock_passwords", force: :cascade do |t|
@@ -65,6 +66,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_114445) do
     t.integer "unlocked_by", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["character_id"], name: "index_padlock_passwords_on_character_id"
+    t.index ["expires_at"], name: "index_padlock_passwords_on_expires_at"
     t.index ["replacement_padlock_id"], name: "index_padlock_passwords_on_replacement_padlock_id"
   end
 
@@ -78,11 +80,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_114445) do
     t.string "user_agent"
     t.index ["character_id"], name: "index_sessions_on_character_id"
     t.index ["expires_at"], name: "index_sessions_on_expires_at"
-    t.index ["token"], name: "sessions_token", unique: true
+    t.index ["token"], name: "index_sessions_on_token", unique: true
   end
 
   add_foreign_key "boss_keys", "characters", column: "holder_id"
-  add_foreign_key "padlock_invitations", "characters", column: "carrier_id"
+  add_foreign_key "padlock_invitations", "characters", column: "holder_id"
   add_foreign_key "padlock_invitations", "characters", column: "issuer_id"
   add_foreign_key "padlock_passwords", "characters"
   add_foreign_key "padlock_passwords", "padlock_passwords", column: "replacement_padlock_id"

@@ -17,19 +17,19 @@ class Padlock::Invitation < ApplicationRecord
   has_secure_token :key, length: KEY_LENGTH
 
   belongs_to :issuer, class_name: "Character", foreign_key: :issuer_id
-  belongs_to :carrier, class_name: "Character", foreign_key: :carrier_id, optional: true
+  belongs_to :holder, class_name: "Character::Adventurer", foreign_key: :holder_id, optional: true
 
   validates :key, presence: true
   validates :issuer_id, presence: true
   validates :expires_at, presence: true, comparison: { greater_than_or_equal_to: -> { Time.current }, on: :create }
-  validates :carrier_id, uniqueness: true, if: -> { carrier_id.present? }
+  validates :holder_id, uniqueness: true, if: -> { holder_id.present? }
 
   validates :deleted_at, presence: true, on: :destroy
-  validates :carrier_id, presence: false, on: :destroy
+  validates :holder_id, presence: false, on: :destroy
 
   scope :active, -> { where(deleted_at: nil) }
-  scope :pending, -> { where(carrier_id: nil) }
-  scope :accepted, -> { where.not(carrier_id: nil) }
+  scope :pending, -> { where(holder_id: nil) }
+  scope :accepted, -> { where.not(holder_id: nil) }
   scope :claimable, -> { pending.where(expires_at: Time.current..) }
   scope :tearable, -> { pending.where(expires_at: ..Time.current) }
 
@@ -87,7 +87,7 @@ class Padlock::Invitation < ApplicationRecord
     claim_outcome = false
 
     transaction do
-      self.carrier = Character.new(character_creator_params.fetch(:carrier, {}).permit(:tag, :contact_address))
+      self.carrier = Character::Adventurer.new(character_creator_params.fetch(:carrier, {}).permit(:tag, :contact_address))
       self.carrier.password_padlock = Padlock::Password.new(character_creator_params.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
       self.carrier.recruiter_key = BossKey::Recruiter.new(access_level: :no)
       self.carrier.locksmith_key = BossKey::Locksmith.new(access_level: :no)
@@ -121,13 +121,13 @@ class Padlock::Invitation < ApplicationRecord
     revocation_outcome = false
 
     transaction do
-      # We first nullify the carrier_id so we can protect the action with the confirmation password. This also allows us
+      # We first nullify the holder_id so we can protect the action with the confirmation password. This also allows us
       # to return early if before expeling the carrier from the platform.
       update!(
         unlocked_by: revoker,
         confirmation_password:,
         from_dangerous_action: true,
-        carrier_id: nil,
+        holder_id: nil,
         deleted_at: Time.current
       )
 
@@ -144,7 +144,7 @@ class Padlock::Invitation < ApplicationRecord
     if revocation_outcome
       OnRevokedOrTornJob.perform_later(self)
     else # if revocation failed we need to
-      self.carrier_id = carrier_to_expel.id
+      self.holder_id = carrier_to_expel.id
 
       errors.merge!(carrier_to_expel.errors)
     end
@@ -174,7 +174,7 @@ class Padlock::Invitation < ApplicationRecord
   end
 
   def claimed?
-    carrier_id.present?
+    holder_id.present?
   end
 
   def expired?

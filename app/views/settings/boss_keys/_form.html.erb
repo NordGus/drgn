@@ -1,7 +1,29 @@
 <%# locals: (boss_key:) %>
 
-<%= form_with(model: boss_key, url: settings_boss_key_path(boss_key), method: :patch, class: "boss-key-entry", id: boss_key) do |form| %>
+<%= form_with(model: boss_key, url: settings_boss_key_path(boss_key), method: :patch, class: "boss-key-entry", id: boss_key, data: { controller: "confirmation-form" }) do |form| %>
   <%= form.label :access_level, boss_key.holder.tag %>
   <%= form.select :access_level, boss_key.type.constantize.access_levels.keys.map { |access_level| [access_level.humanize, access_level] } %>
-  <%= form.submit "Save" %>
+  <%=
+    form.button(
+      "Update",
+      type: "button",
+      command: "show-modal",
+      commandfor: "update_#{dom_id(boss_key)}",
+      data: {
+        action: "confirmation-form#openConfirm"
+      }
+    )
+  %>
+  <dialog id="<%= "update_#{dom_id(boss_key)}" %>" data-confirmation-form-target="dialog">
+    <p>
+      Please enter your password to change the access level of this adventurer.
+    </p>
+    <div>
+      <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+    </div>
+    <div>
+      <%= form.button t("cancel"), type: "button", command: "close", commandfor: "update_#{dom_id(boss_key)}" %>
+      <%= form.submit "Save" %>
+    </div>
+  </dialog>
 <% end %>

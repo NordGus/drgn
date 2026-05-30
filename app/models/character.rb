@@ -111,6 +111,13 @@ class Character < ApplicationRecord
     OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET.from_now).perform_later(self, current_time)
   end
 
+  # Returns whether the Character is the Dungeon Master
+  #
+  # @return Boolean
+  def is_dungeon_master?
+    type == "Character::DungeonMaster"
+  end
+
   private
 
   def must_be_unlocked

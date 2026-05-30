@@ -51,10 +51,10 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
     test "should revoke invitation" do
       invitation = padlock_invitations(:zoro_invitation)
-      carrier = characters(:zoro)
+      holder = characters(:zoro)
 
       freeze_time do
-        assert_changes -> { carrier.reload.deleted_at }, from: nil, to: Time.current do
+        assert_changes -> { holder.reload.deleted_at }, from: nil, to: Time.current do
           assert_difference -> { Padlock::Invitation.active.count }, -1 do
             delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "password" } }
 
@@ -66,9 +66,9 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
     test "should not revoke invitation when confirmation password is invalid" do
       invitation = padlock_invitations(:zoro_invitation)
-      carrier = characters(:zoro)
+      holder = characters(:zoro)
 
-      assert_no_changes -> { carrier.reload.deleted_at } do
+      assert_no_changes -> { holder.reload.deleted_at } do
         assert_no_difference -> { Padlock::Invitation.count } do
           delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "invalid_password" } }
 
@@ -121,10 +121,10 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
     test "should not revoke invitation" do
       invitation = padlock_invitations(:zoro_invitation)
-      carrier = characters(:zoro)
+      holder = characters(:zoro)
 
       freeze_time do
-        assert_no_changes -> { carrier.reload.deleted_at } do
+        assert_no_changes -> { holder.reload.deleted_at } do
           assert_no_difference -> { Padlock::Invitation.count } do
             delete revoke_settings_invitation_url(invitation), params: { padlock_invitation: { confirmation_password: "password" } }
 

@@ -73,29 +73,29 @@ class Padlock::Invitation < ApplicationRecord
     invitation
   end
 
-  # Claims the invitation by the given carrier.
+  # Claims the invitation by the given holder.
   #
   # @note This method has a self-contained transaction. So take this into consideration when calling it.
   #
-  # @param character_creator_params [ActionController::Parameters] parameters for the carrier creation.
+  # @param character_creator_params [ActionController::Parameters] parameters for the holder creation.
   #
   # @return [Boolean] true if the invitation was successfully claimed, false otherwise.
   def claim(character_creator_params)
-    fail NonClaimableError, "is claimed by another carrier" if claimed?
+    fail NonClaimableError, "is claimed by another holder" if claimed?
     fail NonClaimableError, "has expired" if expired?
 
     claim_outcome = false
 
     transaction do
-      self.carrier = Character::Adventurer.new(character_creator_params.fetch(:carrier, {}).permit(:tag, :contact_address))
-      self.carrier.password_padlock = Padlock::Password.new(character_creator_params.fetch(:carrier, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
-      self.carrier.recruiter_key = BossKey::Recruiter.new(access_level: :no)
-      self.carrier.locksmith_key = BossKey::Locksmith.new(access_level: :no)
+      self.holder = Character::Adventurer.new(character_creator_params.fetch(:holder, {}).permit(:tag, :contact_address))
+      self.holder.password_padlock = Padlock::Password.new(character_creator_params.fetch(:holder, {}).fetch(:password_padlock, {}).permit(:key, :key_confirmation))
+      self.holder.recruiter_key = BossKey::Recruiter.new(access_level: :no)
+      self.holder.locksmith_key = BossKey::Locksmith.new(access_level: :no)
 
-      self.carrier.save!
-      self.carrier.password_padlock.save!
-      self.carrier.recruiter_key.save!
-      self.carrier.locksmith_key.save!
+      self.holder.save!
+      self.holder.password_padlock.save!
+      self.holder.recruiter_key.save!
+      self.holder.locksmith_key.save!
 
       update!(last_unlocked_at: Time.current)
 
@@ -115,14 +115,14 @@ class Padlock::Invitation < ApplicationRecord
   end
 
   def revoke(revoker:, confirmation_password:)
-    fail NonRevocableError, "This invitation cannot be revoked because it does not has a carrier" unless claimed?
+    fail NonRevocableError, "This invitation cannot be revoked because it does not has a holder" unless claimed?
 
-    carrier_to_expel = carrier
+    holder_to_expel = holder
     revocation_outcome = false
 
     transaction do
       # We first nullify the holder_id so we can protect the action with the confirmation password. This also allows us
-      # to return early if before expeling the carrier from the platform.
+      # to return early if before expeling the holder from the platform.
       update!(
         unlocked_by: revoker,
         confirmation_password:,
@@ -131,7 +131,7 @@ class Padlock::Invitation < ApplicationRecord
         deleted_at: Time.current
       )
 
-      carrier_to_expel.expel_from_party!
+      holder_to_expel.expel_from_party!
 
       revocation_outcome = true
     rescue StandardError => e
@@ -144,16 +144,16 @@ class Padlock::Invitation < ApplicationRecord
     if revocation_outcome
       OnRevokedOrTornJob.perform_later(self)
     else # if revocation failed we need to
-      self.holder_id = carrier_to_expel.id
+      self.holder_id = holder_to_expel.id
 
-      errors.merge!(carrier_to_expel.errors)
+      errors.merge!(holder_to_expel.errors)
     end
 
     revocation_outcome
   end
 
   def tear
-    fail NonTearableError, "This invitation cannot be torn because it has a carrier" if claimed?
+    fail NonTearableError, "This invitation cannot be torn because it has a holder" if claimed?
 
     tear_outcome = false
 

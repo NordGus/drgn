@@ -64,7 +64,7 @@ class Settings::InvitationsController < SettingsController
   private
 
   def set_invitation
-    @invitation = Padlock::Invitation.includes(:issuer, :carrier).active.find(params.expect(:id))
+    @invitation = Padlock::Invitation.includes(:issuer, :holder).active.find(params.expect(:id))
   end
 
   def invitation_params
@@ -76,6 +76,6 @@ class Settings::InvitationsController < SettingsController
   end
 
   def set_invitations
-    @invitations = Padlock::Invitation.includes(:issuer, :carrier).active.order(created_at: :desc)
+    @invitations = Padlock::Invitation.includes(:issuer, :holder).active.order(created_at: :desc)
   end
 end

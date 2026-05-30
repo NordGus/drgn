@@ -2,17 +2,17 @@
   <div class="entry">
     <p>
       Carried by: <%=
-      if invitation.carrier.present? && invitation.carrier.deleted_at?
-        "#{invitation.carrier.tag} (Deleted)"
-      elsif invitation.carrier.present?
-        invitation.carrier.tag
+      if invitation.holder.present? && invitation.holder.deleted_at?
+        "#{invitation.holder.tag} (Deleted)"
+      elsif invitation.holder.present?
+        invitation.holder.tag
       else
         "Nobody"
       end
     %>
     </p>
 
-    <% if invitation.carrier_id.present? %>
+    <% if invitation.holder_id.present? %>
       <p>Since <%= relative_time_in_words(invitation.last_unlocked_at) %></p>
     <% elsif current_time < invitation.expires_at %>
       <p>Expires in <%= relative_time_in_words(invitation.expires_at) %></p>
@@ -26,7 +26,7 @@
     </p>
 
     <div class="controls">
-      <% unless invitation.carrier_id.present? || current_time > invitation.expires_at %>
+      <% unless invitation.holder_id.present? || current_time > invitation.expires_at %>
         <% link_to_character_creation = invitation_path(key: invitation.key) %>
         <%= button_tag "Share", command: "show-modal", commandfor: "#{dom_id invitation}_share" %>
 
@@ -52,7 +52,7 @@
         </dialog>
       <% end %>
 
-      <% if invitation.carrier_id.present? %>
+      <% if invitation.holder_id.present? %>
         <%= form_for invitation, url: revoke_settings_invitation_path(invitation), method: :delete, data: { controller: "confirmation_form" } do |form| %>
           <%=
             form.button(
@@ -60,13 +60,13 @@
               type: "button",
               command: "show-modal",
               commandfor: "#{dom_id invitation}_revoke",
-              disabled: invitation.carrier == current_character || !current_character.recruiter_key.can_revoke?,
+              disabled: invitation.holder == current_character || !current_character.recruiter_key.can_revoke?,
             ) %>
 
-          <% if invitation.carrier != current_character && current_character.recruiter_key.can_revoke? %>
+          <% if invitation.holder != current_character && current_character.recruiter_key.can_revoke? %>
             <dialog id="<%= dom_id invitation %>_revoke" closedby="any" data-confirmation-form-target="dialog">
               <p>
-                By revoking this invitation, you are also deleting the carrier's character sheet with their access.
+                By revoking this invitation, you are also deleting the holder's character sheet with their access.
               </p>
               <p>
                 Please provide your password to confirm that you want to revoke this invitation.
@@ -81,7 +81,7 @@
             </dialog>
           <% end %>
         <% end %>
-      <% elsif invitation.carrier_id.nil? %>
+      <% elsif invitation.holder_id.nil? %>
         <%=
           button_tag(
             "Delete",

@@ -14,7 +14,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
 
             assert invitation.persisted?
             assert_equal @issuer, invitation.issuer
-            assert_nil invitation.carrier
+            assert_nil invitation.holder
             assert_equal Padlock::Invitation.expires_at, invitation.expires_at
           end
         end
@@ -78,7 +78,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       end
     end
 
-    test "does not revoke an invitation that do not have a carrier" do
+    test "does not revoke an invitation that do not have a holder" do
       invitation = padlock_invitations(:pending_invitation)
       confirmation_password = "password"
 
@@ -122,7 +122,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
     test "claims the invitation" do
       @params = ActionController::Parameters.new({
                                                    padlock_invitation: {
-                                                     carrier: {
+                                                     holder: {
                                                        tag: "sun-of-the-sea-jimbe",
                                                        contact_address: "jimbe@mugiwara.com",
                                                        password_padlock: {
@@ -146,10 +146,10 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       end
     end
 
-    test "does not claim the invitation when the carrier is invalid" do
+    test "does not claim the invitation when the holder is invalid" do
       @params = ActionController::Parameters.new({
                                                    padlock_invitation: {
-                                                     carrier: {
+                                                     holder: {
                                                        tag: "monkey-d-luffy",
                                                        contact_address: "jimbe@mugiwara.com",
                                                        password_padlock: {
@@ -173,10 +173,10 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       end
     end
 
-    test "does not claim the invitation when the carrier password padlock is invalid" do
+    test "does not claim the invitation when the holder password padlock is invalid" do
       @params = ActionController::Parameters.new({
                                                    padlock_invitation: {
-                                                     carrier: {
+                                                     holder: {
                                                        tag: "sun-of-the-sea-jimbe",
                                                        contact_address: "jimbe@mugiwara.com",
                                                        password_padlock: {
@@ -228,7 +228,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
           assert_no_difference -> { BossKey.active.count } do
             assert_no_difference -> { Character.count } do
               assert_no_enqueued_jobs do
-                assert_raise Padlock::Invitation::NonClaimableError, match: /is claimed by another carrier/ do
+                assert_raise Padlock::Invitation::NonClaimableError, match: /is claimed by another holder/ do
                   invitation.claim(padlock_invitation_params)
                 end
               end
@@ -241,7 +241,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
     private
 
     def padlock_invitation_params
-      @params.fetch(:padlock_invitation, {}).permit(carrier: [ :tag, :contact_address, password_padlock: [ :key, :key_confirmation ] ])
+      @params.fetch(:padlock_invitation, {}).permit(holder: [ :tag, :contact_address, password_padlock: [ :key, :key_confirmation ] ])
     end
   end
 end

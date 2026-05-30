@@ -1,6 +1,7 @@
-<%# locals: (boss_key:, current_character: nil, current_time: nil) %>
+<%# locals: (boss_key:) %>
 
 <%= form_with(model: boss_key, url: settings_boss_key_path(boss_key), method: :patch, class: "boss-key-entry", id: boss_key) do |form| %>
-  <%= form.label :access_level, boss_key.type %>
+  <%= form.label :access_level, boss_key.holder.tag %>
   <%= form.select :access_level, boss_key.type.constantize.access_levels.keys.map { |access_level| [access_level.humanize, access_level] } %>
+  <%= form.submit "Save" %>
 <% end %>

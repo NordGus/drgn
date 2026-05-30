@@ -10,8 +10,8 @@ class BossKeyChannel < ApplicationCable::StreamsChannel
       broadcast_replace_to(
         key.holder,
         target: boss_key,
-        partial: "settings/boss_keys/boss_key",
-        locals: { boss_key:, current_character: key.holder, current_time: Time.current }
+        partial: "settings/boss_keys/form",
+        locals: { boss_key: }
       )
     end
   end

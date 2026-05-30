@@ -1,93 +1,34 @@
 #settings_boss_keys {
-    display: grid;
-    gap: 5px;
-    grid-template-columns: 1fr 1fr;
-    grid-auto-rows: auto;
-    align-items: stretch;
-    justify-content: stretch;
-
-    .adventurer-entry {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        justify-content: start;
-        align-items: start;
-        padding: 10px;
-        background-color: transparent;
-        border-width: 1px;
-        border-style: solid;
-        border-color: #222222;
-        transition: border-color 0.2s ease-in-out;
-        color: #ffffff;
-
-        &:hover {
-            border-color: #ffffff;
-        }
-
-        p {
-            padding: 0;
-            margin: 0;
-        }
-
-        .boss-key-entry {
-            display: grid;
-            width: 100%;
-            grid-template-columns: 1fr 1fr 0.5fr;
-            grid-template-rows: auto;
-            gap: 5px;
-        }
-    }
-}
-
-.invitation-entries {
-    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 5px;
-    justify-items: stretch;
-    align-items: stretch;
-}
 
-.invitation-entry {
-    display: flex;
-    gap: 5px;
-
-    .entry {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
+    .boss-key-entries {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
         gap: 5px;
-        justify-content: start;
-        align-items: start;
-        padding: 10px;
-        background-color: transparent;
-        border-width: 1px;
-        border-style: solid;
-        border-color: #222222;
-        transition: border-color 0.2s ease-in-out;
-        color: #ffffff;
+        align-items: stretch;
+        justify-content: stretch;
 
-        &:hover {
-            border-color: #ffffff;
-        }
-
-        p {
-            padding: 0;
-            margin: 0;
-        }
-
-        .controls {
-            display: flex;
+        form {
+            display: grid;
+            grid-template-columns: 1fr 0.75fr 0.5fr;
+            grid-template-rows: auto;
             gap: 5px;
-            justify-content: end;
-            width: 100%;
+            padding: 10px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #222222;
+            align-items: center;
 
-            button {
-                cursor: pointer;
+            &:hover {
+                border-color: #ffffff;
+            }
 
-                &:disabled {
-                    cursor: not-allowed;
-                }
+            input[type=submit] {
+                &:hover { cursor: pointer; }
+                &:disabled { cursor: not-allowed; }
             }
         }
     }

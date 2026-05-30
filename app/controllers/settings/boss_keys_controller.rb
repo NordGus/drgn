@@ -5,14 +5,10 @@ class Settings::BossKeysController < SettingsController
 
   requires_capability :manage
 
-  before_action :set_adventurers
-  before_action :set_adventurer, only: :show
+  before_action :set_boss_keys
   before_action :set_boss_key, only: :update
 
   def index
-  end
-
-  def show
   end
 
   def update
@@ -31,16 +27,12 @@ class Settings::BossKeysController < SettingsController
 
   private
 
-  def set_adventurers
-    @adventurers = Character.includes(:boss_keys).active.is_adventurer.where.not(id: Current.character.id).order(created_at: :asc)
-  end
-
-  def set_adventurer
-    @adventurer = @adventurers.find(params.expect(:id))
+  def set_boss_keys
+    @boss_keys = BossKey.includes(:holder).modifiable.where.not(holder: { id: Current.character.id }).order(:holder_id)
   end
 
   def set_boss_key
-    @boss_key = BossKey.includes(holder: [ :boss_keys ]).active.where(holder: @adventurers).find(params.expect(:id))
+    @boss_key = @boss_keys.find(params.expect(:id))
   end
 
   def boss_key_params

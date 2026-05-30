@@ -19,16 +19,12 @@
 <% end %>
 
 <section id="settings_boss_keys">
-  <% @adventurers.each do |adventurer| %>
-    <div class="adventurer-entry" id="<%= dom_id adventurer %>">
-      <p><%= adventurer.tag %></p>
-      <p><%= adventurer.contact_address %></p>
-      <%=
-          render partial: "settings/boss_keys/boss_key",
-                 collection: adventurer.boss_keys, as: :boss_key,
-                 current_character: Current.character,
-                 current_time: Time.current
-      %>
-    </div>
-  <% end %>
+  <h3>Invitations</h3>
+  <div class="boss-key-entries">
+    <%= render partial: "settings/boss_keys/form", collection: @boss_keys.recruiter, as: :boss_key %>
+  </div>
+  <h3>Locksmith</h3>
+  <div class="boss-key-entries">
+    <%= render partial: "settings/boss_keys/form", collection: @boss_keys.locksmith, as: :boss_key %>
+  </div>
 </section>

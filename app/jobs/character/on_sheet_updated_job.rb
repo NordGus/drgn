@@ -8,7 +8,11 @@ class Character::OnSheetUpdatedJob < ApplicationJob
     return :no_character_received unless character.present?
     return :old_updated_at_timestamp_received if character.updated_at > last_updated_at
 
+    # We send an email notification to the character to inform them of the chages
     CharacterMailer.sheet_updated(character).deliver_later
+    Padlock::InvitationChannel.broadcast_holder_sheet_updated(character.invitation) if character.invitation.present?
+
+
 
     :post_sheet_actions_executed
   end

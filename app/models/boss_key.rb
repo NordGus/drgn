@@ -16,8 +16,8 @@ class BossKey < ApplicationRecord
   scope :active, -> { where(deleted_at: nil) }
   scope :modifiable, -> { includes(:holder).active.where(holder: { type: "Character::Adventurer" }) }
 
-  scope :recruiter, -> { where(type: Recruiter) }
-  scope :locksmith, -> { where(type: Locksmith) }
+  scope :recruiter, -> { where(type: "BossKey::Recruiter") }
+  scope :locksmith, -> { where(type: "BossKey::Locksmith") }
 
   # attribute used to unlock the record with dangerous actions
   attribute :unlocked_by, type: :character, default: nil

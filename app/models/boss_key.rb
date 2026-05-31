@@ -20,7 +20,7 @@ class BossKey < ApplicationRecord
   scope :locksmith, -> { where(type: Locksmith) }
 
   # attribute used to unlock the record with dangerous actions
-  attribute :manager, type: :character, default: nil
+  attribute :unlocked_by, type: :character, default: nil
 
   def can_access?
     fail NotImplementedError, "each BossKey must implement the #can_access? method"
@@ -38,7 +38,7 @@ class BossKey < ApplicationRecord
 
       update!(attributes.to_h.merge(
         from_dangerous_action: true,
-        manager:,
+        unlocked_by: manager
       ))
 
       update_access_outcome = true
@@ -56,8 +56,8 @@ class BossKey < ApplicationRecord
 
   private
 
-  def must_be_unlocked
-    errors.add(:confirmation_password, :invalid) unless manager.password_padlock.unlock_for_dangerous_action(confirmation_password)
+  def record_was_unlocked?
+    unlocked_by.present? && unlocked_by.password_padlock.unlock_for_dangerous_action(confirmation_password)
   end
 
   def prevent_access_modification_for_dungeon_master!

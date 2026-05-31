@@ -187,9 +187,7 @@ class Padlock::Invitation < ApplicationRecord
 
   private
 
-  def must_be_unlocked
-    return if unlocked_by.present? && unlocked_by.password_padlock.unlock_for_dangerous_action(confirmation_password)
-
-    errors.add(:confirmation_password, :invalid)
+  def record_was_unlocked?
+    unlocked_by.present? && unlocked_by.password_padlock.unlock_for_dangerous_action(confirmation_password)
   end
 end

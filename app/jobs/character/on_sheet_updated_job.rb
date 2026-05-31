@@ -14,8 +14,10 @@ class Character::OnSheetUpdatedJob < ApplicationJob
     CharacterMailer.sheet_updated(character).deliver_later
     # We broadcast the update of character to their invitation if they hold one.
     Padlock::InvitationChannel.broadcast_holder_sheet_updated(character.invitation) if character.invitation.present?
-    # We broadcast the update of character to their issued invitations if they have issued any.
-    Padlock::InvitationChannel.broadcast_issuer_sheet_updated(character.issued_invitations) if character.issued_invitations.any?
+    # We broadcast the update of character to their active issued invitations if they have any.
+    Padlock::InvitationChannel.broadcast_issuer_sheet_updated(character.issued_invitations.active) if character.issued_invitations.active.any?
+    # We broadcast the update of character to their boss keys if they have any.
+    BossKeyChannel.broadcast_holder_sheet_updated(character.boss_keys.active) if character.boss_keys.active.any?
 
     :post_sheet_actions_executed
   end

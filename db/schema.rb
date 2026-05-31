@@ -26,13 +26,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_114445) do
   end
 
   create_table "characters", force: :cascade do |t|
-    t.string "contact_address", limit: 4096, null: false
+    t.string "contact_address", limit: 4096
     t.datetime "created_at", null: false
     t.datetime "deleted_at"
     t.string "tag", limit: 4096, null: false
     t.string "type", default: "Character::Adventurer", null: false
     t.datetime "updated_at", null: false
-    t.index ["contact_address"], name: "index_characters_on_contact_address", unique: true
+    t.index ["contact_address"], name: "index_characters_on_contact_address"
+    t.index ["contact_address"], name: "index_characters_on_unique_contact_address", unique: true, where: "contact_address IS NOT NULL"
     t.index ["deleted_at"], name: "index_characters_on_deleted_at"
     t.index ["tag"], name: "index_characters_on_tag", unique: true
     t.index ["type"], name: "index_characters_on_type"

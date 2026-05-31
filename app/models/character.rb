@@ -8,19 +8,8 @@ class Character < ApplicationRecord
 
   validates :tag, presence: true, uniqueness: true
   validates :contact_address, presence: true, uniqueness: true, email: true
-  validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
-
-  has_many :sessions, inverse_of: :character, dependent: :restrict_with_error
-
-  has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :restrict_with_error
-  has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :restrict_with_error
-
-  has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :restrict_with_error
-  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :holder_id, dependent: :restrict_with_error
 
   has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :restrict_with_error
-  has_one :recruiter_key, class_name: "BossKey::Recruiter", foreign_key: :holder_id
-  has_one :locksmith_key, class_name: "BossKey::Locksmith", foreign_key: :holder_id
 
   scope :active, -> { where(deleted_at: nil) }
   scope :playable, -> { where(type: %w[Character::DungeonMaster Character::Adventurer]) }
@@ -37,19 +26,19 @@ class Character < ApplicationRecord
     transaction do
       close_remote_connections
 
-      sessions.destroy_all
+      sessions.destroy_all if respond_to?(:sessions)
 
       update!(attributes.to_h.merge(from_dangerous_action: true))
 
       update_outcome = true
-
-      OnSheetUpdatedJob.perform_later(self, Time.current)
     rescue StandardError => e
       Rails.logger.debug e.message
       Rails.logger.debug e.backtrace.join("\n")
 
       raise ActiveRecord::Rollback
     end
+
+    OnSheetUpdatedJob.perform_later(self, Time.current) if update_outcome
 
     update_outcome
   end
@@ -60,7 +49,7 @@ class Character < ApplicationRecord
 
     transaction do
       # We delete all sessions to prevent any further connection.
-      sessions.destroy_all
+      sessions.destroy_all if respond_to?(:sessions)
       boss_keys.update_all(deleted_at: current_time, updated_at: current_time)
 
       update!(attributes.to_h.merge(
@@ -120,8 +109,8 @@ class Character < ApplicationRecord
 
   private
 
-  def must_be_unlocked
-    errors.add(:confirmation_password, :invalid) unless password_padlock.unlock_for_dangerous_action(confirmation_password)
+  def record_was_unlocked?
+    false
   end
 
   def close_remote_connections(reconnect: false)
@@ -132,11 +121,5 @@ class Character < ApplicationRecord
     error.add(:base, "Characters are permanent records and cannot be deleted")
 
     throw :abort
-  end
-
-  def dungeon_master_cant_abdicate
-    return unless type_changed? && type_was == "Character::DungeonMaster"
-
-    errors.add(:type, "dungeon master cannot abdicate")
   end
 end

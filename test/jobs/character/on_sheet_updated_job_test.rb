@@ -2,24 +2,52 @@ require "test_helper"
 
 class Character::OnSheetUpdatedJobTest < ActiveJob::TestCase
   include ActionMailer::TestHelper
+  include ActionCable::TestHelper
 
-  setup { @character = characters(:luffy) }
+  setup do
+    @character = characters(:luffy)
+
+    @luffy = characters(:luffy)
+    @nami = characters(:nami)
+  end
 
   test "does nothing when not passing a character" do
     assert_enqueued_emails 0 do
-      assert_equal :no_character_received, Character::OnSheetUpdatedJob.perform_now(nil, Time.current)
+      assert_no_broadcasts(@luffy.to_gid_param) do
+        assert_no_broadcasts(@nami.to_gid_param) do
+          assert_equal :no_character_received, Character::OnSheetUpdatedJob.perform_now(nil, Time.current)
+        end
+      end
     end
   end
 
   test "does nothing when last_updated_at is in the past" do
     assert_enqueued_emails 0 do
-      assert_equal :old_updated_at_timestamp_received, Character::OnSheetUpdatedJob.perform_now(@character, 1.year.ago)
+      assert_no_broadcasts(@luffy.to_gid_param) do
+        assert_no_broadcasts(@nami.to_gid_param) do
+          assert_equal :old_updated_at_timestamp_received, Character::OnSheetUpdatedJob.perform_now(@character, 1.year.ago)
+        end
+      end
     end
   end
 
-  test "sends the email email notification communicating the update" do
+  test "performs all post-sheet-update actions" do
     assert_enqueued_email_with CharacterMailer, :sheet_updated, args: [ @character ] do
-      assert_equal :post_sheet_actions_executed, Character::OnSheetUpdatedJob.perform_now(@character, Time.current)
+      assert_broadcasts(@luffy.to_gid_param, 7) do
+        assert_broadcasts(@nami.to_gid_param, 7) do
+          assert_equal :post_sheet_actions_executed, Character::OnSheetUpdatedJob.perform_now(@character, Time.current)
+        end
+      end
+    end
+  end
+
+  test "broadcasts the updated held invitation to connected invitation panel viewers" do
+    character = characters(:zoro)
+
+    assert_broadcasts(@luffy.to_gid_param, 4) do
+      assert_broadcasts(@nami.to_gid_param, 4) do
+        assert_equal :post_sheet_actions_executed, Character::OnSheetUpdatedJob.perform_now(character, Time.current)
+      end
     end
   end
 end

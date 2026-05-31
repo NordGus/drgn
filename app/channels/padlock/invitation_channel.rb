@@ -44,14 +44,45 @@ class Padlock::InvitationChannel < ApplicationCable::StreamsChannel
     # Because we are inside a background job, and because of our engineering tradeoff, this iteration does not represent
     # a performance problem.
     BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |key|
-      # We broadcast the updated invitation to holder in case is connected to the Invitations panel; and replace it with
-      # the new invitation state.
-      broadcast_replace_to(
-        key.holder,
-        target: invitation,
-        partial: "settings/invitations/invitation",
-        locals: { invitation:, current_time: Time.current, current_character: key.holder }
-      )
+      BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |key|
+        # We broadcast the updated invitation to holder in case is connected to the Invitations panel; and replace it
+        # with the new invitation state.
+        broadcast_replace_to(
+          key.holder,
+          target: invitation,
+          partial: "settings/invitations/invitation",
+          locals: { invitation:, current_time: Time.current, current_character: key.holder }
+        )
+      end
+    end
+  end
+
+  # Broadcasts the updated invitations to all characters connected to the invitations settings panel to replace it with
+  # the new invitation state.
+  #
+  # @note This method should be called from a background job because this action could become a performance bottleneck,
+  #   if a deployment break the assumptions of our engineering tradeoff.
+  #
+  # @param invitations [ActiveRecord::Relation<Padlock::Invitation>, Array<Padlock::Invitation>]
+  def self.broadcast_issuer_sheet_updated(invitations)
+    # Using the BossKey::Recruiter feature we just need to broadcast that the invitation was claimed to the party members
+    # with access to the Invitations BossDoor.
+    #
+    # Because we are inside a background job, and because of our engineering tradeoff, this iteration does not represent
+    # a performance problem.
+    BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |key|
+      # I know this is a performance nightmare, using nested loops, but is necessary to eat this somewhere. We use each
+      # to mitigate the N+1 cases, becase the frist run should load into memory each record and reuse them there.
+      invitations.each do |invitation|
+        # We broadcast the updated invitation to holder in case is connected to the Invitations panel; and replace it
+        # with the new invitation state.
+        broadcast_replace_to(
+          key.holder,
+          target: invitation,
+          partial: "settings/invitations/invitation",
+          locals: { invitation:, current_time: Time.current, current_character: key.holder }
+        )
+      end
     end
   end
 

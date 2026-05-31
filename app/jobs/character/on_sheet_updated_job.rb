@@ -12,12 +12,21 @@ class Character::OnSheetUpdatedJob < ApplicationJob
 
     # We send an email notification to the character to inform them of the chages
     CharacterMailer.sheet_updated(character).deliver_later
+
     # We broadcast the update of character to their invitation if they hold one.
-    Padlock::InvitationChannel.broadcast_holder_sheet_updated(character.invitation) if character.invitation.present?
+    if character.respond_to?(:invitation) && character.invitation.present?
+      Padlock::InvitationChannel.broadcast_holder_sheet_updated(character.invitation)
+    end
+
     # We broadcast the update of character to their active issued invitations if they have any.
-    Padlock::InvitationChannel.broadcast_issuer_sheet_updated(character.issued_invitations.active) if character.issued_invitations.active.any?
+    if character.respond_to?(:issued_invitations) && character.issued_invitations.active.any?
+      Padlock::InvitationChannel.broadcast_issuer_sheet_updated(character.issued_invitations.active)
+    end
+
     # We broadcast the update of character to their boss keys if they have any.
-    BossKeyChannel.broadcast_holder_sheet_updated(character.boss_keys.active) if character.boss_keys.active.any?
+    if character.boss_keys.active.any?
+      BossKeyChannel.broadcast_holder_sheet_updated(character.boss_keys.active)
+    end
 
     :post_sheet_actions_executed
   end

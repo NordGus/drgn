@@ -4,7 +4,7 @@ class Session < ApplicationRecord
 
   has_secure_token length: 64
 
-  belongs_to :character, inverse_of: :sessions
+  belongs_to :character, foreign_key: :character_id
 
   scope :perishable, -> { where.not(expires_at: nil) }
   scope :non_perishable, -> { where(expires_at: nil) }

@@ -14,13 +14,13 @@ module Authorization::BossDoor
     def require_unlocked_door(**options)
       key = @_boss_key
 
-      before_action(**options) { redirect_to root_path unless Current.character.public_send(key).can_access? }
+      before_action(**options) { redirect_to root_path unless Current.character.public_send(key)&.can_access? }
     end
 
     def requires_capability(capability, **options)
       key = @_boss_key
 
-      before_action(**options) { redirect_to root_path unless Current.character.public_send(key).public_send(:"can_#{capability}?") }
+      before_action(**options) { redirect_to root_path unless Current.character.public_send(key)&.public_send(:"can_#{capability}?") }
     end
   end
 end

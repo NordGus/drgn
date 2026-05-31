@@ -18,6 +18,11 @@ nami_recruiter_key:
   holder: nami
   access_level: <%= BossKey::Recruiter.access_levels[:share] %>
 
+kinemon_recruiter_key:
+  <<: *DEFAULTS
+  holder: kinemon
+  access_level: <%= BossKey::Recruiter.access_levels[:invite] %>
+
 kanjuro_recruiter_key:
   <<: *DEFAULTS
   holder: kanjuro

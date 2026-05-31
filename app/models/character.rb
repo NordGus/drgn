@@ -7,7 +7,6 @@ class Character < ApplicationRecord
   include PasswordLockable
 
   validates :tag, presence: true, uniqueness: true
-  validates :contact_address, presence: true, uniqueness: true, email: true
 
   has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :restrict_with_error
 

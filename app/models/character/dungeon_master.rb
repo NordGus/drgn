@@ -1,5 +1,6 @@
 class Character::DungeonMaster < Character
   validates :type, presence: true, uniqueness: true, inclusion: { in: %w[Character::DungeonMaster] }
+  validates :contact_address, presence: true, uniqueness: true, email: true
   validates :deleted_at, absence: true
 
   has_many :sessions, foreign_key: :character_id, dependent: :restrict_with_error

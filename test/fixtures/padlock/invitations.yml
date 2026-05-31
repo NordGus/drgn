@@ -14,8 +14,15 @@ nami_invitation:
   expires_at: <%= 3.years.ago %>
   last_unlocked_at: <%= 3.years.ago %>
 
-kunjuro_invitation:
+kinemon_invitation:
   issuer: luffy
+  holder: kinemon
+  key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
+  expires_at: <%= 1.years.ago %>
+  last_unlocked_at: <%= 1.years.ago %>
+
+kunjuro_invitation:
+  issuer: kinemon
   holder: kanjuro
   key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
   expires_at: <%= 6.weeks.ago %>

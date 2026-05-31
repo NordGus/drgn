@@ -18,6 +18,11 @@ nami_locksmith_key:
   holder: nami
   access_level: <%= BossKey::Locksmith.access_levels[:manage] %>
 
+kinemon_locksmith_key:
+  <<: *DEFAULTS
+  holder: kinemon
+  access_level: <%= BossKey::Locksmith.access_levels[:no] %>
+
 kanjuro_locksmith_key:
   <<: *DEFAULTS
   holder: kanjuro

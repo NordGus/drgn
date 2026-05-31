@@ -1,5 +1,6 @@
 class Character::Adventurer < Character
   validates :type, presence: true, inclusion: { in: %w[Character::Adventurer] }
+  validates :contact_address, presence: true, uniqueness: true, email: true
 
   has_many :sessions, inverse_of: :character, dependent: :restrict_with_error
 

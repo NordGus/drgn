@@ -104,13 +104,7 @@ class CharacterTest < ActiveSupport::TestCase
         assert_changes -> { @character.reload.deleted_at }, from: nil, to: Time.current do
           assert_difference -> { @character.reload.sessions.count }, -1 do
             assert_difference -> { @character.boss_keys.deleted.count }, 2 do
-              assert_enqueued_with(
-                job: Character::OnMarkedAsDeletedJob,
-                args: [ @character, Time.current ],
-                at: ->(job_at) { (1.minute.from_now..3.minutes.from_now).cover?(job_at) }
-              ) do
-                assert @character.expel_from_party!
-              end
+              assert @character.expel_from_party!
             end
           end
         end

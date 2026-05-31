@@ -17,6 +17,9 @@ class Padlock::Invitation::OnRevokedOrTornJob < ApplicationJob
 
     invitation.destroy! # If we have reached this point we assumed the invitation can be destroyed
 
+    # With the invitation deleted we can procee
+    Character::OnMarkedAsDeletedJob.perform_later(invitation.holder, invitation.deleted_at)
+
     # Using the BossKey::Recruiter feature we just need to broadcast that the invitation was revoked to the party members
     # with access to the Invitations BossDoor.
     #

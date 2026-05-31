@@ -11,6 +11,7 @@ class Character::OnMarkedAsDeletedJob < ApplicationJob
     return :no_character_received unless character.present?
     return :no_deletion_time_received unless deletion_timestamp.present?
     return :old_deletion_timestamp_received if character.updated_at > deletion_timestamp
+    return :non_deleted_character_received if character.active?
 
     updated = false
     deactivation_token = SecureRandom.uuid
@@ -23,8 +24,7 @@ class Character::OnMarkedAsDeletedJob < ApplicationJob
 
       character.update!(
         tag: "deleted-character-#{deactivation_token}",
-        contact_address: character.contact_address.gsub(/@/, "-deactivated-#{deactivation_token}@"),
-        deleted_at: deletion_timestamp
+        contact_address: character.contact_address.gsub(/@/, "-deactivated-#{deactivation_token}@")
       )
 
       updated = true

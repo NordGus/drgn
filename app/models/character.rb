@@ -4,15 +4,11 @@
 # A Character cannot be deleted, only marked as deleted action which cleans the record while maintaining relevant
 # information in the platform.
 class Character < ApplicationRecord
-  EXPULSION_TIME_OFFSET = 2.minutes.freeze
-
   include PasswordLockable
 
   validates :tag, presence: true, uniqueness: true
   validates :contact_address, presence: true, uniqueness: true, email: true
   validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
-  validates :type, presence: true, inclusion: { in: %w[Character::DungeonMaster Character::Adventurer] }
-  validates :type, uniqueness: true, if: -> { type == "Character::DungeonMaster" }
 
   has_many :sessions, inverse_of: :character, dependent: :restrict_with_error
 
@@ -106,9 +102,6 @@ class Character < ApplicationRecord
 
     update!(deleted_at: current_time)
     boss_keys.update_all(deleted_at: current_time, updated_at: current_time)
-
-    # We delay the deletion of the character by a few minutes to allow the surrounding transaction to complete.
-    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET.from_now).perform_later(self, current_time)
   end
 
   # Returns whether the Character is the Dungeon Master
@@ -116,6 +109,13 @@ class Character < ApplicationRecord
   # @return Boolean
   def is_dungeon_master?
     type == "Character::DungeonMaster"
+  end
+
+  # Returns whether the Character is marked as deleted
+  #
+  # @return Boolean
+  def active?
+    deleted_at.nil?
   end
 
   private
@@ -132,5 +132,11 @@ class Character < ApplicationRecord
     error.add(:base, "Characters are permanent records and cannot be deleted")
 
     throw :abort
+  end
+
+  def dungeon_master_cant_abdicate
+    return unless type_changed? && type_was == "Character::DungeonMaster"
+
+    errors.add(:type, "dungeon master cannot abdicate")
   end
 end

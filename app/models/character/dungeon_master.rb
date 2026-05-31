@@ -1,5 +1,6 @@
 class Character::DungeonMaster < Character
-  validates :type, presence: true, inclusion: { in: %w[Character::DungeonMaster] }
+  validates :type, presence: true, uniqueness: true, inclusion: { in: %w[Character::DungeonMaster] }
+  validates :deleted_at, absence: true
 
   # We reimplement expel_from_party! to prevent the DungeonMaster from been deleted
   def mark_as_deleted(attributes)

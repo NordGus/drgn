@@ -2,7 +2,7 @@ require "test_helper"
 
 class Character::OnMarkedAsDeletedJobTest < ActiveJob::TestCase
   setup do
-    @character = characters(:kanjuro)
+    @character = character_adventurers(:kanjuro)
 
     @character.sessions.create!(expires_at: 1.day.from_now)
   end

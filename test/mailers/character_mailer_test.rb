@@ -1,7 +1,7 @@
 require "test_helper"
 
 class CharacterMailerTest < ActionMailer::TestCase
-  setup { @character = characters(:luffy) }
+  setup { @character = character_dungeon_masters(:luffy) }
 
   test "sheet_updated" do
     mail = CharacterMailer.sheet_updated(@character)

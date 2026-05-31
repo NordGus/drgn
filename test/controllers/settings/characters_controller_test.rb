@@ -1,7 +1,7 @@
 require "test_helper"
 
 class Settings::CharactersControllerTest < ActionDispatch::IntegrationTest
-  setup { @character = characters(:zoro) }
+  setup { @character = character_adventurers(:zoro) }
 
   class WithAnAuthenticatedCharacter < self
     setup { sign_in_as @character }

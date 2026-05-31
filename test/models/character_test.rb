@@ -3,7 +3,7 @@ require "test_helper"
 class CharacterTest < ActiveSupport::TestCase
   class UpdateSheetTest < self
     setup do
-      @character = characters(:luffy)
+      @character = character_dungeon_masters(:luffy)
 
       @character.sessions.create!
     end
@@ -50,7 +50,7 @@ class CharacterTest < ActiveSupport::TestCase
 
   class MarkedAsDeletedTest < self
     setup do
-      @character = characters(:zoro)
+      @character = character_adventurers(:zoro)
 
       @character.sessions.create!
 
@@ -94,7 +94,7 @@ class CharacterTest < ActiveSupport::TestCase
 
     # We create a session to test the application state changes as expected
     setup do
-      @character = characters(:zoro)
+      @character = character_adventurers(:zoro)
 
       @character.sessions.create!
     end

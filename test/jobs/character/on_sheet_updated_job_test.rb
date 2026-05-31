@@ -5,10 +5,10 @@ class Character::OnSheetUpdatedJobTest < ActiveJob::TestCase
   include ActionCable::TestHelper
 
   setup do
-    @character = characters(:luffy)
+    @character = character_dungeon_masters(:luffy)
 
-    @luffy = characters(:luffy)
-    @nami = characters(:nami)
+    @luffy = character_dungeon_masters(:luffy)
+    @nami = character_adventurers(:nami)
   end
 
   test "does nothing when not passing a character" do
@@ -42,10 +42,10 @@ class Character::OnSheetUpdatedJobTest < ActiveJob::TestCase
   end
 
   test "broadcasts the updated held invitation to connected invitation panel viewers" do
-    character = characters(:zoro)
+    character = character_adventurers(:zoro)
 
-    assert_broadcasts(@luffy.to_gid_param, 4) do
-      assert_broadcasts(@nami.to_gid_param, 4) do
+    assert_broadcasts(@luffy.to_gid_param, 5) do
+      assert_broadcasts(@nami.to_gid_param, 5) do
         assert_equal :post_sheet_actions_executed, Character::OnSheetUpdatedJob.perform_now(character, Time.current)
       end
     end

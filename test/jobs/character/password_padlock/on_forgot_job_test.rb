@@ -3,7 +3,7 @@ require "test_helper"
 class Character::PasswordPadlock::OnForgotJobTest < ActiveJob::TestCase
   include ActionMailer::TestHelper
 
-  setup { @character = characters(:luffy) }
+  setup { @character = character_dungeon_masters(:luffy) }
 
   test "with character tag as username" do
     assert_enqueued_email_with PasswordsMailer, :reset, args: [ @character ] do

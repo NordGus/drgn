@@ -3,7 +3,7 @@ require "test_helper"
 class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
   class WithAnAuthorizedCharacter < self
     setup do
-      @character = characters(:luffy)
+      @character = character_dungeon_masters(:luffy)
       sign_in_as @character
     end
 
@@ -51,7 +51,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
     test "should revoke invitation" do
       invitation = padlock_invitations(:zoro_invitation)
-      holder = characters(:zoro)
+      holder = character_adventurers(:zoro)
 
       freeze_time do
         assert_changes -> { holder.reload.deleted_at }, from: nil, to: Time.current do
@@ -66,7 +66,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
     test "should not revoke invitation when confirmation password is invalid" do
       invitation = padlock_invitations(:zoro_invitation)
-      holder = characters(:zoro)
+      holder = character_adventurers(:zoro)
 
       assert_no_changes -> { holder.reload.deleted_at } do
         assert_no_difference -> { Padlock::Invitation.count } do
@@ -91,7 +91,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
   class WithAnUnauthenticatedCharacter < self
     setup do
-      @character = characters(:zoro)
+      @character = character_adventurers(:zoro)
       sign_in_as @character
     end
 
@@ -121,7 +121,7 @@ class Settings::InvitationsControllerTest < ActionDispatch::IntegrationTest
 
     test "should not revoke invitation" do
       invitation = padlock_invitations(:zoro_invitation)
-      holder = characters(:zoro)
+      holder = character_adventurers(:zoro)
 
       freeze_time do
         assert_no_changes -> { holder.reload.deleted_at } do

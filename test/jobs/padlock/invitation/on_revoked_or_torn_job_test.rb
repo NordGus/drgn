@@ -3,7 +3,7 @@ require "test_helper"
 class Padlock::Invitation::OnRevokedOrTornJobTest < ActiveJob::TestCase
   include ActionCable::TestHelper
 
-  setup { @luffy = characters(:luffy) }
+  setup { @luffy = character_dungeon_masters(:luffy) }
 
   test "does nothing when not receiving an invitation" do
     assert_no_changes -> { Padlock::Invitation.count } do

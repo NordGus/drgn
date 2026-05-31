@@ -4,7 +4,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
 
   class IssueTest < self
-    setup { @issuer = characters(:luffy) }
+    setup { @issuer = character_dungeon_masters(:luffy) }
 
     test "issues an invitation with the given character as issuer" do
       freeze_time do
@@ -46,7 +46,7 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
   class RevokeTest < self
     setup do
       @invitation = padlock_invitations(:kunjuro_invitation)
-      @revoker = characters(:luffy)
+      @revoker = character_dungeon_masters(:luffy)
     end
 
     test "revokes the invitation" do

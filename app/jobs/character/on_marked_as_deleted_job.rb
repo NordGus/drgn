@@ -1,6 +1,12 @@
 class Character::OnMarkedAsDeletedJob < ApplicationJob
   queue_as :default
 
+  class FailedToDeletedCharacterError < StandardError; end
+
+  retry_on FailedToDeletedCharacterError, wait: 5.minutes, attempts: :unlimited, report: true
+
+  discard_on ActiveRecord::RecordNotFound
+
   def perform(character, deletion_timestamp)
     return :no_character_received unless character.present?
     return :no_deletion_time_received unless deletion_timestamp.present?
@@ -29,10 +35,12 @@ class Character::OnMarkedAsDeletedJob < ApplicationJob
       raise ActiveRecord::Rollback
     end
 
-    if updated
-      :character_deleted
-    else
-      :character_not_deleted
-    end
+    fail FailedToDeletedCharacterError, self unless updated
+
+    # In case the character was kicked out of the party we stream a refresh of their current view
+    ApplicationCable::StreamsChannel.broadcast_refresh_to(character)
+    ApplicationCable::StreamsChannel.broadcast_refresh_to(:settings, character)
+
+    :character_deleted
   end
 end

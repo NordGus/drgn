@@ -4,9 +4,9 @@
 - [x] Master padlock data model.
   - [x] Write the design document.
   - [x] Implement the base data model.
-- [ ] Implement locksmith feature settings.
-  - [ ] Make it so it can only manage settings and features authorization.
-  - [ ] Make access level updates instantly reactive on the affected character.
+- [x] Implement locksmith feature settings.
+  - [x] Make it so it can only manage settings and features authorization.
+  - [x] Make access level updates instantly reactive on the affected character.
   - [ ] Implement all the missing test cases.
 - [x] Implement a concern to protect the controllers with the `BossKey` authorization.
 - [x] Extend current `Character` and `Padlock::Invitation` to handle `BossKey` creation.

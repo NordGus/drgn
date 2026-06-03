@@ -54,6 +54,7 @@ class BossKeyChannel < ApplicationCable::StreamsChannel
   private
 
   def character_can_tap_this_channel?
-    connection.current_character.locksmith_key.can_access?
+    verified_stream_name_from_params == connection.current_character.to_gid_param &&
+      connection.current_character.locksmith_key.can_access?
   end
 end

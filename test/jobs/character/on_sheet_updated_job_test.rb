@@ -44,8 +44,8 @@ class Character::OnSheetUpdatedJobTest < ActiveJob::TestCase
   test "broadcasts the updated held invitation to connected invitation panel viewers" do
     character = character_adventurers(:zoro)
 
-    assert_broadcasts(@luffy.to_gid_param, 5) do
-      assert_broadcasts(@nami.to_gid_param, 5) do
+    assert_broadcasts(@luffy.to_gid_param, 3) do
+      assert_broadcasts(@nami.to_gid_param, 3) do
         assert_equal :post_sheet_actions_executed, Character::OnSheetUpdatedJob.perform_now(character, Time.current)
       end
     end

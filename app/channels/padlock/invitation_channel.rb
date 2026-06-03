@@ -44,16 +44,14 @@ class Padlock::InvitationChannel < ApplicationCable::StreamsChannel
     # Because we are inside a background job, and because of our engineering tradeoff, this iteration does not represent
     # a performance problem.
     BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |key|
-      BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |key|
-        # We broadcast the updated invitation to holder in case is connected to the Invitations panel; and replace it
-        # with the new invitation state.
-        broadcast_replace_to(
-          key.holder,
-          target: invitation,
-          partial: "settings/invitations/invitation",
-          locals: { invitation:, current_time: Time.current, current_character: key.holder }
-        )
-      end
+      # We broadcast the updated invitation to holder in case is connected to the Invitations panel; and replace it
+      # with the new invitation state.
+      broadcast_replace_to(
+        key.holder,
+        target: invitation,
+        partial: "settings/invitations/invitation",
+        locals: { invitation:, current_time: Time.current, current_character: key.holder }
+      )
     end
   end
 
@@ -89,6 +87,7 @@ class Padlock::InvitationChannel < ApplicationCable::StreamsChannel
   private
 
   def character_can_tap_this_channel?
-    connection.current_character.recruiter_key.can_access?
+    verified_stream_name_from_params == connection.current_character.to_gid_param &&
+      connection.current_character.recruiter_key.can_access?
   end
 end

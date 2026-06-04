@@ -4,7 +4,7 @@
 #
 # In this case:
 #   1. Enqueue the Invitation expiration job.
-#   2. Broadcast the action into_
+#   2. Broadcast the ui changes to Padlock::InvitationChannel
 class Padlock::Invitation::OnIssuedJob < ApplicationJob
   queue_as :default
 
@@ -26,20 +26,7 @@ class Padlock::Invitation::OnIssuedJob < ApplicationJob
     # out leaving a security gap in the invitation system.
     Padlock::Invitation::OnExpiredJob.set(wait_until: invitation.expires_at).perform_later(invitation)
 
-    # Using the BossKey::Recruiter feature we just need to broadcast that the invitation was issued to the party members
-    # with access to the Invitations BossDoor.
-    #
-    # Because we are inside a background job, and because of our engineering tradeoff, this iteration does not represent
-    # a performance problem.
-    BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |key|
-      Padlock::InvitationChannel.broadcast_action_to(
-        key.holder,
-        action: :prepend,
-        target: "pending_invitations",
-        partial: "settings/invitations/invitation",
-        locals: { invitation:, current_time: Time.current, current_character: key.holder }
-      )
-    end
+    Padlock::InvitationChannel.broadcast_issued(invitation)
 
     :issued_invitation_processed
   end

@@ -83,4 +83,28 @@ class BossKeyChannelTest < ActionCable::Channel::TestCase
       end
     end
   end
+
+  class BroadcastHolderMarkedAsDeletedTest < self
+    setup do
+      @luffy = character_dungeon_masters(:luffy)
+      @nami = character_adventurers(:nami)
+      @zoro = character_adventurers(:zoro)
+
+      @boss_keys = @zoro.boss_keys
+    end
+
+    test "broadcasts once per boss key to all holders with locksmith access" do
+      assert_broadcasts(@luffy.to_gid_param, @boss_keys.size) do
+        assert_broadcasts(@nami.to_gid_param, @boss_keys.size) do
+          BossKeyChannel.broadcast_holder_marked_as_deleted(@boss_keys)
+        end
+      end
+    end
+
+    test "does not broadcast to holders with no locksmith access" do
+      assert_no_broadcasts(@zoro.to_gid_param) do
+        BossKeyChannel.broadcast_holder_marked_as_deleted(@boss_keys)
+      end
+    end
+  end
 end

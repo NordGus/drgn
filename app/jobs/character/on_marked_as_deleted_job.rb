@@ -15,6 +15,7 @@ class Character::OnMarkedAsDeletedJob < ApplicationJob
 
     updated = false
     deactivation_token = SecureRandom.uuid
+    boss_keys = character.boss_keys.to_a
 
     character.transaction do
       # The Padlock::Password configuration will ensure that all previous padlocks are destroyed as well.
@@ -40,6 +41,8 @@ class Character::OnMarkedAsDeletedJob < ApplicationJob
     # In case the character was kicked out of the party we stream a refresh of their current view
     ApplicationCable::StreamsChannel.broadcast_refresh_to(character)
     ApplicationCable::StreamsChannel.broadcast_refresh_to(:settings, character)
+    # We also need to broadcast the removal of their boss keys
+    BossKeyChannel.broadcast_holder_marked_as_deleted(boss_keys)
 
     :character_deleted
   end

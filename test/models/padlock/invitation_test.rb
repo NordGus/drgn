@@ -55,9 +55,9 @@ class Padlock::InvitationTest < ActiveSupport::TestCase
       freeze_time do
         assert_difference -> { Padlock::Invitation.active.count }, -1 do
           assert_enqueued_with(job: Padlock::Invitation::OnRevokedOrTornJob, args: [ @invitation ]) do
-            assert @invitation.revoke(revoker: @revoker, confirmation_password:)
-
-            assert_nil @invitation.holder_id
+            assert_changes -> { @invitation.reload.deleted_at }, from: nil, to: Time.current do
+              assert @invitation.revoke(revoker: @revoker, confirmation_password:)
+            end
           end
         end
       end

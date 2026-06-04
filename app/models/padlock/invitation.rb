@@ -117,21 +117,18 @@ class Padlock::Invitation < ApplicationRecord
   def revoke(revoker:, confirmation_password:)
     fail NonRevocableError, "This invitation cannot be revoked because it does not has a holder" unless claimed?
 
-    holder_to_expel = holder
     revocation_outcome = false
 
     transaction do
-      # We first nullify the holder_id so we can protect the action with the confirmation password. This also allows us
-      # to return early if before expeling the holder from the platform.
+      # first we expel the holder from the party
+      holder.expel_from_party!
+
       update!(
         unlocked_by: revoker,
         confirmation_password:,
         from_dangerous_action: true,
-        holder_id: nil,
         deleted_at: Time.current
       )
-
-      holder_to_expel.expel_from_party!
 
       revocation_outcome = true
     rescue StandardError => e
@@ -141,13 +138,10 @@ class Padlock::Invitation < ApplicationRecord
       raise ActiveRecord::Rollback
     end
 
-    if revocation_outcome
-      OnRevokedOrTornJob.perform_later(self)
-    else # if revocation failed we need to
-      self.holder_id = holder_to_expel.id
+    OnRevokedOrTornJob.perform_later(self) if revocation_outcome
 
-      errors.merge!(holder_to_expel.errors)
-    end
+    # if revocation failed we merge the errors of the holder into the padlock
+    errors.merge!(holder.errors) unless revocation_outcome
 
     revocation_outcome
   end

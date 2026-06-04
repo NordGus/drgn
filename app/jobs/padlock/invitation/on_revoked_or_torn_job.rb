@@ -17,18 +17,11 @@ class Padlock::Invitation::OnRevokedOrTornJob < ApplicationJob
 
     invitation.destroy! # If we have reached this point we assumed the invitation can be destroyed
 
-    # With the invitation deleted we can procee
+    # With the invitation deleted we can proceed to mark the holder as deleted
     Character::OnMarkedAsDeletedJob.perform_later(invitation.holder, invitation.deleted_at)
 
-    # Using the BossKey::Recruiter feature we just need to broadcast that the invitation was revoked to the party members
-    # with access to the Invitations BossDoor.
-    #
-    # Because we are inside a background job, and because of our engineering tradeoff, this iteration does not represent
-    # a performance problem.
-    BossKey::Recruiter.with_whom_can_be_broadcasted.find_each do |key|
-      # We remove the invitation from the accepted invitations list
-      Padlock::InvitationChannel.broadcast_remove_to(key.holder, target: invitation)
-    end
+    # We broadcast the deletion to the ui
+    Padlock::InvitationChannel.broadcast_torn_or_revoked(invitation)
 
     :inactive_invitation_processed
   end

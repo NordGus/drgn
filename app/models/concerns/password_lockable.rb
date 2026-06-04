@@ -22,6 +22,6 @@ module PasswordLockable
   private
 
   def must_be_unlocked
-    fail NotImplementedError, "remember to implement must_be_unlocked private method in #{self.class}"
+    errors.add(:confirmation_password, :invalid) unless record_was_unlocked?
   end
 end

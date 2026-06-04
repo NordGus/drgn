@@ -11,17 +11,17 @@ For this reason user registration, or `Character` creation from here onwards, is
 `Invitation` is a new type of `Padlock` that any `Character` who has access to the Invitations settings can create and
 share with others. A single use, expirable `Invitation` is the only way to open the gate to your world of DRGN.
 
-So the idea is that a `Character` has many `Invitation` as an issuer while another `Character` has only one as carrier.
+So the idea is that a `Character` has many `Invitation` as an issuer while another `Character` has only one as holder.
 Nothing complex.
 
 ```mermaid
 graph TD;
     c1["Character (issuer)"] -- has many --> i1["Padlock::Invitation"]
-    i1 -- belongs to --> c2["Character (carrier)"]
+    i1 -- belongs to --> c2["Character (holder)"]
     c1 -- has many --> i2["Padlock::Invitation"]
-    i2 -- belongs to --> c3["Character (carrier)"]
+    i2 -- belongs to --> c3["Character (holder)"]
     c1 -- has many --> i3["Padlock::Invitation"]
-    i3 -- belongs to --> c4["Character (carrier)"]
+    i3 -- belongs to --> c4["Character (holder)"]
 ```
 
 The idea is for this Invitation system to also work as the control access to the platform. When a trusted `Character`
@@ -35,22 +35,23 @@ to invite users to join the platform but also to remove them from it.
 > This is a living document, so it's constantly being updated to include new the implementation specs for our Locks and
 > Keys.
 
-### Padlock Invitation (v0.1)
+### Padlock Invitation (v0.2)
 
 A `Padlock::Invitation` is a `Padlock` that can be used once by a user to create their own `Character`. Which can only be
 issued by a `Character` with the `Padlock::Admin::Invitation` key.
 
-#### v0.1
+#### v0.2
 
 ##### Table Design
 
-| Column           | Type                     | Constraints         | Usage                                                                                                 |
-|------------------|--------------------------|---------------------|-------------------------------------------------------------------------------------------------------|
-| id               | integer (auto-increment) | index, pk, not null |                                                                                                       |
-| issuer_id        | integer                  | index, fk, not null | A pointer/reference to the character who issued this padlock                                          |
-| carrier_id       | integer                  | index, fk           | (Optional) A pointer/reference to the created using this invitation                                   |
-| key              | string                   | index               | The secure token used to unlock this padlock                                                          |
-| expires_at       | datetime                 | not null            | A simple expiration date expired this invitation to prevent usage after a configurable amount of time |
-| last_unlocked_at | datetime                 | not null            | A timestamp that stores the last time the padlock record was unlocked at                              |
-| created_at       | datetime                 | not null            |                                                                                                       |
-| updated_at       | datetime                 | not null            |                                                                                                       |
+| Column           | Type                     | Constraints         | Usage                                                                                                                                                                       |
+|------------------|--------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| id               | integer (auto-increment) | index, pk, not null |                                                                                                                                                                             |
+| issuer_id        | integer                  | index, fk, not null | A pointer/reference to the character who issued this padlock                                                                                                                |
+| holder_id        | integer                  | index, fk           | (Optional) A pointer/reference to the created using this invitation                                                                                                         |
+| key              | string                   | index               | The secure token used to unlock this padlock                                                                                                                                |
+| expires_at       | datetime                 | not null            | A simple expiration date expired this invitation to prevent usage after a configurable amount of time                                                                       |
+| last_unlocked_at | datetime                 | not null            | A timestamp that stores the last time the padlock record was unlocked at                                                                                                    |
+| deleted_at       | datetime                 | index               | (Optional) Timestamp indicating when the record was marked for deletion. Soft deletion is used to remove the record from the UI while the system erase it in the background |
+| created_at       | datetime                 | not null            |                                                                                                                                                                             |
+| updated_at       | datetime                 | not null            |                                                                                                                                                                             |

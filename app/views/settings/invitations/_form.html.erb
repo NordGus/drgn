@@ -1,17 +1,29 @@
-<%= form_with(model: settings_invitation) do |form| %>
-  <% if settings_invitation.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(settings_invitation.errors.count, "error") %> prohibited this settings_invitation from being saved:</h2>
-
-      <ul>
-        <% settings_invitation.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
-    </div>
+<section id="issue_invitation">
+  <% if current_character.recruiter_key.can_invite? %>
+    <%= form_for :padlock_invitation, url: settings_invitations_path, method: :post, data: { controller: "confirmation-form" } do |form| %>
+      <%=
+        form.button(
+          "New invitation",
+          type: "button",
+          command: "show-modal",
+          commandfor: 'new-invitation-modal',
+          data: {
+            action: "confirmation-form#openConfirm"
+          }
+        )
+      %>
+      <dialog id="new-invitation-modal" data-confirmation-form-target="dialog">
+        <p>
+          Please enter your password to create a new invitation.
+        </p>
+        <div>
+          <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+        </div>
+        <div>
+          <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'new-invitation-modal' %>
+          <%= form.submit %>
+        </div>
+      </dialog>
+    <% end %>
   <% end %>
-
-  <div>
-    <%= form.submit %>
-  </div>
-<% end %>
+</section>

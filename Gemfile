@@ -15,7 +15,7 @@ gem "turbo-rails", "~> 2", ">= 2.0.21"
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "stimulus-rails", "~> 1.3", ">= 1.3.4"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
-gem "jbuilder", "~> 2.14", ">= 2.14.1"
+gem "jbuilder", "~> 2.15"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
@@ -26,10 +26,10 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache", "~> 1", ">= 1.0.10"
 gem "solid_queue", "~> 1", ">= 1.3.1"
-gem "solid_cable", "~> 3", ">= 3.0.12"
+gem "solid_cable", "~> 4"
 
 # Reduces boot times through caching; required in config/boot.rb
-gem "bootsnap", "~> 1.21", ">= 1.21.1", require: false
+gem "bootsnap", "~> 1.24", require: false
 
 # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
 gem "kamal", "~> 2.10", ">= 2.10.1", require: false
@@ -38,7 +38,7 @@ gem "kamal", "~> 2.10", ">= 2.10.1", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

@@ -2,14 +2,28 @@
 
 zoro_invitation:
   issuer: luffy
-  carrier: zoro
+  holder: zoro
   key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
   expires_at: <%= 3.years.ago %>
   last_unlocked_at: <%= 3.years.ago %>
 
-kunjuro_invitation:
+nami_invitation:
   issuer: luffy
-  carrier: kanjuro
+  holder: nami
+  key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
+  expires_at: <%= 3.years.ago %>
+  last_unlocked_at: <%= 3.years.ago %>
+
+kinemon_invitation:
+  issuer: luffy
+  holder: kinemon
+  key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
+  expires_at: <%= 1.years.ago %>
+  last_unlocked_at: <%= 1.years.ago %>
+
+kunjuro_invitation:
+  issuer: kinemon
+  holder: kanjuro
   key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
   expires_at: <%= 6.weeks.ago %>
   last_unlocked_at: <%= 6.weeks.ago %>
@@ -23,3 +37,9 @@ expired_invitation:
   issuer: luffy
   key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
   expires_at: <%= 1.day.ago %>
+
+deleted_invitation:
+  issuer: luffy
+  key: <%= SecureRandom.base58(Padlock::Invitation::KEY_LENGTH) %>
+  expires_at: <%= 1.minute.ago %>
+  deleted_at: <%= 1.minute.ago %>

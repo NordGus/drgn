@@ -1,27 +1,19 @@
+##
+# Character is a record that represent a user inside the platform.
+#
+# A Character cannot be deleted, only marked as deleted action which cleans the record while maintaining relevant
+# information in the platform.
 class Character < ApplicationRecord
-  EXPULSION_TIME_OFFSET = 2.minutes.freeze
-
   include PasswordLockable
 
-  normalizes :tag, with: ->(t) { t.strip.split(" ").reject(&:blank?).join(" ") }
-  normalizes :contact_address, with: ->(t) { t.strip.downcase.strip.split(" ").reject(&:blank?).join("") }
-
   validates :tag, presence: true, uniqueness: true
-  validates :contact_address, presence: true, uniqueness: true, email: true
-  validates :deleted_at, comparison: { less_than_or_equal_to: Time.current + 1.minute }, if: :deleted_at
 
-  encrypts :tag, deterministic: true, ignore_case: true
-  encrypts :contact_address, deterministic: true, downcase: true
-
-  has_many :sessions, inverse_of: :character, dependent: :destroy
-
-  has_one :password_padlock, -> { active }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
-  has_many :previous_password_padlocks, -> { replaced }, class_name: "Padlock::Password", foreign_key: :character_id, dependent: :destroy
-
-  has_many :issued_invitations, class_name: "Padlock::Invitation", foreign_key: :issuer_id, dependent: :destroy
-  has_one :invitation, class_name: "Padlock::Invitation", foreign_key: :carrier_id, dependent: :destroy
+  has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :restrict_with_error
 
   scope :active, -> { where(deleted_at: nil) }
+  scope :playable, -> { where(type: %w[Character::DungeonMaster Character::Adventurer]) }
+
+  before_destroy :prevent_deletion
 
   def update_sheet(attributes)
     update_outcome = false
@@ -33,13 +25,11 @@ class Character < ApplicationRecord
     transaction do
       close_remote_connections
 
-      sessions.delete_all
+      sessions.destroy_all if respond_to?(:sessions)
 
       update!(attributes.to_h.merge(from_dangerous_action: true))
 
       update_outcome = true
-
-      OnSheetUpdatedJob.perform_later(self, Time.current)
     rescue StandardError => e
       Rails.logger.debug e.message
       Rails.logger.debug e.backtrace.join("\n")
@@ -47,32 +37,38 @@ class Character < ApplicationRecord
       raise ActiveRecord::Rollback
     end
 
+    OnSheetUpdatedJob.perform_later(self, Time.current) if update_outcome
+
     update_outcome
   end
 
   def mark_as_deleted(attributes)
     update_outcome = false
+    current_time = Time.current
 
     transaction do
-      close_remote_connections
-
       # We delete all sessions to prevent any further connection.
-      sessions.delete_all
+      sessions.destroy_all if respond_to?(:sessions)
+      boss_keys.update_all(deleted_at: current_time, updated_at: current_time)
 
       update!(attributes.to_h.merge(
         from_dangerous_action: true,
         # By marking the character as deleted, we also prevent login padlocks from being unlocked.
-        deleted_at: Time.current
+        deleted_at: current_time
       ))
 
       update_outcome = true
-
-      OnMarkedAsDeletedJob.perform_later(self, Time.current)
     rescue StandardError => e
       Rails.logger.debug e.message
       Rails.logger.debug e.backtrace.join("\n")
 
       raise ActiveRecord::Rollback
+    end
+
+    if update_outcome
+      close_remote_connections
+
+      OnMarkedAsDeletedJob.perform_later(self, current_time)
     end
 
     update_outcome
@@ -85,24 +81,44 @@ class Character < ApplicationRecord
   # @note This method is not transactional, so it should only be called within a transaction.
   # @note This method is supposed to be only called by an administrator inside Invitation#revoke.
   def expel_from_party!
+    current_time = Time.current
+
     close_remote_connections
 
     # We delete all sessions to prevent any further connection.
     sessions.destroy_all
 
-    update!(deleted_at: Time.current)
+    update!(deleted_at: current_time)
+    boss_keys.update_all(deleted_at: current_time, updated_at: current_time)
+  end
 
-    # We delay the deletion of the character by a few minutes to allow the surrounding transaction to complete.
-    OnMarkedAsDeletedJob.set(wait_until: EXPULSION_TIME_OFFSET.from_now).perform_later(self, Time.current)
+  # Returns whether the Character is the Dungeon Master
+  #
+  # @return Boolean
+  def is_dungeon_master?
+    type == "Character::DungeonMaster"
+  end
+
+  # Returns whether the Character is marked as deleted
+  #
+  # @return Boolean
+  def active?
+    deleted_at.nil?
   end
 
   private
 
-  def must_be_unlocked
-    errors.add(:confirmation_password, :invalid) unless password_padlock.unlock_for_dangerous_action(confirmation_password)
+  def record_was_unlocked?
+    false
   end
 
   def close_remote_connections(reconnect: false)
     ActionCable.server.remote_connections.where(current_character: self).disconnect reconnect:
+  end
+
+  def prevent_deletion
+    error.add(:base, "Characters are permanent records and cannot be deleted")
+
+    throw :abort
   end
 end

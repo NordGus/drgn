@@ -1,0 +1,35 @@
+#settings_boss_keys {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    .boss-key-entries {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+        gap: 5px;
+        align-items: stretch;
+        justify-content: stretch;
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 0.75fr 0.5fr;
+            grid-template-rows: auto;
+            gap: 5px;
+            padding: 10px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: #222222;
+            align-items: center;
+
+            &:hover {
+                border-color: #ffffff;
+            }
+
+            input[type=submit] {
+                &:hover { cursor: pointer; }
+                &:disabled { cursor: not-allowed; }
+            }
+        }
+    }
+}

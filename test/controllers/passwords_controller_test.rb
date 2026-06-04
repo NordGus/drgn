@@ -3,7 +3,7 @@ require "test_helper"
 class PasswordsControllerTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
 
-  setup { @character = characters(:luffy) }
+  setup { @character = character_dungeon_masters(:luffy) }
 
   test "new" do
     get new_password_path

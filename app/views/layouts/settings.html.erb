@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Drgn" %></title>
+    <title><%= ["Settings", content_for(:title)].flatten.reject(&:blank?).join(" - ") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Drgn">
@@ -24,11 +24,11 @@
     <%= action_cable_meta_tag %>
   </head>
 
-  <body class="settings">
-    <nav class="settings-navigation">
-      <%= link_to "Character Sheet", settings_character_path, class: "#{params[:controller] == "settings/characters" ? "active" : ""}" %>
-      <%= link_to "Invitations", settings_invitations_path, class: "#{params[:controller] == "settings/invitations" ? "active" : ""}" %>
-    </nav>
+  <body class="settings" data-controller="settings" data-settings-current-controller-value="<%= params[:controller] %>">
+    <%= authorized_turbo_stream_from :settings, Current.character %>
+    <%= authorized_turbo_stream_from *params[:controller]&.split('/'), Current.character %>
+
+    <%= render partial: "shared/settings_nav", locals: { current_character: Current.character } %>
 
     <section class="settings-header">
       <h1 class="title">
@@ -37,7 +37,7 @@
       <%= link_to "Back", root_path, class: "back-link" %>
     </section>
 
-    <main class="settings-content">
+    <main class="settings-content" id="settings_content">
       <%= yield %>
     </main>
   </body>

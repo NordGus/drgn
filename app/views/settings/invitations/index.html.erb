@@ -1,9 +1,10 @@
 <% content_for :settings_title, "Invitations" %>
+<% content_for :title, "Invitations" %>
+
+<%= authorized_turbo_stream_from Current.character, channel: Padlock::InvitationChannel %>
 
 <p style="color: green"><%= notice %></p>
 <p style="color: red"><%= alert %></p>
-
-<% content_for :title, "Invitations" %>
 
 <% if @invitation.present? && @invitation.errors.any? %>
   <% @invitation.errors.each do |error| %>
@@ -17,54 +18,28 @@
   <% end %>
 <% end %>
 
-<%= form_for :padlock_invitation, url: settings_invitations_path, method: :post, data: { controller: "confirmation-form" } do |form| %>
-  <%=
-    form.button(
-      "New invitation",
-      type: "button",
-      command: "show-modal",
-      commandfor: 'new-invitation-modal',
-      data: {
-        action: "confirmation-form#openConfirm"
-      }
-    )
-  %>
-  <dialog id="new-invitation-modal" data-confirmation-form-target="dialog">
-    <p>
-      Please enter your password to create a new invitation.
-    </p>
-    <div>
-      <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
-    </div>
-    <div>
-      <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'new-invitation-modal' %>
-      <%= form.submit %>
-    </div>
-  </dialog>
-<% end %>
+<%= render partial: "settings/invitations/form", locals: { current_character: Current.character } %>
 
 <section id="settings_invitations">
   <div>
-    <%= turbo_stream_from "invitations_pending", channel: Padlock::Invitation::PendingChannel %>
     <h2>Pending</h2>
-    <div class="invitation-entries" id="pending-invitations">
+    <div class="invitation-entries" id="pending_invitations">
       <%=
         render partial: "settings/invitations/invitation",
                collection: @invitations.pending,
                as: :invitation,
-               locals: { current_time: Time.current }
+               locals: { current_time: Time.current, current_character: Current.character }
       %>
     </div>
   </div>
   <div>
-    <%= turbo_stream_from "invitations_accepted", channel: Padlock::Invitation::AcceptedChannel %>
     <h2>In use</h2>
-    <div class="invitation-entries" id="accepted-invitations">
+    <div class="invitation-entries" id="accepted_invitations">
       <%=
         render partial: "settings/invitations/invitation",
                collection: @invitations.accepted,
                as: :invitation,
-               locals: { current_time: Time.current }
+               locals: { current_time: Time.current, current_character: Current.character }
       %>
     </div>
   </div>

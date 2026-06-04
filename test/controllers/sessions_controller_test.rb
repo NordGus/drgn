@@ -4,7 +4,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
 
   class WithAnActiveCharacter < self
-    setup { @character = characters(:luffy) }
+    setup { @character = character_dungeon_masters(:luffy) }
 
     test "new" do
       get new_session_path
@@ -61,7 +61,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   class WithADeletedCharacter < self
-    setup { @character = characters(:kanjuro) }
+    setup { @character = character_adventurers(:kanjuro) }
 
     test "should not be able to sign in" do
       assert_no_enqueued_jobs only: Session::ExpireJob do

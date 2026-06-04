@@ -8,8 +8,8 @@ class InvitationsController < ApplicationController
 
   # GET /invitations/1 or /invitations/1.json
   def show
-    @invitation.carrier = Character.new
-    @invitation.carrier.password_padlock = Padlock::Password.new
+    @invitation.holder = Character.new
+    @invitation.holder.password_padlock = Padlock::Password.new
   end
 
   # POST /invitations/1/claim or /invitations/1/claim.json
@@ -29,11 +29,11 @@ class InvitationsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_invitation
-    @invitation = Padlock::Invitation.claimable.find_by!(key: params.expect(:key))
+    @invitation = Padlock::Invitation.active.claimable.find_by!(key: params.expect(:key))
   end
 
   # Only allow a list of trusted parameters through.
   def character_creator_params
-    params.fetch(:padlock_invitation, {}).permit(carrier: [ :tag, :contact_address, password_padlock: [ :key, :key_confirmation ] ])
+    params.fetch(:padlock_invitation, {}).permit(holder: [ :tag, :contact_address, password_padlock: [ :key, :key_confirmation ] ])
   end
 end

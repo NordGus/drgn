@@ -1,7 +1,7 @@
 require "test_helper"
 
 class Session::ExpireJobTest < ActiveJob::TestCase
-  setup { @character = characters(:luffy) }
+  setup { @character = character_dungeon_masters(:luffy) }
 
   test "with a non perishable session" do
     session =  @character.sessions.create!

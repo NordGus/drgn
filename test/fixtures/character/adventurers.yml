@@ -1,14 +1,25 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-luffy:
-  tag: monkey-d-luffy
-  contact_address: luffy@mugiwara.com
+DEFAULTS: &DEFAULTS
+  type: "Character::Adventurer"
 
 zoro:
+  <<: *DEFAULTS
   tag: roronoa-zoro
   contact_address: zoro@mugiwara.com
 
+nami:
+  <<: *DEFAULTS
+  tag: cat-burglar-nami
+  contact_address: nami@mugiwara.com
+
+kinemon:
+  <<: *DEFAULTS
+  tag: kinemon
+  contact_address: kinemon@akazaya.com
+
 kanjuro:
+  <<: *DEFAULTS
   tag: kurozumi-kanjuro
   contact_address: kanjuro@akazaya.com
   deleted_at: <%= 1.day.ago %>

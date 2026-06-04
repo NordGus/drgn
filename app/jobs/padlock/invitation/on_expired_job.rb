@@ -1,6 +1,8 @@
 class Padlock::Invitation::OnExpiredJob < ApplicationJob
   queue_as :default
 
+  limits_concurrency to: 1, key: ->(invitation) { invitation }, duration: 1.minute, group: "PadlockActions"
+
   retry_on Padlock::Invitation::StillAliveError, wait: 5.seconds, attempts: :unlimited, report: true
   retry_on ActiveRecord::RecordNotDestroyed, wait: 5.minutes, attempts: :unlimited, report: true
 
@@ -8,7 +10,7 @@ class Padlock::Invitation::OnExpiredJob < ApplicationJob
 
   def perform(invitation)
     return :no_invitation_received unless invitation.present?
-    return :invitation_in_use if invitation.carrier_id.present?
+    return :invitation_in_use if invitation.claimed?
 
     # We throw an error that has a retry_on configuration if the invitation hasn't expired yet, so it's retried until
     # any of the previous guard clauses passes or the invitation has expired.
@@ -17,6 +19,6 @@ class Padlock::Invitation::OnExpiredJob < ApplicationJob
     # We destroy the issued invitation as a security measure to prevent it from being used. This is so there are no
     # zombie invitations in the database that could be used to create a new character without the knowledge of the
     # issuer.
-    invitation.tear!
+    invitation.tear
   end
 end

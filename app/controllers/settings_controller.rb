@@ -1,15 +1,11 @@
 class SettingsController < ApplicationController
-  before_action :set_character
+  # including Authorization::BossDoor to have settings-wide access all authorization methods for controllers that use
+  # BossKey-based authorization to work, without needing to include this concern on every single one of them.
+  include Authorization::BossDoor
 
   layout "settings"
 
   private
-
-  # We load the character here so all controllers under Settings can access it and check for authorization. This also
-  # is used for eagerload al character required data for the settings pannel.
-  def set_character
-    @character = Character.includes(:password_padlock, :sessions).where(deleted_at: nil).find(Current.session.character_id)
-  end
 
   def unprocessable_entity_response_with_custom_message(message)
     respond_to do |format|

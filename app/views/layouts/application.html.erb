@@ -26,6 +26,8 @@
 
   <body>
     <% if Current.session.present? %>
+      <%= authorized_turbo_stream_from Current.character %>
+
       <div>
         <%= link_to Current.character.tag, settings_character_path %>
         <%= button_to "Logout", session_path, method: :delete %>

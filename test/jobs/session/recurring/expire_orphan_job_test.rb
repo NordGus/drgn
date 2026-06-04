@@ -2,7 +2,7 @@ require "test_helper"
 
 class Session::Recurring::ExpireOrphanJobTest < ActiveJob::TestCase
   setup do
-    @character = characters(:luffy)
+    @character = character_dungeon_masters(:luffy)
     @perishable_session = @character.sessions.create!(expires_at: 1.day.from_now)
     @non_perishable_session = @character.sessions.create!(expires_at: nil)
   end

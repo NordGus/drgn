@@ -1,0 +1,33 @@
+<nav
+  class="settings-navigation"
+  id="settings_navigation"
+>
+  <%=
+    link_to "Character Sheet",
+            settings_character_path,
+            data: {
+              panel_controller: "settings/characters",
+              settings_target: "link"
+            }
+  %>
+  <% if current_character.recruiter_key.can_access? %>
+    <%=
+      link_to "Invitations",
+              settings_invitations_path,
+              data: {
+                panel_controller: "settings/invitations",
+                settings_target: "link"
+              }
+    %>
+  <% end %>
+  <% if current_character.locksmith_key.can_access? %>
+    <%=
+      link_to "Locksmith",
+              settings_boss_keys_path,
+              data: {
+                panel_controller: "settings/boss_keys",
+                settings_target: "link"
+              }
+    %>
+  <% end %>
+</nav>

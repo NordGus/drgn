@@ -1,0 +1,30 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+DEFAULTS: &DEFAULTS
+  type: "BossKey::Recruiter"
+
+luffys_recruiter_key:
+  <<: *DEFAULTS
+  holder: luffy
+  access_level: <%= BossKey::Recruiter.access_levels[:manage] %>
+
+zoro_recruiter_key:
+  <<: *DEFAULTS
+  holder: zoro
+  access_level: <%= BossKey::Recruiter.access_levels[:no] %>
+
+nami_recruiter_key:
+  <<: *DEFAULTS
+  holder: nami
+  access_level: <%= BossKey::Recruiter.access_levels[:share] %>
+
+kinemon_recruiter_key:
+  <<: *DEFAULTS
+  holder: kinemon
+  access_level: <%= BossKey::Recruiter.access_levels[:invite] %>
+
+kanjuro_recruiter_key:
+  <<: *DEFAULTS
+  holder: kanjuro
+  access_level: <%= BossKey::Recruiter.access_levels[:no] %>
+  deleted_at: <%= 1.day.ago %>

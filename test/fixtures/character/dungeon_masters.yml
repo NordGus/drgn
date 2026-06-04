@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+DEFAULTS: &DEFAULTS
+  type: "Character::DungeonMaster"
+
+luffy:
+  <<: *DEFAULTS
+  tag: monkey-d-luffy
+  contact_address: luffy@mugiwara.com

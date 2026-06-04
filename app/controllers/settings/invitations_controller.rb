@@ -1,5 +1,12 @@
 class Settings::InvitationsController < SettingsController
-  # TODO: Add authorization with the master key system
+  unlockable_with :recruiter_key
+
+  require_unlocked_door
+
+  requires_capability :invite, only: :create
+  requires_capability :teardown, only: :destroy
+  requires_capability :revoke, only: :revoke
+
   before_action :set_invitation, only: %i[ revoke destroy ]
   before_action :set_invitations, only: %i[ index create revoke destroy ]
 
@@ -13,7 +20,7 @@ class Settings::InvitationsController < SettingsController
   # POST /settings/invitations or /settings/invitations.json
   def create
     confirmation_password = invitation_params[:confirmation_password]
-    @invitation = Padlock::Invitation.issue(issuer: @character, confirmation_password:)
+    @invitation = Padlock::Invitation.issue(issuer: Current.character, confirmation_password:)
 
     respond_to do |format|
       if @invitation.persisted?
@@ -28,11 +35,14 @@ class Settings::InvitationsController < SettingsController
 
   # DELETE /settings/invitations/1 or /settings/invitations/1.json
   def destroy
-    @invitation.tear!
-
     respond_to do |format|
-      format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully destroyed.", status: :see_other }
-      format.json { head :no_content }
+      if @invitation.tear
+        format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully destroyed.", status: :see_other }
+        format.json { head :no_content }
+      else
+        format.html { render :index, status: :unprocessable_entity }
+        format.json { render json: @invitation.errors, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -41,7 +51,7 @@ class Settings::InvitationsController < SettingsController
     confirmation_password = revoke_invitation_params[:confirmation_password]
 
     respond_to do |format|
-      if @invitation.revoke(revoker: @character, confirmation_password:)
+      if @invitation.revoke(revoker: Current.character, confirmation_password:)
         format.html { redirect_to settings_invitations_path, notice: "Invitation was successfully revoked.", status: :see_other }
         format.json { head :no_content }
       else
@@ -54,7 +64,7 @@ class Settings::InvitationsController < SettingsController
   private
 
   def set_invitation
-    @invitation = Padlock::Invitation.includes(:issuer, :carrier).find(params.expect(:id))
+    @invitation = Padlock::Invitation.includes(:issuer, :holder).active.find(params.expect(:id))
   end
 
   def invitation_params
@@ -66,6 +76,6 @@ class Settings::InvitationsController < SettingsController
   end
 
   def set_invitations
-    @invitations = Padlock::Invitation.includes(:issuer, :carrier).all.order(created_at: :desc)
+    @invitations = Padlock::Invitation.includes(:issuer, :holder).active.order(created_at: :desc)
   end
 end

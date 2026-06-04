@@ -14,7 +14,7 @@ class Padlock::Password < ApplicationRecord
     dangerous_action_authorization: 1
   }, default: :web_login, prefix: true
 
-  belongs_to :character
+  belongs_to :character, -> { playable }, foreign_key: :character_id
   belongs_to :_replacement_padlock, optional: true, class_name: "Padlock::Password", foreign_key: :replacement_padlock_id
 
   has_one :_replaced_padlock, class_name: "Padlock::Password", dependent: :destroy, foreign_key: :replacement_padlock_id

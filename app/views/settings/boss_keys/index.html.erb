@@ -1,0 +1,30 @@
+<% content_for :settings_title, "Boss Keys" %>
+<% content_for :title, "Boss Keys" %>
+
+<%= authorized_turbo_stream_from Current.character, channel: BossKeyChannel %>
+
+<p style="color: green"><%= notice %></p>
+<p style="color: red"><%= alert %></p>
+
+<% if @boss_key.present? && @boss_key.errors.any? %>
+  <% @boss_key.errors.each do |error| %>
+    <div style="color: red">
+      <% if error.attribute == :confirmation_password %>
+        <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
+      <% else %>
+        <h2 style="font-size: 1em"><%= error.full_message %></h2>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+
+<section id="settings_boss_keys">
+  <h3>Invitations</h3>
+  <div class="boss-key-entries">
+    <%= render partial: "settings/boss_keys/form", collection: @boss_keys.recruiter, as: :boss_key %>
+  </div>
+  <h3>Locksmith</h3>
+  <div class="boss-key-entries">
+    <%= render partial: "settings/boss_keys/form", collection: @boss_keys.locksmith, as: :boss_key %>
+  </div>
+</section>

@@ -19,12 +19,19 @@ So reading into this, a high level visualization of the data model will be somet
 
 ```mermaid
 flowchart LR
-    ch1["Character"] --has one--> pl1["Padlock::Password"]
+    ch1["Character::DungeonMaster"] --has one--> pl1["Padlock::Password"]
     ch1 --has one--> pl2["Padlock::Passkey"]
     ch1 --has one--> pl3["Padlock::OAuth::Apple"]
     ch1 --has one--> pl4["Padlock::OAuth::Google"]
     ch1 --has one--> pl5["Padlock::OAuth::Github"]
     ch1 --has many--> pl6["Padlock::Token"]
+
+    ch2["Character::Adventurer"] --has one--> pl7["Padlock::Password"]
+    ch2 --has one--> pl8["Padlock::Passkey"]
+    ch2 --has one--> pl9["Padlock::OAuth::Apple"]
+    ch2 --has one--> pl10["Padlock::OAuth::Google"]
+    ch2 --has one--> pl11["Padlock::OAuth::Github"]
+    ch2 --has many--> pl12["Padlock::Token"]
 ```
 
 So, each `Character` will be implemented using Single Table Inheritance (STI) over a character table. While each

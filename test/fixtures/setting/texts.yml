@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  type: 
+  mechanic: one
+  mechanic_type: Mechanic
+  value: MyString
+
+two:
+  type: 
+  mechanic: two
+  mechanic_type: Mechanic
+  value: MyString

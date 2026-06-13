@@ -44,8 +44,7 @@ flowchart LR
 ```
 
 So each `Mechanic` will be implemented using Single Table Inheritance (STI) over one of two tables `mechanic_environmentals`
-for platform-wide systems and `mechanic_enchantments` for resource-specific systems.
-
+for platform-wide systems and `mechanic_enchantments`
 
 ## Specification
 
@@ -56,7 +55,8 @@ for platform-wide systems and `mechanic_enchantments` for resource-specific syst
 ## Mechanic::Environmental (v0.1)
 
 A `Mechanic::Environmental` is a record that represents a sub-system or mechanic in the database use only to group all
-user defined settings values into an easily accessible and controllable interface.
+user defined settings values into an easily accessible and controllable interface. And operates as singletons for each
+deployment.
 
 ### v0.1
 

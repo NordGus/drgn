@@ -1,7 +1,7 @@
 class Mechanic::PostOffice < Mechanic
   validates :type, inclusion: { in: %w[Mechanic::PostOffice] }
 
-  default_scope { includes(:address, :port, :username, :password) }
+  default_scope { includes(:address, :port, :username, :password, :disable_notifications) }
 
   has_one :address, class_name: "Mechanic::PostOffice::Address", foreign_key: :mechanic_id, dependent: :destroy
   has_one :port, class_name: "Mechanic::PostOffice::Port", foreign_key: :mechanic_id, dependent: :destroy

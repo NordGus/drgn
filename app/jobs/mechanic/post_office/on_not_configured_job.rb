@@ -1,30 +1,17 @@
 class Mechanic::PostOffice::OnNotConfiguredJob < ApplicationJob
   queue_as :default
 
-  def perform(notification_time)
-    return :no_notification_time_received unless notification_time.present?
+  def perform(current_time)
+    return :no_notification_time_received unless current_time.present?
 
     post_office = Mechanic::PostOffice.instance!
 
-    return :notification_disabled if post_office.disable_notifications&.value
+    if post_office.disable_notifications&.value
+      :notification_disabled
+    else
+      ScribingWindChannel.notify_postmasters_that_post_office_is_not_configured(current_time)
 
-    # We notify all postmasters that the post office is not configured.
-    BossKey::Postmaster.with_whom_can_be_broadcasted.find_each do |key|
-      ApplicationCable::StreamsChannel.broadcast_prepend_to(
-        key.holder,
-        target: "notifications",
-        partial: "settings/post_offices/post_office_not_configured",
-        locals: { current_time: Time.current, current_character: key.holder }
-      )
-
-      ApplicationCable::StreamsChannel.broadcast_prepend_to(
-        :settings, key.holder,
-        target: "notifications",
-        partial: "settings/post_offices/post_office_not_configured",
-        locals: { current_time: Time.current, current_character: key.holder }
-      )
+      :postmasters_notified
     end
-
-    :postmasters_notified
   end
 end

@@ -12,6 +12,7 @@ class Character::DungeonMaster < Character
 
   has_one :recruiter_key, class_name: "BossKey::Recruiter", foreign_key: :holder_id
   has_one :locksmith_key, class_name: "BossKey::Locksmith", foreign_key: :holder_id
+  has_one :postmaster_key, class_name: "BossKey::Postmaster", foreign_key: :holder_id
 
   private
 

@@ -1,3 +1,4 @@
 [tools]
+go = "latest"
 ruby = "4.0.2"
 sqlite = "latest"

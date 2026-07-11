@@ -1,6 +1,11 @@
 namespace :mailhog do
   desc "Start MailHog server"
   task :serve, :environment do
+    unless Rails.env.development? || Rails.env.test?
+      puts "+++ MailHog is only for development and test environments +++"
+      exit(0)
+    end
+
     puts "+++ Starting MailHog server +++"
     success = system "MailHog --auth-file=#{Rails.root.join(".mailhog", "auth-file")}"
 
@@ -15,6 +20,11 @@ namespace :mailhog do
 
   desc "Configure MailHog"
   task :configure, :environment do
+    unless Rails.env.development? || Rails.env.test?
+      puts "+++ MailHog is only for development and test environments +++"
+      exit(0)
+    end
+
     auth_file_path = Rails.root.join(".mailhog", "auth-file")
 
     if File.exist?(auth_file_path)

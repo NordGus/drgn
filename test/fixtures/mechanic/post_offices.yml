@@ -1,4 +1,4 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-post_office:
+mechanic_post_office:
   type: "Mechanic::PostOffice"

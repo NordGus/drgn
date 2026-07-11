@@ -18,6 +18,7 @@ class BossKey < ApplicationRecord
 
   scope :recruiter, -> { where(type: "BossKey::Recruiter") }
   scope :locksmith, -> { where(type: "BossKey::Locksmith") }
+  scope :postmaster, -> { where(type: "BossKey::Postmaster") }
 
   # attribute used to unlock the record with dangerous actions
   attribute :unlocked_by, type: :character, default: nil

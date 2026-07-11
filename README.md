@@ -22,9 +22,14 @@ Install MailHog dependency:
 go install github.com/mailhog/MailHog@latest
 ```
 
-Now you can start the MailHog server during development while using:
+Configure MailHog for development by running:
 ```shell
-MailHog
+bin/rails mailhog:configure
+```
+
+Now you can start MailHog by running:
+```shell
+bin/rails mailhog:serve
 ```
 
 Setup bundle to store the gems inside the current project to prevent dependency collisions with other projects:
@@ -41,6 +46,23 @@ bundle install
 Prepare the database and load some text data:
 ```shell
 bin/rails db:setup db:fixtures:load
+```
+
+### Setup development environment
+
+Generate a new MailHog password:
+```shell
+MailHog bcrypt password
+```
+
+Copy the output of the above command and paste it in a new file `.mailhog/auth-file` in the follwing way
+```shell
+developer:<bycrypt-password-output-from-above-command>
+```
+
+This will allow you to start MailHog with the correct credentials and by running the script:
+```shell
+bin/rails mailhog
 ```
 
 ---

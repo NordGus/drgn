@@ -1,10 +1,8 @@
 # If Single Table Inheritance, Polymorphic Associations and Background Jobs are hammers, every data modeling problem is a nail
 
 ---
-
-An Entity Component System approach to data modeling approach to extend other models or give them metadata. Allowing
+An Entity Component System approach to data modeling extend other models or give them metadata. Allowing
 DRGN to encapsulate behaviors and use ActionJob to build subsystems to compose the entire DRGN's system.
-
 ---
 
 ## Abstract

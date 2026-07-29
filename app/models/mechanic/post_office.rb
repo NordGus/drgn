@@ -3,19 +3,19 @@ class Mechanic::PostOffice < Mechanic
 
   validates :type, inclusion: { in: %w[Mechanic::PostOffice] }
 
-  default_scope { includes(:address, :port, :username, :password, :disable_notification) }
+  default_scope { includes(:address, :port, :username, :password, :disable_configuration_errors_notification) }
 
   has_one :address, class_name: "Mechanic::PostOffice::Address", foreign_key: :mechanic_id, dependent: :destroy
   has_one :port, class_name: "Mechanic::PostOffice::Port", foreign_key: :mechanic_id, dependent: :destroy
   has_one :username, class_name: "Mechanic::PostOffice::Username", foreign_key: :mechanic_id, dependent: :destroy
   has_one :password, class_name: "Mechanic::PostOffice::Password", foreign_key: :mechanic_id, dependent: :destroy
-  has_one :disable_notification, class_name: "Mechanic::PostOffice::DisableNotification", foreign_key: :mechanic_id, dependent: :destroy
+  has_one :disable_configuration_errors_notification, class_name: "Mechanic::PostOffice::DisableConfigurationErrorsNotification", foreign_key: :mechanic_id, dependent: :destroy
 
   accepts_nested_attributes_for :address, reject_if: :all_blank, allow_destroy: false
   accepts_nested_attributes_for :port, reject_if: :all_blank, allow_destroy: false
   accepts_nested_attributes_for :username, reject_if: :all_blank, allow_destroy: false
   accepts_nested_attributes_for :password, reject_if: :all_blank, allow_destroy: false
-  accepts_nested_attributes_for :disable_notification, reject_if: :all_blank, allow_destroy: false
+  accepts_nested_attributes_for :disable_configuration_errors_notification, reject_if: :all_blank, allow_destroy: false
 
   attribute :unlocked_by, type: :character, default: nil
 

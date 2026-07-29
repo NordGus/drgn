@@ -56,7 +56,7 @@ class Settings::PostOfficesController < SettingsController
       @post_office.build_port unless @post_office.port.present?
       @post_office.build_username unless @post_office.username.present?
       @post_office.build_password unless @post_office.password.present?
-      @post_office.build_disable_notification unless @post_office.disable_notification.present?
+      @post_office.build_disable_configuration_errors_notification unless @post_office.disable_configuration_errors_notification.present?
     end
 
     # Only allow a list of trusted parameters through.
@@ -67,7 +67,7 @@ class Settings::PostOfficesController < SettingsController
         port_attributes: [ :id, :value ],
         username_attributes: [ :id, :value ],
         password_attributes: [ :id, :value ],
-        disable_notification_attributes: [ :id, :value ]
+        disable_configuration_errors_notification_attributes: [ :id, :value ]
       )
     end
 end

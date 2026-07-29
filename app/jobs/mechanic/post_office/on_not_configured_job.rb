@@ -14,7 +14,7 @@ class Mechanic::PostOffice::OnNotConfiguredJob < ApplicationJob
 
     post_office = Mechanic::PostOffice.instance!
 
-    if post_office.disable_notification&.value
+    if post_office.disable_configuration_errors_notification&.value
       :notification_disabled
     else
       ScribingWindChannel.notify_postmasters_that_post_office_is_not_configured(current_time)

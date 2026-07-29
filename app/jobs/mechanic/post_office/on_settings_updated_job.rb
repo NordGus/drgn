@@ -19,7 +19,7 @@ class Mechanic::PostOffice::OnSettingsUpdatedJob < ApplicationJob
     post_office.build_port unless post_office.port.present?
     post_office.build_username unless post_office.username.present?
     post_office.build_password unless post_office.password.present?
-    post_office.build_disable_notification unless post_office.disable_notification.present?
+    post_office.build_disable_configuration_errors_notification unless post_office.disable_configuration_errors_notification.present?
 
     # We broadcast the update to all party memebers connected to the settings panel
     Mechanic::PostOfficeChannel.broadcast_updated(post_office)

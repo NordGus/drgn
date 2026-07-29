@@ -16,7 +16,7 @@ class BossKey::Postmaster < BossKey
   end
 
   def settings_controller_name
-    "post_office"
+    "post_offices"
   end
 
   def can_manage?

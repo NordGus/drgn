@@ -1,4 +1,20 @@
+<% content_for :settings_title, "Post Office" %>
+<% content_for :title, "Post Office" %>
+
+<%= authorized_turbo_stream_from Current.character, channel: Mechanic::PostOfficeChannel %>
+
 <p style="color: green"><%= notice %></p>
 
-<h1>Hello World</h1>
-<h2>Wolololo</h2>
+<% if @post_office.present? && @post_office.errors.any? %>
+  <% @post_office.errors.each do |error| %>
+    <div style="color: red">
+      <% if error.attribute == :confirmation_password %>
+        <h2 style="font-size: 1em">Invalid password, your action cannot be executed!</h2>
+      <% else %>
+        <h2 style="font-size: 1em"><%= error.full_message %></h2>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+
+<%= render "form", current_character: Current.character, post_office: @post_office %>

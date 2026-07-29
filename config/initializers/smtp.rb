@@ -12,7 +12,9 @@ class SMTPInterceptor
       user_name: post_office.username.value,
       password: post_office.password.value,
       authentication: :plain,
-      enable_starttls_auto: true
+      enable_starttls_auto: true,
+      open_timeout: 5,
+      read_timeout: 5
     )
   end
 end

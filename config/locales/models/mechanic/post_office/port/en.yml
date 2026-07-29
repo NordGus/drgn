@@ -1,0 +1,9 @@
+en:
+  activerecord:
+    models:
+      mechanic/post_office/port:
+        one: "Post Office Port"
+        other: "Post Office Ports"
+    attributes:
+      mechanic/post_office/port:
+        value: "Port"

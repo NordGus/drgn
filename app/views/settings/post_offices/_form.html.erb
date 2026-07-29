@@ -42,7 +42,7 @@
     </div>
   <% end %>
 
-  <%= form.fields_for :disable_notification do |disable_notifications_form| %>
+  <%= form.fields_for :disable_configuration_errors_notification do |disable_notifications_form| %>
     <%= disable_notifications_form.hidden_field :id %>
     <div style="display: grid; grid-template-columns: 0.75fr 1fr;">
       <%= disable_notifications_form.label :value %>

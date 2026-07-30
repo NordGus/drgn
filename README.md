@@ -9,6 +9,7 @@ dreams and goals.
 
 To work on developing DRGN you need to install the following dependencies
 - [mise-en-place](https://mise.jdx.dev/getting-started.html)
+- vips
 
 ### Tooling and Ruby Dependencies
 

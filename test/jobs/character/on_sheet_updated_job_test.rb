@@ -33,8 +33,8 @@ class Character::OnSheetUpdatedJobTest < ActiveJob::TestCase
 
   test "performs all post-sheet-update actions" do
     assert_enqueued_email_with CharacterMailer, :sheet_updated, args: [ @character ] do
-      assert_broadcasts(@luffy.to_gid_param, 7) do
-        assert_broadcasts(@nami.to_gid_param, 7) do
+      assert_broadcasts(@luffy.to_gid_param, 8) do
+        assert_broadcasts(@nami.to_gid_param, 8) do
           assert_equal :post_sheet_actions_executed, Character::OnSheetUpdatedJob.perform_now(@character, Time.current)
         end
       end
@@ -44,8 +44,8 @@ class Character::OnSheetUpdatedJobTest < ActiveJob::TestCase
   test "broadcasts the updated held invitation to connected invitation panel viewers" do
     character = character_adventurers(:zoro)
 
-    assert_broadcasts(@luffy.to_gid_param, 3) do
-      assert_broadcasts(@nami.to_gid_param, 3) do
+    assert_broadcasts(@luffy.to_gid_param, 4) do
+      assert_broadcasts(@nami.to_gid_param, 4) do
         assert_equal :post_sheet_actions_executed, Character::OnSheetUpdatedJob.perform_now(character, Time.current)
       end
     end

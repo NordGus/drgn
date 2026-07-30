@@ -2,47 +2,37 @@ require "test_helper"
 
 class Settings::PostOfficesControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @settings_post_office = settings_post_offices(:one)
-  end
+    @post_office = mechanic_post_offices(:mechanic_post_office)
+    @character = character_dungeon_masters(:luffy)
 
-  test "should get index" do
-    get settings_post_offices_url
-    assert_response :success
-  end
-
-  test "should get new" do
-    get new_settings_post_office_url
-    assert_response :success
-  end
-
-  test "should create settings_post_office" do
-    assert_difference("Settings::PostOffice.count") do
-      post settings_post_offices_url, params: { settings_post_office: {} }
-    end
-
-    assert_redirected_to settings_post_office_url(Settings::PostOffice.last)
+    sign_in_as(@character)
   end
 
   test "should show settings_post_office" do
-    get settings_post_office_url(@settings_post_office)
+    get settings_post_office_url
     assert_response :success
   end
 
-  test "should get edit" do
-    get edit_settings_post_office_url(@settings_post_office)
-    assert_response :success
-  end
+
 
   test "should update settings_post_office" do
-    patch settings_post_office_url(@settings_post_office), params: { settings_post_office: {} }
-    assert_redirected_to settings_post_office_url(@settings_post_office)
-  end
+    update_params = {
+      mechanic_post_office: {
+        confirmation_password: "password",
+        address_attributes: { id: @post_office.address.id, value: "smtp.gmail.com" },
+        port_attributes: { id: @post_office.port.id, value: @post_office.port.value },
+        username_attributes: { id: @post_office.username.id, value: @post_office.username.value },
+        password_attributes: { id: @post_office.password.id, value: @post_office.password.value },
+        disable_configuration_errors_notification_attributes: {
+          id: @post_office.disable_configuration_errors_notification.id,
+          value: true
+        }
+      }
+    }
 
-  test "should destroy settings_post_office" do
-    assert_difference("Settings::PostOffice.count", -1) do
-      delete settings_post_office_url(@settings_post_office)
+    assert_changes -> { @post_office.reload.address.value } do
+      patch settings_post_office_url, params: update_params
+      assert_redirected_to settings_post_office_url
     end
-
-    assert_redirected_to settings_post_offices_url
   end
 end

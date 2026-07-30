@@ -1,6 +1,6 @@
 # DRGN
 
-DRGN (read as Dragon) is a personal finances control platform, to take control of your finances and start achieving your
+DRGN (read as Dragon) is a personal finance control platform to take control of your finances and start achieving your
 dreams and goals.
 
 ## Setting Up Your Development Environment
@@ -8,8 +8,8 @@ dreams and goals.
 ### System Dependencies
 
 To work on developing DRGN you need to install the following dependencies
-- sqlite3
 - [mise-en-place](https://mise.jdx.dev/getting-started.html)
+- vips
 
 ### Tooling and Ruby Dependencies
 
@@ -18,7 +18,22 @@ Install the tooling:
 mise install
 ```
 
-Setup bundle to store the gems inside the current project, to prevent dependency collisions with other projects:
+Install MailHog dependency:
+```shell
+go install github.com/mailhog/MailHog@latest
+```
+
+Configure MailHog for development by running:
+```shell
+bin/rails mailhog:configure
+```
+
+Now you can start MailHog by running:
+```shell
+bin/rails mailhog:serve
+```
+
+Setup bundle to store the gems inside the current project to prevent dependency collisions with other projects:
 ```shell
 bundle config set --local path 'vendor/bundle'
 ```

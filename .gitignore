@@ -38,3 +38,6 @@
 
 # Ignore IDE configuration
 /.idea
+
+# Ignore development configuration for MailHog
+/.mailhog

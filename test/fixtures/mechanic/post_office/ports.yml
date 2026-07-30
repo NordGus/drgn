@@ -1,0 +1,7 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+post_hog_port:
+  mechanic: mechanic_post_office
+  type: "Mechanic::PostOffice::Port"
+  value: 1025
+  touched: true

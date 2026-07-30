@@ -30,4 +30,14 @@
               }
     %>
   <% end %>
+  <% if current_character.postmaster_key.can_access? %>
+    <%=
+      link_to "Post Office",
+              settings_post_office_path,
+              data: {
+                panel_controller: "settings/post_offices",
+                settings_target: "link"
+              }
+    %>
+  <% end %>
 </nav>

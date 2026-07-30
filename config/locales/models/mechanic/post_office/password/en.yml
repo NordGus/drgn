@@ -1,0 +1,9 @@
+en:
+  activerecord:
+    models:
+      mechanic/post_office/password:
+        one: "Post Office Password"
+        other: "Post Office Passwords"
+    attributes:
+      mechanic/post_office/password:
+        value: "Password"

@@ -22,6 +22,12 @@ Rails.application.routes.draw do
     end
 
     resources :boss_keys, only: [ :index, :update ]
+
+    resource :post_office, only: [ :show, :update ] do
+      member do
+        post :test_connection
+      end
+    end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

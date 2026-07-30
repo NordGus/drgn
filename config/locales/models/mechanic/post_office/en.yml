@@ -1,0 +1,20 @@
+en:
+  activerecord:
+    models:
+      mechanic/post_office:
+        one: "Post Office"
+        other: "Post Offices"
+    errors:
+      models:
+        mechanic/post_office:
+          attributes:
+            base:
+              uninitialized: "settings are not initialized"
+              connection_failed: "SMTP connection failed: %{reason}"
+  helpers:
+    submit:
+      mechanic_post_office:
+        create: "Create and Configure"
+        update: "Save"
+        save_settings: "Save"
+        test_connection: "Test Connection"

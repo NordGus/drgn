@@ -1,0 +1,78 @@
+<%# locals: (current_character:, post_office:) %>
+
+<%=
+    form_with(
+      model: post_office,
+      scope: :mechanic_post_office,
+      url: settings_post_office_path,
+      method: :patch,
+      id: "post_office_settings",
+      data: { controller: "confirmation-form" }
+    ) do |form|
+%>
+  <%= form.fields_for :address do |address_form| %>
+    <%= address_form.hidden_field :id %>
+    <div style="display: grid; grid-template-columns: 0.75fr 1fr;">
+      <%= address_form.label :value %>
+      <%= address_form.text_field :value %>
+    </div>
+  <% end %>
+
+  <%= form.fields_for :port do |port_form| %>
+    <%= port_form.hidden_field :id %>
+    <div style="display: grid; grid-template-columns: 0.75fr 1fr;">
+      <%= port_form.label :value %>
+      <%= port_form.number_field :value %>
+    </div>
+  <% end %>
+
+  <%= form.fields_for :username do |username_form| %>
+    <%= username_form.hidden_field :id %>
+    <div style="display: grid; grid-template-columns: 0.75fr 1fr;">
+      <%= username_form.label :value %>
+      <%= username_form.text_field :value %>
+    </div>
+  <% end %>
+
+  <%= form.fields_for :password do |password_form| %>
+    <%= password_form.hidden_field :id %>
+    <div style="display: grid; grid-template-columns: 0.75fr 1fr;">
+      <%= password_form.label :value %>
+      <%= password_form.password_field :value, value: post_office.password.value %>
+    </div>
+  <% end %>
+
+  <%= form.fields_for :disable_configuration_errors_notification do |disable_notifications_form| %>
+    <%= disable_notifications_form.hidden_field :id %>
+    <div style="display: grid; grid-template-columns: 0.75fr 1fr;">
+      <%= disable_notifications_form.label :value %>
+      <%= disable_notifications_form.check_box :value %>
+    </div>
+  <% end %>
+
+  <%=
+      form.button(
+        t("helpers.submit.mechanic_post_office.save_settings"),
+        type: "button",
+        command: "show-modal",
+        commandfor: 'confirm-post-office-update-modal',
+        data: {
+          action: "confirmation-form#openConfirm"
+        }
+      )
+  %>
+  <%= form.submit t("helpers.submit.mechanic_post_office.test_connection"), name: "test_connection" %>
+
+  <dialog id="confirm-post-office-update-modal" data-confirmation-form-target="dialog">
+    <p>
+      Please enter your password to create a new invitation.
+    </p>
+    <div>
+      <%= form.password_field :confirmation_password, data: { confirmation_form_target: "password" }, value: nil %>
+    </div>
+    <div>
+      <%= form.button t("cancel"), type: "button", command: "close", commandfor: 'confirm-post-office-update-modal' %>
+      <%= form.submit %>
+    </div>
+  </dialog>
+<% end %>

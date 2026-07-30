@@ -1,0 +1,9 @@
+en:
+  activerecord:
+    models:
+      mechanic/post_office/address:
+        one: "Post Office Address"
+        other: "Post Office Addresses"
+    attributes:
+      mechanic/post_office/address:
+        value: "Address"

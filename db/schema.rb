@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_23_114445) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_225615) do
   create_table "boss_keys", force: :cascade do |t|
     t.integer "access_level", default: 0, null: false
     t.datetime "created_at", null: false
@@ -38,6 +38,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_114445) do
     t.index ["tag"], name: "index_characters_on_tag", unique: true
     t.index ["type"], name: "index_characters_on_type"
     t.index ["type"], name: "index_characters_on_unique_dungeon_master", unique: true, where: "type = 'Character::DungeonMaster'"
+  end
+
+  create_table "mechanics", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["type"], name: "index_mechanics_on_type", unique: true
   end
 
   create_table "padlock_invitations", force: :cascade do |t|
@@ -84,10 +91,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_23_114445) do
     t.index ["token"], name: "index_sessions_on_token", unique: true
   end
 
+  create_table "setting_bools", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "mechanic_id", null: false
+    t.boolean "touched", default: false, null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "value", default: false, null: false
+    t.index ["mechanic_id"], name: "index_setting_bools_on_mechanic_id"
+    t.index ["type", "mechanic_id"], name: "uniqueness_setting_bools_on_type_mechanic_id", unique: true
+    t.index ["type"], name: "uniqueness_setting_bools_on_type", unique: true
+  end
+
+  create_table "setting_ints", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "mechanic_id", null: false
+    t.boolean "touched", default: false, null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.integer "value"
+    t.index ["mechanic_id"], name: "index_setting_ints_on_mechanic_id"
+    t.index ["type", "mechanic_id"], name: "uniqueness_setting_ints_on_type_mechanic_id", unique: true
+    t.index ["type"], name: "uniqueness_setting_ints_on_type", unique: true
+  end
+
+  create_table "setting_texts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "mechanic_id", null: false
+    t.boolean "touched", default: false, null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.text "value"
+    t.index ["mechanic_id"], name: "index_setting_texts_on_mechanic_id"
+    t.index ["type", "mechanic_id"], name: "uniqueness_setting_texts_on_type_mechanic_id", unique: true
+    t.index ["type"], name: "uniqueness_setting_texts_on_type", unique: true
+  end
+
   add_foreign_key "boss_keys", "characters", column: "holder_id"
   add_foreign_key "padlock_invitations", "characters", column: "holder_id"
   add_foreign_key "padlock_invitations", "characters", column: "issuer_id"
   add_foreign_key "padlock_passwords", "characters"
   add_foreign_key "padlock_passwords", "padlock_passwords", column: "replacement_padlock_id"
   add_foreign_key "sessions", "characters"
+  add_foreign_key "setting_bools", "mechanics"
+  add_foreign_key "setting_ints", "mechanics"
+  add_foreign_key "setting_texts", "mechanics"
 end

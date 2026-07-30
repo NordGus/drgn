@@ -1,0 +1,7 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+post_hog_disbale_configuration_errors_notification:
+  mechanic: mechanic_post_office
+  type: "Mechanic::PostOffice::DisableConfigurationErrorsNotification"
+  value: false
+  touched: true

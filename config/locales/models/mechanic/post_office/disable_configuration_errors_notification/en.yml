@@ -1,0 +1,9 @@
+en:
+  activerecord:
+    models:
+      mechanic/post_office/disable_configuration_errors_notification:
+        one: "Post Office Disable Error Notifications"
+        other: "Post Office Disable Error Notifications"
+    attributes:
+      mechanic/post_office/disable_configuration_errors_notification:
+        value: "Disable Configuration Errors Notifications"

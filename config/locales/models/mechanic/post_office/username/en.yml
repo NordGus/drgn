@@ -1,0 +1,9 @@
+en:
+  activerecord:
+    models:
+      mechanic/post_office/username:
+        one: "Post Office Username"
+        other: "Post Office Usernames"
+    attributes:
+      mechanic/post_office/username:
+        value: "Username"

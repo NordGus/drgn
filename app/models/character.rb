@@ -1,7 +1,7 @@
 ##
-# Character is a record that represent a user inside the platform.
+# Character is a record that represents a user inside the platform.
 #
-# A Character cannot be deleted, only marked as deleted action which cleans the record while maintaining relevant
+# A Character cannot be deleted, only marked_as_deleted action which cleans the record while maintaining relevant
 # information in the platform.
 class Character < ApplicationRecord
   include PasswordLockable

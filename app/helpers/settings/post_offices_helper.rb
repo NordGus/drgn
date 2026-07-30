@@ -1,0 +1,2 @@
+module Settings::PostOfficesHelper
+end

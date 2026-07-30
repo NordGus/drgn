@@ -97,13 +97,13 @@ class Character::OnMarkedAsDeletedJobTest < ActiveJob::TestCase
       deletion_timestamp = @character.updated_at
 
       assert_broadcasts(@character.to_gid_param, 1) do
-        assert_broadcasts(@luffy.to_gid_param, 2) do
-          assert_broadcasts(@nami.to_gid_param, 2) do
+        assert_broadcasts(@luffy.to_gid_param, 3) do
+          assert_broadcasts(@nami.to_gid_param, 3) do
             assert_broadcasts("settings:#{@character.to_gid_param}", 1) do
               assert_changes -> { @character.reload.tag } do
                 assert_changes -> { @character.reload.contact_address } do
                   assert_difference -> { @character.reload.sessions.count }, -1 do
-                    assert_difference -> { @character.reload.boss_keys.count }, -2 do
+                    assert_difference -> { @character.reload.boss_keys.count }, -3 do
                       assert_difference -> { Padlock::Password.where(character: @character).count }, -1 do
                         assert_equal :character_deleted, Character::OnMarkedAsDeletedJob.perform_now(@character, deletion_timestamp)
                       end

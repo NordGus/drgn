@@ -36,6 +36,9 @@ jobs:
         with:
           bundler-cache: true
 
+      - name: Install install vips lib
+        run: apt-get install libvips-dev -y
+
       - name: Scan for security vulnerabilities in JavaScript dependencies
         run: bin/importmap audit
 
@@ -62,6 +65,9 @@ jobs:
           restore-keys: |
             rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-
 
+      - name: Install install vips lib
+        run: apt-get install libvips-dev -y
+
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
@@ -82,6 +88,9 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Install install vips lib
+        run: apt-get install libvips-dev -y
 
       - name: Run tests
         env:
@@ -107,6 +116,9 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Install install vips lib
+        run: apt-get install libvips-dev -y
 
       - name: Run System Tests
         env:

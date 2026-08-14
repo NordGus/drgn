@@ -10,7 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_14_184306) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_14_213057) do
+  create_table "accounts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "created_by_id", null: false
+    t.string "name", null: false
+    t.integer "parent_id"
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_accounts_on_created_by_id"
+    t.index ["name"], name: "index_on_accounts_name"
+    t.index ["parent_id"], name: "index_accounts_on_parent_id"
+    t.index ["type", "id"], name: "index_on_accounts_type_and_id"
+    t.index ["type"], name: "index_on_accounts_type"
+  end
+
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -165,6 +179,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_14_184306) do
     t.index ["type"], name: "uniqueness_setting_texts_on_type", unique: true
   end
 
+  add_foreign_key "accounts", "accounts", column: "parent_id"
+  add_foreign_key "accounts", "characters", column: "created_by_id"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "boss_keys", "characters", column: "holder_id"

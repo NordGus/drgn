@@ -62,6 +62,7 @@ group :development do
   gem "rubocop", require: false
 
   gem "ruby-lsp", require: false
+  gem "ruby-lsp-rails", require: false
 
   gem "sorbet", require: false
   gem "sorbet-runtime", require: false

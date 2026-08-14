@@ -60,6 +60,12 @@ group :development do
   gem "web-console"
 
   gem "rubocop", require: false
+
+  gem "ruby-lsp", require: false
+
+  gem "sorbet", require: false
+  gem "sorbet-runtime", require: false
+  gem "sorbet-rails", require: false
 end
 
 group :test do

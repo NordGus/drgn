@@ -1,4 +1,7 @@
 class Ledger::Account < ApplicationRecord
+  validate :type, presence: true
+  validate :name, presence: true
+
   belongs_to :parent, class_name: "Ledger::Account", optional: true
   belongs_to :created_by, class_name: "Character"
 

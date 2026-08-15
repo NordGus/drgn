@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  type: 
+  source_account: one
+  destination_account: one
+  source_amount: 9.99
+  destination_amount: 9.99
+  issue_date: 2026-08-16
+  execution_date: 2026-08-16
+
+two:
+  type: 
+  source_account: two
+  destination_account: two
+  source_amount: 9.99
+  destination_amount: 9.99
+  issue_date: 2026-08-16
+  execution_date: 2026-08-16

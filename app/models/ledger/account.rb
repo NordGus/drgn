@@ -1,8 +1,8 @@
 class Ledger::Account < ApplicationRecord
-  validate :type, presence: true
-  validate :name, presence: true
-  validate :parent_id, comparison: { other_than: :id }
-  validates :theres_no_grandparent_accounts, if: :parent_id_present?
+  validates :type, presence: true
+  validates :name, presence: true
+  validates :parent_id, comparison: { other_than: :id }
+  validate :theres_no_grandparent_accounts, if: :parent_id?
 
   belongs_to :parent, class_name: "Ledger::Account", optional: true
   belongs_to :created_by, class_name: "Character"

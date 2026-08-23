@@ -8,7 +8,11 @@ class Ledger::Account < ApplicationRecord
   validates :type, presence: true
   validates :name, presence: true
   validates :creator_id, presence: true
+  validates :parent_id, comparison: { other_than: :id } # prevents circular associations
 
+  belongs_to :parent, class_name: "Ledger::Account", optional: true, foreign_key: :parent_id, inverse_of: :subaccounts
+
+  has_many :subaccounts, class_name: "Ledger::Account", foreign_key: :parent_id, dependent: :destroy, inverse_of: :parent
   has_many :outflows, class_name: "Ledger::Movement", foreign_key: :from_id, inverse_of: :from, dependent: :destroy
   has_many :inflows, class_name: "Ledger::Movement", foreign_key: :to_id, inverse_of: :to, dependent: :destroy
 end

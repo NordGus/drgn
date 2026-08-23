@@ -1,4 +1,6 @@
 class Ledger::Account::Debt::CreditLine < Ledger::Account
+  include WithHistorySubaccount
+
   validates :type, inclusion: { in: %w[Ledger::Account::Debt::CreditLine] }
   validates :parent_id, absence: true
 

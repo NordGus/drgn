@@ -1,5 +1,7 @@
 
 class Ledger::Account::Debt::Loan < Ledger::Account
+  include WithHistorySubaccount
+
   validates :type, inclusion: { in: %w[Ledger::Account::Debt::Loan] }
 
   validate :parent_id_matches_scoped_type, if: :parent_id_changed?

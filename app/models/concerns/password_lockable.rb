@@ -1,5 +1,3 @@
-require "active_support/concern"
-
 ##
 # PasswordLockable gives the model the ability to be protected by the password lock of the character or their own key.
 #

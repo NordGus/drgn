@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_23_004538) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_23_005846) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -76,6 +76,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_004538) do
     t.index ["tag"], name: "index_characters_on_tag", unique: true
     t.index ["type"], name: "index_characters_on_type"
     t.index ["type"], name: "index_characters_on_unique_dungeon_master", unique: true, where: "type = 'Character::DungeonMaster'"
+  end
+
+  create_table "ledger_accounts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "creator_id", null: false
+    t.datetime "deleted_at"
+    t.string "name", null: false
+    t.integer "parent_id"
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_ledger_accounts_on_creator_id"
+    t.index ["deleted_at"], name: "index_ledger_accounts_on_deleted_at"
+    t.index ["name"], name: "index_ledger_accounts_on_name"
+    t.index ["parent_id"], name: "index_ledger_accounts_on_parent_id"
+    t.index ["type"], name: "index_ledger_accounts_on_type"
   end
 
   create_table "mechanics", force: :cascade do |t|
@@ -168,6 +183,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_004538) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "boss_keys", "characters", column: "holder_id"
+  add_foreign_key "ledger_accounts", "characters", column: "creator_id"
+  add_foreign_key "ledger_accounts", "ledger_accounts", column: "parent_id"
   add_foreign_key "padlock_invitations", "characters", column: "holder_id"
   add_foreign_key "padlock_invitations", "characters", column: "issuer_id"
   add_foreign_key "padlock_passwords", "characters"

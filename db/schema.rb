@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_23_005846) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_23_014231) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -82,7 +82,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_005846) do
     t.datetime "created_at", null: false
     t.integer "creator_id", null: false
     t.datetime "deleted_at"
+    t.integer "inflows_count", default: 0, null: false
     t.string "name", null: false
+    t.integer "outflows_count", default: 0, null: false
     t.integer "parent_id"
     t.string "type", null: false
     t.datetime "updated_at", null: false
@@ -91,6 +93,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_005846) do
     t.index ["name"], name: "index_ledger_accounts_on_name"
     t.index ["parent_id"], name: "index_ledger_accounts_on_parent_id"
     t.index ["type"], name: "index_ledger_accounts_on_type"
+  end
+
+  create_table "ledger_movements", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "creator_id", null: false
+    t.datetime "deleted_at"
+    t.date "executed_at"
+    t.decimal "from_amount", precision: 16, scale: 4, null: false
+    t.integer "from_id", null: false
+    t.date "issued_at", null: false
+    t.decimal "to_amount", precision: 16, scale: 4, null: false
+    t.integer "to_id", null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_ledger_movements_on_creator_id"
+    t.index ["deleted_at"], name: "index_ledger_movements_on_deleted_at"
+    t.index ["executed_at"], name: "index_ledger_movements_on_executed_at"
+    t.index ["from_id"], name: "index_ledger_movements_on_from_id"
+    t.index ["issued_at"], name: "index_ledger_movements_on_issued_at"
+    t.index ["to_id"], name: "index_ledger_movements_on_to_id"
+    t.index ["type"], name: "index_ledger_movements_on_type"
   end
 
   create_table "mechanics", force: :cascade do |t|
@@ -185,6 +208,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_005846) do
   add_foreign_key "boss_keys", "characters", column: "holder_id"
   add_foreign_key "ledger_accounts", "characters", column: "creator_id"
   add_foreign_key "ledger_accounts", "ledger_accounts", column: "parent_id"
+  add_foreign_key "ledger_movements", "characters", column: "creator_id"
+  add_foreign_key "ledger_movements", "ledger_accounts", column: "from_id"
+  add_foreign_key "ledger_movements", "ledger_accounts", column: "to_id"
   add_foreign_key "padlock_invitations", "characters", column: "holder_id"
   add_foreign_key "padlock_invitations", "characters", column: "issuer_id"
   add_foreign_key "padlock_passwords", "characters"

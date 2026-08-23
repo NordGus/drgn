@@ -9,7 +9,8 @@ class Character < ApplicationRecord
   validates :tag, presence: true, uniqueness: true
 
   has_many :boss_keys, foreign_key: :holder_id, inverse_of: :holder, dependent: :restrict_with_error
-  has_many :ledger_accounts, class_name: "Ledger::Account", foreign_key: :creator_id, inverse_of: :creator, dependent: :restrict_with_error
+  has_many :created_ledger_accounts, class_name: "Ledger::Account", foreign_key: :creator_id, inverse_of: :creator, dependent: :restrict_with_error
+  has_many :created_ledger_movements, class_name: "Ledger::Movement", foreign_key: :creator_id, inverse_of: :creator, dependent: :restrict_with_error
 
   scope :active, -> { where(deleted_at: nil) }
   scope :playable, -> { where(type: %w[Character::DungeonMaster Character::Adventurer]) }

@@ -3,6 +3,12 @@ class Ledger::Movement < ApplicationRecord
   belongs_to :to, class_name: "Ledger::Account", foreign_key: :to_id, inverse_of: :inflows, counter_cache: :inflows_count
   belongs_to :creator, class_name: "Character", foreign_key: :creator_id
 
+  enum :currency, {
+    eur: 1,
+    usd: 2,
+    gbp: 3
+  }, suffix: true, default: :multi, allow_nil: false
+
   validates :type, presence: true
   validates :from_id, presence: true
   validates :to_id, presence: true, comparison: { other_than: :from_id }

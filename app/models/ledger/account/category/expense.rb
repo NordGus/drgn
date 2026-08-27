@@ -1,5 +1,6 @@
 class Ledger::Account::Category::Expense < Ledger::Account
   validates :type, inclusion: { in: %w[Ledger::Account::Category::Expense] }
+  validates :currency, presence: true, inclusion: { in: %w[multi] }
   validate :parent_id_matches_scoped_type, if: :parent_id_changed?
 
   belongs_to :parent, class_name: "Ledger::Account", optional: true, inverse_of: :subaccounts

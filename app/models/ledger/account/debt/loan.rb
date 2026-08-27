@@ -5,6 +5,7 @@ class Ledger::Account::Debt::Loan < Ledger::Account
   validates :type, inclusion: { in: %w[Ledger::Account::Debt::Loan] }
 
   validate :parent_id_matches_scoped_type, if: :parent_id_changed?
+  validates :currency, presence: true, exclusion: { in: %w[multi] }
 
   # [Ledger::Account::Debt::Loan] can be a subaccount of [Ledger::Account::Debt::CreditLine] to model financed payments
   # on a [Ledger::Account::Debt::CreditLine] in the Ledger Graph

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_23_014231) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_23_155859) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -81,6 +81,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_23_014231) do
   create_table "ledger_accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "creator_id", null: false
+    t.integer "currency", default: 0, null: false
     t.datetime "deleted_at"
     t.integer "inflows_count", default: 0, null: false
     t.string "name", null: false

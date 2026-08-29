@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_27_223655) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_29_231716) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -79,6 +79,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_27_223655) do
   end
 
   create_table "ledger_accounts", force: :cascade do |t|
+    t.datetime "archived_at"
     t.datetime "created_at", null: false
     t.integer "creator_id", null: false
     t.integer "currency", default: 0, null: false
@@ -89,6 +90,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_27_223655) do
     t.integer "parent_id"
     t.string "type", null: false
     t.datetime "updated_at", null: false
+    t.index ["archived_at"], name: "index_ledger_accounts_on_archived_at"
     t.index ["creator_id"], name: "index_ledger_accounts_on_creator_id"
     t.index ["deleted_at"], name: "index_ledger_accounts_on_deleted_at"
     t.index ["name"], name: "index_ledger_accounts_on_name"

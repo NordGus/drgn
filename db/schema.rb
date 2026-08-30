@@ -10,7 +10,45 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_225615) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_29_231716) do
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
+  end
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "boss_keys", force: :cascade do |t|
     t.integer "access_level", default: 0, null: false
     t.datetime "created_at", null: false
@@ -38,6 +76,48 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_225615) do
     t.index ["tag"], name: "index_characters_on_tag", unique: true
     t.index ["type"], name: "index_characters_on_type"
     t.index ["type"], name: "index_characters_on_unique_dungeon_master", unique: true, where: "type = 'Character::DungeonMaster'"
+  end
+
+  create_table "ledger_accounts", force: :cascade do |t|
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.integer "creator_id", null: false
+    t.integer "currency", default: 0, null: false
+    t.datetime "deleted_at"
+    t.integer "inflows_count", default: 0, null: false
+    t.string "name", null: false
+    t.integer "outflows_count", default: 0, null: false
+    t.integer "parent_id"
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["archived_at"], name: "index_ledger_accounts_on_archived_at"
+    t.index ["creator_id"], name: "index_ledger_accounts_on_creator_id"
+    t.index ["deleted_at"], name: "index_ledger_accounts_on_deleted_at"
+    t.index ["name"], name: "index_ledger_accounts_on_name"
+    t.index ["parent_id"], name: "index_ledger_accounts_on_parent_id"
+    t.index ["type"], name: "index_ledger_accounts_on_type"
+  end
+
+  create_table "ledger_movements", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "creator_id", null: false
+    t.integer "currency", default: 0, null: false
+    t.datetime "deleted_at"
+    t.date "executed_at"
+    t.decimal "from_amount", precision: 16, scale: 4, null: false
+    t.integer "from_id", null: false
+    t.date "issued_at", null: false
+    t.decimal "to_amount", precision: 16, scale: 4, null: false
+    t.integer "to_id", null: false
+    t.string "type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["creator_id"], name: "index_ledger_movements_on_creator_id"
+    t.index ["deleted_at"], name: "index_ledger_movements_on_deleted_at"
+    t.index ["executed_at"], name: "index_ledger_movements_on_executed_at"
+    t.index ["from_id"], name: "index_ledger_movements_on_from_id"
+    t.index ["issued_at"], name: "index_ledger_movements_on_issued_at"
+    t.index ["to_id"], name: "index_ledger_movements_on_to_id"
+    t.index ["type"], name: "index_ledger_movements_on_type"
   end
 
   create_table "mechanics", force: :cascade do |t|
@@ -127,7 +207,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_225615) do
     t.index ["type"], name: "uniqueness_setting_texts_on_type", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "boss_keys", "characters", column: "holder_id"
+  add_foreign_key "ledger_accounts", "characters", column: "creator_id"
+  add_foreign_key "ledger_accounts", "ledger_accounts", column: "parent_id"
+  add_foreign_key "ledger_movements", "characters", column: "creator_id"
+  add_foreign_key "ledger_movements", "ledger_accounts", column: "from_id"
+  add_foreign_key "ledger_movements", "ledger_accounts", column: "to_id"
   add_foreign_key "padlock_invitations", "characters", column: "holder_id"
   add_foreign_key "padlock_invitations", "characters", column: "issuer_id"
   add_foreign_key "padlock_passwords", "characters"

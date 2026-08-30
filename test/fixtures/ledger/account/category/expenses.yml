@@ -1,2 +1,34 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+ledger_account_subscription_category:
+  type: "Ledger::Account::Category::Expense"
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:multi] %>
+  name: "Subscriptions"
+
+ledger_account_subscription_newspaper_subcategory:
+  type: "Ledger::Account::Category::Expense"
+  parent: ledger_account_subscription_category
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:multi] %>
+  name: "World Economy News"
+
+ledger_account_market_category:
+  type: "Ledger::Account::Category::Expense"
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:multi] %>
+  name: "Market"
+
+ledger_account_cola_supply_subcategory:
+  type: "Ledger::Account::Category::Expense"
+  parent: ledger_account_market_category
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:multi] %>
+  name: "Cola Supply"
+
+ledger_account_wood_supply_subcategory:
+  type: "Ledger::Account::Category::Expense"
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:multi] %>
+  name: "Wood Supply"
+  archive_at: <%= 10.years.ago %>

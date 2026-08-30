@@ -1,2 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+ledger_account_donations_category:
+  type: "Ledger::Account::Category::Income"
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:multi] %>
+  name: "Donations"

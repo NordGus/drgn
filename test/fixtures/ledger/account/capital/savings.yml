@@ -1,2 +1,14 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+ledger_account_thousand_sunny_stash:
+  type: "Ledger::Account::Capital::Saving"
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:eur] %>
+  name: "Thousand Sunny Stash"
+
+ledger_account_going_merry_stash:
+  type: "Ledger::Account::Capital::Saving"
+  creator: luffy
+  currency: <%= Ledger::Account.currencies[:eur] %>
+  name: "Thousand Sunny Stash"
+  archived_at: <%= 10.years.ago %>

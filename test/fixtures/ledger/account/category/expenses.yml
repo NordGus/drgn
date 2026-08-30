@@ -31,4 +31,4 @@ ledger_account_wood_supply_subcategory:
   creator: luffy
   currency: <%= Ledger::Account.currencies[:multi] %>
   name: "Wood Supply"
-  archive_at: <%= 10.years.ago %>
+  archived_at: <%= 10.years.ago %>
